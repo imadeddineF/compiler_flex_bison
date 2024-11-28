@@ -24,7 +24,6 @@
    int entier; 
    float reel;
    char* str;
-   int yylex(void);
    struct 
    {
        char *type;

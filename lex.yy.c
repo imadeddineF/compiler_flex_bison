@@ -531,7 +531,7 @@ char *yytext;
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-// #include "ts.h"
+#include "ts.h"
 #include "syntaxical.tab.h"
 extern nb_ligne;
 extern nb_colonne;
@@ -539,9 +539,8 @@ char currentScope[10];
 char typeidf[10];
 extern YYSTYPE yylval;
 char *yytext;
-
+#line 543 "lex.yy.c"
 #line 544 "lex.yy.c"
-#line 545 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -760,7 +759,7 @@ YY_DECL
 	{
 #line 25 "lexical.l"
 
-#line 764 "lex.yy.c"
+#line 763 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1111,7 +1110,7 @@ YY_RULE_SETUP
 #line 120 "lexical.l"
 ECHO;
 	YY_BREAK
-#line 1115 "lex.yy.c"
+#line 1114 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

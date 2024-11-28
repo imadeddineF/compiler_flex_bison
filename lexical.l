@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-// #include "ts.h"
+#include "ts.h"
 #include "syntaxical.tab.h"
 extern nb_ligne;
 extern nb_colonne;
@@ -10,8 +10,8 @@ char currentScope[10];
 char typeidf[10];
 extern YYSTYPE yylval;
 char *yytext;
-
 %}
+
 lettre [a-zA-Z]
 chiffre [0-9]
 IDF {lettre}({lettre}|{chiffre})*

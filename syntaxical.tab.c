@@ -584,16 +584,16 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    45,    45,    45,    45,    51,    51,    55,    59,    59,
-      73,    77,    81,    83,    85,    89,    91,    93,    94,    98,
-     100,   102,   104,   106,   108,   110,   114,   116,   120,   124,
-     124,   128,   133,   144,   156,   162,   169,   177,   188,   190,
-     195,   197,   199,   204,   209,   213,   217,   223,   225,   228,
-     232,   236,   240,   244,   246,   252,   258,   262,   266,   268,
-     270,   272,   276,   278,   282,   284,   286,   290,   294,   296,
-     298,   300,   302,   304,   308,   310,   314,   316,   318,   320,
-     322,   324,   326,   328,   330,   332,   336,   338,   342,   344,
-     348,   350,   352,   354,   356,   358
+       0,    44,    44,    44,    44,    50,    50,    54,    58,    58,
+      72,    76,    80,    82,    84,    88,    90,    92,    93,    97,
+      99,   101,   103,   105,   107,   109,   113,   115,   119,   123,
+     123,   127,   132,   143,   155,   161,   168,   176,   187,   189,
+     194,   196,   198,   203,   208,   212,   216,   222,   224,   227,
+     231,   235,   239,   243,   245,   251,   257,   261,   265,   267,
+     269,   271,   275,   277,   281,   283,   285,   289,   293,   295,
+     297,   299,   301,   303,   307,   309,   313,   315,   317,   319,
+     321,   323,   325,   327,   329,   331,   335,   337,   341,   343,
+     347,   349,   351,   353,   355,   357
 };
 #endif
 
@@ -1298,25 +1298,25 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* $@1: %empty  */
-#line 45 "syntaxical.y"
+#line 44 "syntaxical.y"
       {strcpy(currentScope, "main");}
 #line 1304 "syntaxical.tab.c"
     break;
 
   case 4: /* PROG: PP  */
-#line 45 "syntaxical.y"
+#line 44 "syntaxical.y"
                                                         {printf("syntaxe correcte\n"); YYACCEPT;}
 #line 1310 "syntaxical.tab.c"
     break;
 
   case 5: /* $@2: %empty  */
-#line 51 "syntaxical.y"
+#line 50 "syntaxical.y"
                    {strcpy(currentScope, "main");}
 #line 1316 "syntaxical.tab.c"
     break;
 
   case 8: /* $@3: %empty  */
-#line 59 "syntaxical.y"
+#line 58 "syntaxical.y"
                              {
     strcpy(currentScope, (yyvsp[0].str));
 if (doubleDeclaration((yyvsp[0].str), currentScope)) {
@@ -1332,37 +1332,37 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 10: /* CORP_FONCTION: LIST_DEC LIST_INSTRUCTION RETURN mc_endr  */
-#line 73 "syntaxical.y"
+#line 72 "syntaxical.y"
                                                         {strcpy(currentScope, "main");}
 #line 1338 "syntaxical.tab.c"
     break;
 
   case 15: /* TYPE: mc_integer  */
-#line 89 "syntaxical.y"
+#line 88 "syntaxical.y"
                  {strcpy(typeidf, "INTEGER");}
 #line 1344 "syntaxical.tab.c"
     break;
 
   case 16: /* TYPE: mc_real  */
-#line 91 "syntaxical.y"
+#line 90 "syntaxical.y"
               {strcpy(typeidf, "REAL");}
 #line 1350 "syntaxical.tab.c"
     break;
 
   case 17: /* TYPE: mc_logical  */
-#line 93 "syntaxical.y"
+#line 92 "syntaxical.y"
                  {strcpy(typeidf, "LOGICAL");}
 #line 1356 "syntaxical.tab.c"
     break;
 
   case 18: /* TYPE: mc_character  */
-#line 94 "syntaxical.y"
+#line 93 "syntaxical.y"
                    {strcpy(typeidf, "CHARACTER");}
 #line 1362 "syntaxical.tab.c"
     break;
 
   case 31: /* DECLARATION: idf  */
-#line 128 "syntaxical.y"
+#line 127 "syntaxical.y"
                  {
     if (doubleDeclaration((yyvsp[0].str), currentScope)) erreurdd((yyvsp[0].str));
     else insererTYPE((yyvsp[0].str), typeidf, currentScope);
@@ -1371,7 +1371,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 32: /* DECLARATION: idf mc_dimension po cst_int pf  */
-#line 133 "syntaxical.y"
+#line 132 "syntaxical.y"
                                         {
        if(doubleDeclaration((yyvsp[-4].str), currentScope)) erreurdd((yyvsp[-4].str)); 
        else
@@ -1387,7 +1387,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 33: /* DECLARATION: idf mc_dimension po cst_int vg cst_int pf  */
-#line 145 "syntaxical.y"
+#line 144 "syntaxical.y"
            {
             if(doubleDeclaration((yyvsp[-6].str), currentScope)) erreurdd((yyvsp[-6].str)); 
             else
@@ -1402,7 +1402,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 34: /* DECLARATION: idf opar_mult cst_int  */
-#line 156 "syntaxical.y"
+#line 155 "syntaxical.y"
                                    {if(doubleDeclaration((yyvsp[-2].str), currentScope)) erreurdd((yyvsp[-2].str));
             else insererTYPE((yyvsp[-2].str), typeidf, currentScope);
             }
@@ -1410,7 +1410,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 35: /* AFFECT: idf aff EXPRESSION  */
-#line 162 "syntaxical.y"
+#line 161 "syntaxical.y"
                            {
     if(!doubleDeclaration((yyvsp[-2].str), currentScope)) erreurnondec((yyvsp[-2].str));
     else
@@ -1420,7 +1420,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 36: /* AFFECT: idf po CST pf aff EXPRESSION  */
-#line 169 "syntaxical.y"
+#line 168 "syntaxical.y"
                                {
     if (!doubleDeclaration((yyvsp[-5].str), currentScope)) 
         erreurnondec((yyvsp[-5].str)); else
@@ -1432,7 +1432,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 37: /* AFFECT: idf po CST vg CST pf aff EXPRESSION  */
-#line 177 "syntaxical.y"
+#line 176 "syntaxical.y"
                                       {
     if (!doubleDeclaration((yyvsp[-7].str), currentScope)) erreurnondec((yyvsp[-7].str));
     else
@@ -1443,13 +1443,13 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 38: /* EXPRESSION: CST  */
-#line 188 "syntaxical.y"
+#line 187 "syntaxical.y"
                 { (yyval.exp) = (yyvsp[0].exp); }
 #line 1449 "syntaxical.tab.c"
     break;
 
   case 39: /* EXPRESSION: idf  */
-#line 190 "syntaxical.y"
+#line 189 "syntaxical.y"
                 { 
             if(!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));
             (yyval.exp).type = type_idf((yyvsp[0].str), currentScope);
@@ -1458,19 +1458,19 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 40: /* EXPRESSION: cst_char  */
-#line 195 "syntaxical.y"
+#line 194 "syntaxical.y"
                      {(yyval.exp).type = "CHARACTER";}
 #line 1464 "syntaxical.tab.c"
     break;
 
   case 41: /* EXPRESSION: cst_bool  */
-#line 197 "syntaxical.y"
+#line 196 "syntaxical.y"
                      {(yyval.exp).type = "LOGICAL";}
 #line 1470 "syntaxical.tab.c"
     break;
 
   case 42: /* EXPRESSION: EXPRESSION OPAR idf  */
-#line 199 "syntaxical.y"
+#line 198 "syntaxical.y"
                                 { 
             if(!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));
             (yyval.exp).type = incomp_type((yyvsp[-2].exp).type, type_idf((yyvsp[0].str), currentScope));
@@ -1479,7 +1479,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 43: /* EXPRESSION: EXPRESSION opar_div idf  */
-#line 204 "syntaxical.y"
+#line 203 "syntaxical.y"
                                     { 
              if (!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));
             (yyval.exp).type = incomp_type((yyvsp[-2].exp).type, type_idf((yyvsp[0].str), currentScope));
@@ -1488,7 +1488,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 44: /* EXPRESSION: EXPRESSION OPAR CST  */
-#line 209 "syntaxical.y"
+#line 208 "syntaxical.y"
                                 { 
             (yyval.exp).type = incomp_type((yyvsp[-2].exp).type, (yyvsp[0].exp).type);
           }
@@ -1496,7 +1496,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 45: /* EXPRESSION: EXPRESSION opar_div cst_real  */
-#line 213 "syntaxical.y"
+#line 212 "syntaxical.y"
                                          { 
             (yyval.exp).type = incomp_type((yyvsp[-2].exp).type, "REAL");
           }
@@ -1504,7 +1504,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 46: /* EXPRESSION: EXPRESSION opar_div cst_int  */
-#line 217 "syntaxical.y"
+#line 216 "syntaxical.y"
                                          {
           if ((yyvsp[0].entier)==0) 
           printf ("Erreur semantique division par 0 a la ligne %d et a la colonne %d \n",nb_ligne,nb_colonne); 
@@ -1514,19 +1514,19 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 47: /* EXPRESSION: po EXPRESSION pf  */
-#line 223 "syntaxical.y"
+#line 222 "syntaxical.y"
                              { (yyval.exp) = (yyvsp[-1].exp); }
 #line 1520 "syntaxical.tab.c"
     break;
 
   case 48: /* EXPRESSION: CALL  */
-#line 225 "syntaxical.y"
+#line 224 "syntaxical.y"
                  { (yyval.exp) = (yyvsp[0].exp); }
 #line 1526 "syntaxical.tab.c"
     break;
 
   case 49: /* EXPRESSION: EXPRESSION OPAR cst_char  */
-#line 228 "syntaxical.y"
+#line 227 "syntaxical.y"
                                      { 
             (yyval.exp).type = incomp_type((yyvsp[-2].exp).type, "CHARACTER");
             }
@@ -1534,7 +1534,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 50: /* EXPRESSION: EXPRESSION opar_div cst_char  */
-#line 232 "syntaxical.y"
+#line 231 "syntaxical.y"
                                          { 
             (yyval.exp).type = incomp_type((yyvsp[-2].exp).type, "CHARACTER");
             }
@@ -1542,7 +1542,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 51: /* EXPRESSION: EXPRESSION po CST pf  */
-#line 236 "syntaxical.y"
+#line 235 "syntaxical.y"
                                  { 
             (yyval.exp).type = type_idf((yyvsp[-3].exp).type, currentScope);
             }
@@ -1550,7 +1550,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 52: /* EXPRESSION: EXPRESSION po CST vg CST pf  */
-#line 240 "syntaxical.y"
+#line 239 "syntaxical.y"
                                         { 
             (yyval.exp).type = type_idf((yyvsp[-5].exp).type, currentScope);
             }
@@ -1558,7 +1558,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 54: /* EXPRESSION: EXPRESSION opar_div po EXPRESSION pf  */
-#line 246 "syntaxical.y"
+#line 245 "syntaxical.y"
                                                  { 
             (yyval.exp).type = incomp_type((yyvsp[-4].exp).type, (yyvsp[-1].exp).type);
             }
@@ -1566,7 +1566,7 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 55: /* CALL: mc_call idf po LIST_PARAMETRE_RT pf  */
-#line 252 "syntaxical.y"
+#line 251 "syntaxical.y"
                                           { 
     (yyval.exp).type = type_idf((yyvsp[-3].str), (yyvsp[-3].str));
     }
@@ -1574,49 +1574,49 @@ if (doubleDeclaration((yyvsp[0].str), currentScope)) {
     break;
 
   case 59: /* WRITE_ARGS: idf  */
-#line 268 "syntaxical.y"
+#line 267 "syntaxical.y"
                 { if(!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));}
 #line 1580 "syntaxical.tab.c"
     break;
 
   case 61: /* WRITE_ARGS: WRITE_ARGS vg idf  */
-#line 272 "syntaxical.y"
+#line 271 "syntaxical.y"
                               { if(!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));}
 #line 1586 "syntaxical.tab.c"
     break;
 
   case 77: /* LIST_PARAMETRE_EQ: idf  */
-#line 316 "syntaxical.y"
+#line 315 "syntaxical.y"
                        { if(!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));}
 #line 1592 "syntaxical.tab.c"
     break;
 
   case 78: /* LIST_PARAMETRE_EQ: LIST_PARAMETRE_EQ vg idf  */
-#line 318 "syntaxical.y"
+#line 317 "syntaxical.y"
                                          { if(!doubleDeclaration((yyvsp[0].str), currentScope)) erreurnondec((yyvsp[0].str));}
 #line 1598 "syntaxical.tab.c"
     break;
 
   case 81: /* LIST_PARAMETRE_EQ: LIST_PARAMETRE_EQ vg idf po CST pf  */
-#line 324 "syntaxical.y"
+#line 323 "syntaxical.y"
                                                    { if(!doubleDeclaration((yyvsp[-3].str), currentScope)) erreurnondec((yyvsp[-3].str));}
 #line 1604 "syntaxical.tab.c"
     break;
 
   case 82: /* LIST_PARAMETRE_EQ: LIST_PARAMETRE_EQ vg idf po CST vg CST pf  */
-#line 326 "syntaxical.y"
+#line 325 "syntaxical.y"
                                                           { if(!doubleDeclaration((yyvsp[-5].str), currentScope)) erreurnondec((yyvsp[-5].str));}
 #line 1610 "syntaxical.tab.c"
     break;
 
   case 86: /* CST: cst_int  */
-#line 336 "syntaxical.y"
+#line 335 "syntaxical.y"
              {(yyval.exp).type = "INTEGER";}
 #line 1616 "syntaxical.tab.c"
     break;
 
   case 87: /* CST: cst_real  */
-#line 338 "syntaxical.y"
+#line 337 "syntaxical.y"
               {(yyval.exp).type = "REAL";}
 #line 1622 "syntaxical.tab.c"
     break;
@@ -1815,7 +1815,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 363 "syntaxical.y"
+#line 362 "syntaxical.y"
 
 
 void erreurdd(char *idf){
@@ -1845,8 +1845,9 @@ void erreur_dim(char* idf) {
 }
 
 #include <stdio.h>
-void yyerror(char *msg) {
-  printf(" ------------------------------- Erreur Syntaxique at ligne: %d et colonne: %d -------------------------------", nb_ligne, nb_colonne);
+int yyerror(char *msg) {
+    printf(" ------------------------------- Erreur Syntaxique at ligne: %d et colonne: %d -------------------------------", nb_ligne, nb_colonne);
+    return 1;
 }
 
 int yywrap() {

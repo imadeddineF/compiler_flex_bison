@@ -109,13 +109,12 @@ union YYSTYPE
    int entier; 
    float reel;
    char* str;
-   int yylex(void);
    struct 
    {
        char *type;
    }exp;
 
-#line 119 "syntaxical.tab.h"
+#line 118 "syntaxical.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
