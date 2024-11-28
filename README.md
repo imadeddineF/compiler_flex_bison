@@ -1,6 +1,6 @@
 # Compiler with Flex & Bison
 
-## EasyCode language
+## EasyCode language jj
 
 ```
 DEBUT
