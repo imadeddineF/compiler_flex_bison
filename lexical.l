@@ -12,16 +12,19 @@ extern YYSTYPE yylval;
 char *yytext;
 %}
 
+
+
 lettre [a-zA-Z]
+lettre_maj [A-Z]
+underscore _
 chiffre [0-9]
-IDF {lettre}({lettre}|{chiffre})*
-UNSIGNED_INT [0-9]+
-UNSIGNED_REAL [0-9]+\.[0-9]+
-SIGNED_INT [-]?[0-9]+
-SIGNED_REAL [-]?[0-9]+\.[0-9]+
+IDF {lettre_maj}({lettre}|{chiffre}|{underscore}){0,9}
+NUM [-]?[0-9]+
+REAL [-]?[0-9]+\.[0-9]+
 LOGICAL "TRUE"|"FALSE" 
 chainec \"[^\"]*\"
 COMMENTAIRE %[^;]*;	
+
 %%
 "=" { rechercher (yytext,"egalite","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return aff;}
 "-" { rechercher (yytext,"soustraction","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return opar_moins;}
@@ -63,27 +66,7 @@ COMMENTAIRE %[^;]*;
 {LOGICAL} {yylval.str=strdup(yytext);rechercher (yytext,"cst LOGICAL","LOGICAL",0,yytext, 0, ""); nb_colonne=nb_colonne+strlen(yytext); return cst_bool;}
 {COMMENTAIRE} {nb_colonne = nb_colonne + strlen(yytext);}
 {chainec} {rechercher (yytext,"CST CHARACTER","chainec",0,yytext, 0, ""); yylval.str=strdup(yytext); nb_colonne=nb_colonne+strlen(yytext); return cst_char;}
-{UNSIGNED_INT} {
-    if (atoi(yytext) > 32767) {
-        printf("WARNING: ligne %d, colonne %d, nombre trop grand\n", nb_ligne, nb_colonne);
-    } else {
-        rechercher (yytext,"Cst INTEGER ","INTEGER",atoi(yytext),"", 0, "");
-        nb_colonne = nb_colonne + strlen(yytext);
-        yylval.entier= atoi(yytext);
-        return cst_int;
-    }
-}
-{UNSIGNED_REAL} {
-    if (atof(yytext) > 32767 || atof(yytext) < -32768) {
-        printf("WARNING: ligne %d, colonne %d, nombre trop grand\n", nb_ligne, nb_colonne);
-    } else {
-        rechercher (yytext,"Cst REAL","REAL",atof(yytext),"", 0, "");
-        nb_colonne = nb_colonne + strlen(yytext);
-        yylval.str=strdup(yytext);
-        return cst_real;
-    }
-}
-{SIGNED_INT} {
+{NUM} {
     if (atoi(yytext) > 32767 || atoi(yytext) < -32768) {
         printf("WARNING: ligne %d, colonne %d, nombre trop grand\n", nb_ligne, nb_colonne);
     } else {
@@ -93,7 +76,7 @@ COMMENTAIRE %[^;]*;
         return cst_int;
     }
 }
-{SIGNED_REAL} {
+{REAL} {
     if (atof(yytext) > 32767 || atof(yytext) < -32768) {
         printf("WARNING: ligne %d, colonne %d, nombre trop grand\n", nb_ligne, nb_colonne);
     } else {
