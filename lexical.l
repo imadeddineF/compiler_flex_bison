@@ -13,7 +13,6 @@ char *yytext;
 %}
 
 
-
 lettre [a-zA-Z]
 lettre_maj [A-Z]
 underscore _
