@@ -1,4 +1,4 @@
-.lex.yy.c
-.output
-.syntaxical.tab.c
-.syntaxical.tab.h
+lex.yy.c
+output
+syntaxical.tab.c
+syntaxical.tab.h

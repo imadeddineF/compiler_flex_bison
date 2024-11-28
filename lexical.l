@@ -4,15 +4,19 @@
 #include<string.h>
 #include "ts.h"
 #include "syntaxical.tab.h"
-extern nb_ligne;
-extern nb_colonne;
+
+// Déclarations externes
+extern int nb_ligne; // initialiser nb_ligne à 0 ailleurs
+extern int nb_colonne;
 char currentScope[10];
 char typeidf[10];
 extern YYSTYPE yylval;
-char *yytext;
+
+// Fonction pour afficher les warnings
+void print_warning(const char* message, int ligne, int colonne) {
+    printf("WARNING: %s à la ligne %d, colonne %d\n", message, ligne, colonne);
+}
 %}
-
-
 
 lettre [a-zA-Z]
 lettre_maj [A-Z]
@@ -21,84 +25,58 @@ chiffre [0-9]
 IDF {lettre_maj}({lettre}|{chiffre}|{underscore}){0,9}
 NUM [-]?[0-9]+
 REAL [-]?[0-9]+\.[0-9]+
-LOGICAL "TRUE"|"FALSE" 
-chainec \"[^\"]*\"
-COMMENTAIRE %[^;]*;	
+LOGICAL "TRUE"|"FALSE"
+TEXT \"[^\"]*\"
+commentaire_sur_ligne "--"[^#\n]*"##"
+commentaire_multi /\{-([^{}-]|\n)*-\}/
 
 %%
-"=" { rechercher (yytext,"egalite","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return aff;}
-"-" { rechercher (yytext,"soustraction","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return opar_moins;}
-"+" { rechercher (yytext,"addition","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return opar_plus;}
-"*" { rechercher (yytext,"multiplication","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return opar_mult;}
-"/" { rechercher (yytext,"division","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return opar_div;}
-"." { rechercher (yytext,"point","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return point;}
-"(" { rechercher (yytext,"par_ouvr","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return po;}
-")" { rechercher (yytext,"par_ferm","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return pf;}
-"," { rechercher (yytext,"virgule","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return vg;}
-";" { rechercher (yytext,"point_virgule","",0,"", 2, ""); nb_colonne=nb_colonne+strlen(yytext); return pvg;}
-"THEN" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_then;}
-"IF" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_if;}
-"ELSE" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_else;}
-"PROGRAM" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_program;}
-"ENDIF" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_endif;}
-"CHARACTER" {yylval.str=strdup(yytext);rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_character;}
-"REAL" {yylval.str=strdup(yytext);rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_real;}
-"ENDDO" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_enddo;}
-"READ" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_read;}
-"WRITE" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_write;}
-"INTEGER" {rechercher (yytext,"Mot cle","",0, "", 1, "");  nb_colonne=nb_colonne+strlen(yytext); return mc_integer;}
-"ENDR" {rechercher (yytext,"Mot cle","",0, "", 1, "");nb_colonne=nb_colonne+strlen(yytext); return mc_endr;}
-"ROUTINE" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_routine;}
-"EQUIVALENCE" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_equivalence;}
-"GT" {rechercher (yytext,"Mot Cle","",0,"", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_gt;}
-"LT" {rechercher (yytext,"Mot Cle","",0,"", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_lt;}
-"GE" {rechercher (yytext,"Mot Cle","",0,"", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_ge;}
-"NE" {rechercher (yytext,"Mot Cle","",0,"", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_ne;}
-"LE" {rechercher (yytext,"Mot Cle","",0,"", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_le;}
-"OR" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_or;}
-"AND" {rechercher (yytext,"Mot cle","",0, "", 1, "");nb_colonne=nb_colonne+strlen(yytext); return op_and;}
-"DOWHILE" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_dowhile;}
-"END" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_end;}
-"CALL" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_call;}
-"DIMENSION" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_dimension;}
-"EQ" {rechercher (yytext,"mot cle","",0,"", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return op_eq;}
-"LOGICAL" {rechercher (yytext,"Mot cle","",0, "", 1, ""); nb_colonne=nb_colonne+strlen(yytext); return mc_logical;}
-{LOGICAL} {yylval.str=strdup(yytext);rechercher (yytext,"cst LOGICAL","LOGICAL",0,yytext, 0, ""); nb_colonne=nb_colonne+strlen(yytext); return cst_bool;}
-{COMMENTAIRE} {nb_colonne = nb_colonne + strlen(yytext);}
-{chainec} {rechercher (yytext,"CST CHARACTER","chainec",0,yytext, 0, ""); yylval.str=strdup(yytext); nb_colonne=nb_colonne+strlen(yytext); return cst_char;}
+
+"DEBUT" { rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Début du programme"); nb_colonne += strlen(yytext); return mc_debut; }
+"FIN" { rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Fin du programme"); nb_colonne += strlen(yytext); return mc_fin; }
+"{" { rechercher(yytext, "Symbole", "Accolade ouvrante", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return acc_ouvrante; }
+"}" { rechercher(yytext, "Symbole", "Accolade fermante", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return acc_fermante; }
+"=" { rechercher(yytext, "egalite", "", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return aff; }
+"-" { rechercher(yytext, "soustraction", "", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return opar_moins; }
+"+" { rechercher(yytext, "addition", "", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return opar_plus; }
+"*" { rechercher(yytext, "multiplication", "", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return opar_mult; }
+"/" { rechercher(yytext, "division", "", nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); return opar_div; }
+"OR" { rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, ""); nb_colonne += strlen(yytext); return op_or; }
+"AND" { rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, ""); nb_colonne += strlen(yytext); return op_and; }
+{LOGICAL} { yylval.str = strdup(yytext); rechercher(yytext, "CST LOGICAL", "LOGICAL", nb_ligne, yytext, 0, ""); nb_colonne += strlen(yytext); return cst_bool; }
+{TEXT} { rechercher(yytext, "CST CHARACTER", "TEXT", nb_ligne, yytext, 0, ""); yylval.str = strdup(yytext); nb_colonne += strlen(yytext); return cst_char; }
 {NUM} {
     if (atoi(yytext) > 32767 || atoi(yytext) < -32768) {
-        printf("WARNING: ligne %d, colonne %d, nombre trop grand\n", nb_ligne, nb_colonne);
+        print_warning("Nombre trop grand", nb_ligne, nb_colonne);
     } else {
-        rechercher (yytext,"Cst INTEGER ","INTEGER",atoi(yytext),"", 0, "");
-        nb_colonne = nb_colonne + strlen(yytext);
-        yylval.reel= atof(yytext);
-        return cst_int;
+        rechercher(yytext, "CST INTEGER", "INTEGER", nb_ligne, "", 0, "");
+        yylval.reel = atof(yytext);
     }
+    nb_colonne += strlen(yytext);
+    return cst_int;
 }
 {REAL} {
     if (atof(yytext) > 32767 || atof(yytext) < -32768) {
-        printf("WARNING: ligne %d, colonne %d, nombre trop grand\n", nb_ligne, nb_colonne);
+        print_warning("Nombre réel trop grand", nb_ligne, nb_colonne);
     } else {
-        rechercher (yytext,"Cst REEL","REEL",atof(yytext),"",0, "");
-        nb_colonne = nb_colonne + strlen(yytext);
-        yylval.reel=atof(yytext);
-        return cst_real;
+        rechercher(yytext, "CST REEL", "REEL", nb_ligne, "", 0, "");
+        yylval.reel = atof(yytext);
     }
+    nb_colonne += strlen(yytext);
+    return cst_real;
 }
 {IDF} {
-    if(yyleng > 10){
-        printf("WARNING: identificateur trop long at ligne %d, colonne %d\n", nb_ligne, nb_colonne);
+    if (strlen(yytext) > 10) {
+        print_warning("Identificateur trop long", nb_ligne, nb_colonne);
+    } else {
+        rechercher(yytext, "IDF", "", nb_ligne, "", 0, currentScope);
+        yylval.str = strdup(yytext);
     }
-    else{
-            rechercher (yytext,"IDF" , "" ,0,"", 0, currentScope); 
-			yylval.str=strdup(yytext); }
-            nb_colonne=nb_colonne+strlen(yytext);
+    nb_colonne += strlen(yytext);
     return idf;
-
 }
-[ \t] nb_colonne=nb_colonne+strlen(yytext);
-\n  nb_ligne++; nb_colonne = 1; 
-. { printf("erreur lexicale %s , (non reconnu) ligne: %d, colonne: %d\n",yytext, nb_ligne, nb_colonne); nb_colonne=nb_colonne+strlen(yytext); }
-%%
+[ \t] { nb_colonne += strlen(yytext); }
+\n { nb_ligne++; nb_colonne = 1; }
+. { printf("Erreur lexicale : %s (non reconnu), ligne : %d, colonne : %d\n", yytext, nb_ligne, nb_colonne); nb_colonne += strlen(yytext); }
 
+%%
