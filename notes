@@ -5,3 +5,4 @@ gcc lex.yy.c
 gcc lex.yy.c -o output
 
 3. ./output
+//test
