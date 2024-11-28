@@ -1,8 +1,0 @@
-1. lex <file-name>.l
-
-2.
-gcc lex.yy.c
-gcc lex.yy.c -o output
-
-3. ./output
-//test
