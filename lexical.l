@@ -21,12 +21,12 @@ lettre [a-zA-Z]
 lettre_maj [A-Z] 
 underscore _
 chiffre [0-9]
-IDF {lettre_maj}({lettre}|{chiffre}|{underscore}){0,9}
+IDF {lettre_maj}({lettre}|{chiffre}|{underscore}|{chiffre})
 NUM [-]?[0-9]+
 REAL [-]?[0-9]+\.[0-9]+
 LOGICAL "TRUE"|"FALSE"
 TEXT \"[^\"]*\"
-commentaire_sur_ligne "--"[^ \n]*\n
+commentaire_sur_ligne "--"".*?"##""
 commentaire_multi_lignes \{\-(.|\n)*?\-\}
 
 %%
