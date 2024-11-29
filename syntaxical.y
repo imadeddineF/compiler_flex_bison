@@ -2,7 +2,6 @@
   #include <string.h>
   #include <stdio.h>
   #include <stdlib.h>
-  // #include "quads.h"
   void erreurdd(char* idf);
   void erreur_dim(char* idf);
   int getDimension(char entite[], char scope[]);
