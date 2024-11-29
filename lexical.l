@@ -318,4 +318,3 @@ TYPE_TEXT "TEXT"
 	nb_colonne += strlen(yytext); 
 }
 %%
-
