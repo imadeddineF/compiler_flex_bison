@@ -31,7 +31,6 @@ lettre [a-zA-Z]
 lettre_maj [A-Z] 
 underscore _
 chiffre [0-9]
-/* IDF {lettre_maj}({lettre}|{chiffre}|{underscore}|{chiffre}) */
 IDF {lettre_maj}({lettre}|{chiffre}|{underscore})*
 NUM [-]?[0-9]+
 REAL [-]?[0-9]+\.[0-9]+
