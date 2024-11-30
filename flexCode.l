@@ -20,8 +20,10 @@ lettre_maj [A-Z]
 underscore _
 chiffre [0-9]
 IDF {lettre_maj}({lettre}|{chiffre}|{underscore})*
-NUM [-+]?[0-9]+
-REAL [-+]?[0-9]+\.[0-9]+
+NUM 0|[1-9][0-9]*
+SIGNEDNUM [+-]?{NUM}
+REAL 0\.[0-9]+|[1-9][0-9]*\.[0-9]+
+SIGNEDREAL [+-]?{REAL}
 /* NUM_START_ZERO */
 LOGICAL "TRUE"|"FALSE"
 TEXT \"[^\"]*\"
