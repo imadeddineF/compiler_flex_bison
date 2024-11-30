@@ -41,6 +41,51 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 	nb_colonne += strlen(yytext); 
 	return mc_fin; 
 }
+"EXECUTION" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Début de l'exécution"); 
+  nb_colonne += strlen(yytext); 
+  return mc_execution;
+}
+"SI" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Condition SI"); 
+  nb_colonne += strlen(yytext); 
+  return mc_si;
+}
+"ALORS" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Bloc ALORS"); 
+  nb_colonne += strlen(yytext); 
+  return mc_alors;
+}
+"SINON" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Bloc SINON"); 
+  nb_colonne += strlen(yytext); 
+  return mc_sinon;
+}
+"TANTQUE" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Boucle TANTQUE"); 
+  nb_colonne += strlen(yytext); 
+  return mc_tantque;
+}
+"FAIRE" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Mot-clé FAIRE"); 
+  nb_colonne += strlen(yytext); 
+  return mc_faire;
+}
+"FIXE" {
+  rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Déclaration de constante"); 
+  nb_colonne += strlen(yytext); 
+  return mc_fixe;
+}
+"affiche" {
+  rechercher(yytext, "Fonction", "", nb_ligne, "", 1, "Fonction d'affichage"); 
+  nb_colonne += strlen(yytext); 
+  return func_affiche;
+}
+"lire" {
+  rechercher(yytext, "Fonction", "", nb_ligne, "", 1, "Fonction de lecture"); 
+  nb_colonne += strlen(yytext); 
+  return func_lire;
+}
 "{" { 
 	rechercher(yytext, "Symbole", "Accolade ouvrante", nb_ligne, "", 2, ""); 
 	nb_colonne += strlen(yytext); 
@@ -85,6 +130,16 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 	rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, ""); 
 	nb_colonne += strlen(yytext); 
 	return op_and; 
+}
+":" {
+  rechercher(yytext, "Séparateur", "", nb_ligne, "", 2, "Déclaration de type"); 
+  nb_colonne += strlen(yytext); 
+  return type_separator;
+}
+"<-" {
+  rechercher(yytext, "Affectation", "", nb_ligne, "", 2, "Affectation de variable"); 
+  nb_colonne += strlen(yytext); 
+  return affect_sign;
 }
 "<" { 
 	rechercher(yytext, "Inferieur_a", "", nb_ligne, "", 2, ""); 
