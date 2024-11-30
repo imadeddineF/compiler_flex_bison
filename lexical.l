@@ -96,10 +96,25 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 	nb_colonne += strlen(yytext); 
 	return acc_fermante; 
 }
-"=" { 
-	rechercher(yytext, "egalite", "", nb_ligne, "", 2, ""); 
+"[" { 
+	rechercher(yytext, "Symbole", "Crochet ouvrant", nb_ligne, "", 2, ""); 
 	nb_colonne += strlen(yytext); 
-	return aff; 
+	return cro_ouvrante; 
+}
+"]" { 
+	rechercher(yytext, "Symbole", "Crochet fermant", nb_ligne, "", 2, ""); 
+	nb_colonne += strlen(yytext); 
+	return cro_fermante; 
+}
+"(" { 
+  rechercher(yytext, "Symbole", "Parenthèse ouvrante", nb_ligne, "", 2, ""); 
+  nb_colonne += strlen(yytext); 
+  return par_ouvrante; 
+}
+")" { 
+  rechercher(yytext, "Symbole", "Parenthèse fermante", nb_ligne, "", 2, ""); 
+  nb_colonne += strlen(yytext); 
+  return par_fermante; 
 }
 "-" { 
 	rechercher(yytext, "soustraction", "", nb_ligne, "", 2, ""); 
@@ -121,15 +136,35 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 	nb_colonne += strlen(yytext); 
 	return opar_div; 
 }
-"OR" { 
+"OU" { 
 	rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, ""); 
 	nb_colonne += strlen(yytext); 
-	return op_or; 
+	return op_ou; 
 }
-"AND" { 
+"ET" { 
 	rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, ""); 
 	nb_colonne += strlen(yytext); 
-	return op_and; 
+	return op_et; 
+}
+"NON" { 
+	rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, ""); 
+	nb_colonne += strlen(yytext); 
+	return op_non; 
+}
+"," { 
+	rechercher(yytext, "Séparateur", "", nb_ligne, "", 2, ""); 
+	nb_colonne += strlen(yytext); 
+	return separator; 
+}
+";" { 
+	rechercher(yytext, "Séparateur", "", nb_ligne, "", 2, ""); 
+	nb_colonne += strlen(yytext); 
+	return separator; 
+}
+"=" { 
+	rechercher(yytext, "egalite", "", nb_ligne, "", 2, ""); 
+	nb_colonne += strlen(yytext); 
+	return aff; 
 }
 ":" {
   rechercher(yytext, "Séparateur", "", nb_ligne, "", 2, "Déclaration de type"); 
