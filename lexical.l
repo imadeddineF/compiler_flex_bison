@@ -7,12 +7,23 @@
 
 extern int nb_ligne; 
 extern int nb_colonne;  
-char currentScope[10];   
+// char currentScope[10];   
+char currentScope[10] = "GLOBAL";  
 char typeidf[10];      
 extern YYSTYPE yylval; 
 
+// Enhanced error reporting
 void print_warning(const char* message, int ligne, int colonne) {
   printf("WARNING: %s à la ligne: %d, colonne %d\n", message, ligne, colonne);
+}
+
+// Advanced range checking
+int is_valid_num_range(long long val) {
+  return (val >= -32768 && val <= 32767);
+}
+
+int is_valid_real_range(double val) {
+  return (val >= -32768.0 && val <= 32767.0);
 }
 %}
 
@@ -20,7 +31,7 @@ lettre [a-zA-Z]
 lettre_maj [A-Z] 
 underscore _
 chiffre [0-9]
-IDF {lettre_maj}({lettre}|{chiffre}|{underscore}|{chiffre})
+IDF {lettre_maj}({lettre}|{chiffre}|{underscore})*
 NUM [-]?[0-9]+
 REAL [-]?[0-9]+\.[0-9]+
 LOGICAL "TRUE"|"FALSE"
@@ -30,9 +41,15 @@ commentaire_multi_lignes \{\-(.|\n)*?\-\} */
 commentaire_sur_ligne --[^#\n]*##
 commentaire_multi_lignes \{-(.|\n)*?-\}
 
+/* Type Keywords */
+TYPE_NUM "NUM"
+TYPE_REAL "REAL"
+TYPE_TEXT "TEXT"
+
 %%
 "DEBUT" { 
 	rechercher(yytext, "Mot cle", "", nb_ligne, "", 1, "Début du programme"); 
+	strcpy(currentScope, "GLOBAL");
 	nb_colonne += strlen(yytext); 
 	return mc_debut; 
 }
@@ -225,6 +242,27 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 	return cst_bool; 
 }
 
+{TYPE_TEXT} {
+  rechercher(yytext, "Type", "TEXT", nb_ligne, "", 1, ""); 
+  strcpy(typeidf, "TEXT");
+  nb_colonne += strlen(yytext); 
+  return type_text;
+}
+
+{TYPE_NUM} {
+  rechercher(yytext, "Type", "NUM", nb_ligne, "", 1, ""); 
+  strcpy(typeidf, "NUM");
+  nb_colonne += strlen(yytext); 
+  return type_num;
+}
+
+{TYPE_REAL} {
+  rechercher(yytext, "Type", "REAL", nb_ligne, "", 1, ""); 
+  strcpy(typeidf, "REAL");
+  nb_colonne += strlen(yytext); 
+  return type_real;
+}
+
 {TEXT} { 
 	rechercher(yytext, "CST CHARACTER", "TEXT", nb_ligne, yytext, 0, ""); 
 	yylval.str = strdup(yytext); 
@@ -233,34 +271,36 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 {NUM} {
-  if (atoi(yytext) > 32767 || atoi(yytext) < -32768) {
-    print_warning("Nombre trop grand", nb_ligne, nb_colonne);
-  } else {
-    rechercher(yytext, "CST INTEGER", "INTEGER", nb_ligne, "", 0, "");
-    yylval.reel = atof(yytext);
+  long long val = atoll(yytext);
+  if (!is_valid_num_range(val)) {
+    report_error("Numérique", "Valeur d'entier hors plage", nb_ligne, nb_colonne);
+    return error_token;
   }
+  rechercher(yytext, "CST INTEGER", "INTEGER", nb_ligne, "", 0, "");
+  yylval.reel = atof(yytext);
   nb_colonne += strlen(yytext);
   return cst_int;
 }
 
 {REAL} {
-  if (atof(yytext) > 32767 || atof(yytext) < -32768) {
-    print_warning("Nombre réel trop grand", nb_ligne, nb_colonne);
-  } else {
-    rechercher(yytext, "CST REEL", "REEL", nb_ligne, "", 0, "");
-    yylval.reel = atof(yytext);
+  double val = atof(yytext);
+  if (!is_valid_real_range(val)) {
+    report_error("Numérique", "Valeur réelle hors plage", nb_ligne, nb_colonne);
+    return error_token;
   }
+  rechercher(yytext, "CST REEL", "REEL", nb_ligne, "", 0, "");
+  yylval.reel = val;
   nb_colonne += strlen(yytext);
   return cst_real;
 }
 
 {IDF} {
   if (strlen(yytext) > 10) {
-    print_warning("Identificateur trop long", nb_ligne, nb_colonne);
-  } else {
-    rechercher(yytext, "IDF", "", nb_ligne, "", 0, currentScope);
-    yylval.str = strdup(yytext);
+    report_error("Identificateur", "Identificateur trop long", nb_ligne, nb_colonne);
+    return error_token;
   }
+  rechercher(yytext, "IDF", typeidf, nb_ligne, "", 0, currentScope);
+  yylval.str = strdup(yytext);
   nb_colonne += strlen(yytext);
   return idf;
 }
