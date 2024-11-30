@@ -3,86 +3,268 @@
 #include<stdlib.h>
 #include<string.h>
 #include "ts.h" 
-#include "synt.tab.h"
-extern int nb_ligne; // Line number
-extern int nb_colonne; // Column number
-extern YYSTYPE yylval;
+#include "syntaxical.tab.h" 
 
+extern int nb_ligne; 
+extern int nb_colonne;  
 
+char currentScope[10] = "GLOBAL";  
+char typeidf[10];      
+extern YYSTYPE yylval; 
+
+void print_warning(const char* message, int ligne, int colonne) {
+  printf("WARNING: %s à la ligne: %d, colonne %d\n", message, ligne, colonne);
+}
 %}
 
+lettre [a-zA-Z]  
+lettre_maj [A-Z] 
+underscore _
+chiffre [0-9]
+IDF {lettre_maj}({lettre}|{chiffre}|{underscore})*
+NUM [-]?[0-9]+
+REAL [-]?[0-9]+\.[0-9]+
+LOGICAL "TRUE"|"FALSE"
+TEXT \"[^\"]*\"
+commentaire_sur_ligne --[^#\n]*##
+commentaire_multi_lignes \{-(.|\n)*?-\}
+
+TYPE_NUM "NUM"
+TYPE_REAL "REAL"
+TYPE_TEXT "TEXT"
+
 %%
-\n              { line_num++; col_num = 1; }
-.               { col_num++; /* other lexing rules */ }
-"DEBUT"         { col_num += 5; return DEBUT; }
-"EXECUTION"     { col_num += 9; return EXECUTION; }
-"FIN"           { col_num += 3; return FIN; }
-
-// Commentaire sur une seule ligne: -- ... ##----------------------------------------------------------------------------------------------------
-"--"[^\n]*"##" {/* Ignorer commentaire*/ nb_colonne += strlen(yytext); /* Incrementer colonne avec commentaire length*/ }
-// Commentaire sur lignes multiples:-------------------------------------------------------------------------------------------------------------
-"{-" {
-    // Début d'un commentaire multi-ligne
-    int nesting = 1; // Compteur pour gérer les commentaires imbriqués (si autorisés)
-    while (nesting > 0) {
-        int c = input(); // Lire le prochain caractère
-
-        if (c == EOF) {
-            // Si on atteint la fin du fichier avant de fermer le commentaire
-            printf("Erreur lexicale: Commentaire multi-ligne non terminé à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);
-            exit(1); // Quitter avec une erreur
-        }
-
-        if (c == '-') {
-            c = input(); // Lire le caractère suivant pour vérifier '}'
-            if (c == '}') {
-                nesting--; // Décrémenter le niveau d'imbrication
-            } else if (c == EOF) {
-                // Si la fin du fichier est atteinte après '-'
-                printf("Erreur lexicale: Commentaire multi-ligne non terminé à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);
-                exit(1); // Quitter avec une erreur
-            } else {
-                unput(c); // Remettre le caractère s'il ne s'agit pas de '}'
-            }
-        } else if (c == '{') {
-            c = input(); // Lire le caractère suivant pour vérifier '-'
-            if (c == '-') {
-                nesting++; // Incrémenter le niveau d'imbrication pour les commentaires imbriqués
-            } else if (c == EOF) {
-                // Si la fin du fichier est atteinte après '{'
-                printf("Erreur lexicale: Commentaire multi-ligne non terminé à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);
-                exit(1); // Quitter avec une erreur
-            } else {
-                unput(c); // Remettre le caractère s'il ne s'agit pas de '-'
-            }
-        } else if (c == '\n') {
-            // Gérer les sauts de ligne dans le commentaire
-            nb_ligne++;      // Incrémenter le numéro de ligne
-            nb_colonne = 1;  // Réinitialiser le numéro de colonne au début de la nouvelle ligne
-        } else {
-            nb_colonne++;    // Incrémenter le numéro de colonne pour tous les autres caractères
-        }
-    }
+"DEBUT" { 
+	nb_colonne += strlen(yytext); 
+	return mc_debut; 
 }
-//----------------------------------------------------------------------------------------------------------------------------------------------------------
+"FIN" { 
+	nb_colonne += strlen(yytext); 
+	return mc_fin; 
+}
+"EXECUTION" {
+  nb_colonne += strlen(yytext); 
+  return mc_execution;
+}
+"SI" {
+  nb_colonne += strlen(yytext); 
+  return mc_si;
+}
+"ALORS" {
+  nb_colonne += strlen(yytext); 
+  return mc_alors;
+}
+"SINON" {
+  nb_colonne += strlen(yytext); 
+  return mc_sinon;
+}
+"TANTQUE" {
+  nb_colonne += strlen(yytext); 
+  return mc_tantque;
+}
+"FAIRE" {
+  nb_colonne += strlen(yytext); 
+  return mc_faire;
+}
+"FIXE" {
+  nb_colonne += strlen(yytext); 
+  return mc_fixe;
+}
+"affiche" {
+  nb_colonne += strlen(yytext); 
+  return func_affiche;
+}
+"lire" {
+  nb_colonne += strlen(yytext); 
+  return func_lire;
+}
+"{" { 
+	nb_colonne += strlen(yytext); 
+	return acc_ouvrante; 
+}
+"}" { 
+	nb_colonne += strlen(yytext); 
+	return acc_fermante; 
+}
+"[" { 
+	nb_colonne += strlen(yytext); 
+	return cro_ouvrante; 
+}
+"]" { 
+	nb_colonne += strlen(yytext); 
+	return cro_fermante; 
+}
+"(" { 
+  nb_colonne += strlen(yytext); 
+  return par_ouvrante; 
+}
+")" { 
+  nb_colonne += strlen(yytext); 
+  return par_fermante; 
+}
+"-" { 
+	nb_colonne += strlen(yytext); 
+	return opar_moins; 
+}
+"+" { 
+	nb_colonne += strlen(yytext); 
+	return opar_plus; 
+}
+"*" { 
+	nb_colonne += strlen(yytext); 
+	return opar_mult; 
+}
+"/" { 
+	nb_colonne += strlen(yytext); 
+	return opar_div; 
+}
+"OU" { 
+	nb_colonne += strlen(yytext); 
+	return op_ou; 
+}
+"ET" { 
+	nb_colonne += strlen(yytext); 
+	return op_et; 
+}
+"NON" { 
+	nb_colonne += strlen(yytext); 
+	return op_non; 
+}
+"," { 
+	nb_colonne += strlen(yytext); 
+	return separator; 
+}
+";" { 
+	nb_colonne += strlen(yytext); 
+	return separator; 
+}
+"=" { 
+	nb_colonne += strlen(yytext); 
+	return aff; 
+}
+":" {
+  nb_colonne += strlen(yytext); 
+  return type_separator;
+}
+"<-" {
+  nb_colonne += strlen(yytext); 
+  return affect_sign;
+}
+"<" { 
+	nb_colonne += strlen(yytext); 
+	return op_lt; 
+}
+"<=" { 
+	nb_ligne, "", 2, ""); nb_colonne += strlen(yytext); 
+	return op_le; 
+}
+">" { 
+	nb_colonne += strlen(yytext); 
+	return op_gt; 
+}
+">=" { 
+	nb_colonne += strlen(yytext); 
+	return op_ge; 
+}
+"!=" { 
+	nb_colonne += strlen(yytext); 
+	return op_ne; 
+}
 
-[A-Z][A-Z0-9_]{0,9} { col_num += yyleng; yylval.id = strdup(yytext); return IDENTIFIER; }
-[0-9]+          { col_num += yyleng; yylval.num = atoi(yytext); return NUM; }
-[0-9]+\.[0-9]+  { col_num += yyleng; yylval.real = atof(yytext); return REAL; }
-\"[^\"]*\"      { col_num += yyleng; yylval.text = strdup(yytext); return TEXT; }
-"("             { col_num++; return LPAREN; }
-")"             { col_num++; return RPAREN; }
-"{"             { col_num++; return LBRACE; }
-"}"             { col_num++; return RBRACE; }
-"<-"            { col_num += 2; return ASSIGN; }
-"SI"            { col_num += 2; return SI; }
-"ALORS"         { col_num += 5; return ALORS; }
-"SINON"         { col_num += 5; return SINON; }
-"TANTQUE"       { col_num += 7; return TANTQUE; }
-"FAIRE"         { col_num += 5; return FAIRE; }
-"affiche"       { col_num += 7; return AFFICHE; }
-"lire"          { col_num += 4; return LIRE; }
-[ \t\n]         { /* Ignorer les espaces blancs */ col_num++; }
-.               { fprintf(stderr, "Erreur lexicale à la ligne %d, colonne %d\n", line_num, col_num); }
+{commentaire_sur_ligne} {
+  nb_ligne += (strchr(yytext, '\n') != NULL);
+  nb_colonne = 1;
+}
+
+{commentaire_multi_lignes} {
+  char* ptr = yytext;
+  while ((ptr = strchr(ptr, '\n')) != NULL) {
+    nb_ligne++;
+    ptr++;
+  }
+  nb_colonne = 1;
+}
+
+{LOGICAL} {
+  yylval.str = strdup(yytext); 
+	rechercher(yytext, "CST LOGICAL", "LOGICAL", nb_ligne, yytext, 0, ""); 
+	nb_colonne += strlen(yytext); 
+	return cst_bool; 
+}
+
+{TYPE_TEXT} {
+  rechercher(yytext, "Type", "TEXT", nb_ligne, "", 1, ""); 
+  strcpy(typeidf, "TEXT");
+  nb_colonne += strlen(yytext); 
+  return type_text;
+}
+
+{TYPE_NUM} {
+  rechercher(yytext, "Type", "NUM", nb_ligne, "", 1, ""); 
+  strcpy(typeidf, "NUM");
+  nb_colonne += strlen(yytext); 
+  return type_num;
+}
+
+{TYPE_REAL} {
+  rechercher(yytext, "Type", "REAL", nb_ligne, "", 1, ""); 
+  strcpy(typeidf, "REAL");
+  nb_colonne += strlen(yytext); 
+  return type_real;
+}
+
+{TEXT} { 
+	rechercher(yytext, "CST CHARACTER", "TEXT", nb_ligne, yytext, 0, ""); 
+	yylval.str = strdup(yytext); 
+	nb_colonne += strlen(yytext); 
+	return cst_char; 
+}
+
+{NUM} {
+  long long val = atoll(yytext);
+  if (!(val >= -32768 && val <= 32767)) {
+    report_error("Numérique", "Valeur d'entier hors plage", nb_ligne, nb_colonne);
+    return error_token;
+  }
+  rechercher(yytext, "CST INTEGER", "INTEGER", nb_ligne, "", 0, "");
+  yylval.reel = atof(yytext);
+  nb_colonne += strlen(yytext);
+  return cst_int;
+}
+
+{REAL} {
+  double val = atof(yytext);
+  if (!(val >= -32768.0 && val <= 32767.0)) {
+    report_error("Numérique", "Valeur réelle hors plage", nb_ligne, nb_colonne);
+    return error_token;
+  }
+  rechercher(yytext, "CST REEL", "REEL", nb_ligne, "", 0, "");
+  yylval.reel = val;
+  nb_colonne += strlen(yytext);
+  return cst_real;
+}
+
+{IDF} {
+  if (strlen(yytext) > 10) {
+    report_error("Identificateur", "Identificateur trop long", nb_ligne, nb_colonne);
+    return error_token;
+  }
+  rechercher(yytext, "IDF", typeidf, nb_ligne, "", 0, currentScope);
+  yylval.str = strdup(yytext);
+  nb_colonne += strlen(yytext);
+  return idf;
+}
+
+[ \t] { 
+	nb_colonne += strlen(yytext); 
+}
+
+\n { 
+	nb_ligne++; nb_colonne = 1; 
+}
+
+. { 
+	printf("Erreur lexicale: %s à la ligne: %d, colonne : %d\n", yytext, nb_ligne, nb_colonne); 
+	nb_colonne += strlen(yytext); 
+}
 %%
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
