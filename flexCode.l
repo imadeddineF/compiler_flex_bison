@@ -2,8 +2,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include "ts.h" 
-#include "syntaxical.tab.h" 
 
 extern int nb_ligne; 
 extern int nb_colonne;  
@@ -28,10 +26,6 @@ LOGICAL "TRUE"|"FALSE"
 TEXT \"[^\"]*\"
 commentaire_sur_ligne --[^#\n]*##
 commentaire_multi_lignes \{-(.|\n)*?-\}
-
-TYPE_NUM "NUM"
-TYPE_REAL "REAL"
-TYPE_TEXT "TEXT"
 
 %%
 "DEBUT" { 
@@ -190,27 +184,6 @@ TYPE_TEXT "TEXT"
 	rechercher(yytext, "CST LOGICAL", "LOGICAL", nb_ligne, yytext, 0, ""); 
 	nb_colonne += strlen(yytext); 
 	return cst_bool; 
-}
-
-{TYPE_TEXT} {
-  rechercher(yytext, "Type", "TEXT", nb_ligne, "", 1, ""); 
-  strcpy(typeidf, "TEXT");
-  nb_colonne += strlen(yytext); 
-  return type_text;
-}
-
-{TYPE_NUM} {
-  rechercher(yytext, "Type", "NUM", nb_ligne, "", 1, ""); 
-  strcpy(typeidf, "NUM");
-  nb_colonne += strlen(yytext); 
-  return type_num;
-}
-
-{TYPE_REAL} {
-  rechercher(yytext, "Type", "REAL", nb_ligne, "", 1, ""); 
-  strcpy(typeidf, "REAL");
-  nb_colonne += strlen(yytext); 
-  return type_real;
 }
 
 {TEXT} { 
