@@ -20,8 +20,9 @@ lettre_maj [A-Z]
 underscore _
 chiffre [0-9]
 IDF {lettre_maj}({lettre}|{chiffre}|{underscore})*
-NUM [-]?[0-9]+
-REAL [-]?[0-9]+\.[0-9]+
+NUM [-+]?[0-9]+
+REAL [-+]?[0-9]+\.[0-9]+
+/* NUM_START_ZERO */
 LOGICAL "TRUE"|"FALSE"
 TEXT \"[^\"]*\"
 commentaire_sur_ligne --[^#\n]*##
@@ -168,7 +169,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 {commentaire_sur_ligne} {
   nb_ligne += (strchr(yytext, '\n') != NULL);
   nb_colonne = 1;
-}
+} // must be reviewed
 
 {commentaire_multi_lignes} {
   char* ptr = yytext;
@@ -192,7 +193,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 {NUM} {
-  long long val = atoll(yytext);
+  long long val = atoll(yytext); 
   if (!(val >= -32768 && val <= 32767)) {
     report_error("Numérique", "Valeur d'entier hors plage", nb_ligne, nb_colonne);
     return error_token;
@@ -203,7 +204,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 {REAL} {
-  double val = atof(yytext);
+  double val = atof(yytext); // wtf is atof
   if (!(val >= -32768.0 && val <= 32767.0)) {
     report_error("Numérique", "Valeur réelle hors plage", nb_ligne, nb_colonne);
     return error_token;
