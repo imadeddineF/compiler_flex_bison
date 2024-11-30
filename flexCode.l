@@ -181,13 +181,11 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 
 {LOGICAL} {
   yylval.str = strdup(yytext); 
-	rechercher(yytext, "CST LOGICAL", "LOGICAL", nb_ligne, yytext, 0, ""); 
 	nb_colonne += strlen(yytext); 
 	return cst_bool; 
 }
 
 {TEXT} { 
-	rechercher(yytext, "CST CHARACTER", "TEXT", nb_ligne, yytext, 0, ""); 
 	yylval.str = strdup(yytext); 
 	nb_colonne += strlen(yytext); 
 	return cst_char; 
@@ -199,8 +197,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     report_error("Numérique", "Valeur d'entier hors plage", nb_ligne, nb_colonne);
     return error_token;
   }
-  rechercher(yytext, "CST INTEGER", "INTEGER", nb_ligne, "", 0, "");
-  yylval.reel = atof(yytext);
+	yylval.reel = atof(yytext);
   nb_colonne += strlen(yytext);
   return cst_int;
 }
@@ -211,7 +208,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     report_error("Numérique", "Valeur réelle hors plage", nb_ligne, nb_colonne);
     return error_token;
   }
-  rechercher(yytext, "CST REEL", "REEL", nb_ligne, "", 0, "");
   yylval.reel = val;
   nb_colonne += strlen(yytext);
   return cst_real;
@@ -222,7 +218,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     report_error("Identificateur", "Identificateur trop long", nb_ligne, nb_colonne);
     return error_token;
   }
-  rechercher(yytext, "IDF", typeidf, nb_ligne, "", 0, currentScope);
   yylval.str = strdup(yytext);
   nb_colonne += strlen(yytext);
   return idf;
