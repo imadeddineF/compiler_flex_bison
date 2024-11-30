@@ -77,41 +77,46 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 {TEXT} {printf("This text is correct: %s\n", yytext); /* Print the text literal*/ nb_colonne += strlen(yytext);}
 
 {NUM} {
-  int val = atoi(yytext);  // Convert string to integer using atoi
+  int val = atoi(yytext);  // Convert string to integer
   if (val < 0 || val > 32767) {  // Range check for NUM
-    printf("Erreur: Valeur d'entier hors plage à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);  // Print error message
-    return 0;  // Return 0 to indicate error
+    printf("Erreur: Valeur d'entier hors plage (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+  } else {
+    printf("This number is correct: %s\n", yytext);  // Print message for valid number
   }
-  printf("This number is correct: %s\n", yytext);  // Print message for valid number
-  nb_colonne += strlen(yytext);}
+  nb_colonne += strlen(yytext);  // Always update the column number
+}
 
 {SIGNEDNUM} {
-  int val = atoi(yytext);  // Convert string to integer using atoi
+  int val = atoi(yytext);  // Convert string to integer
   if (val < -32768 || val > 32767) {  // Range check for SIGNEDNUM
-    printf("Erreur: Valeur d'entier signé hors plage à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);  // Print error message
-    return 0;  // Return 0 to indicate error
+    printf("Erreur: Valeur d'entier signé hors plage (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+  } else {
+    printf("This signed number is correct: %s\n", yytext);  // Print message for valid signed number
   }
-  printf("This signed number is correct: %s\n", yytext);  // Print message for valid signed number
-  nb_colonne += strlen(yytext);}
+  nb_colonne += strlen(yytext);  // Always update the column number
+}
+
 
 {REAL} {
-  double val = atof(yytext);  // Convert string to double using atof
+  double val = atof(yytext);  // Convert string to double
   if (val < 0.0 || val > 32767.0) {  // Range check for REAL
-    printf("Erreur: Valeur réelle hors plage à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);  // Print error message
-    return 0;  // Return 0 to indicate error
+    printf("Erreur: Valeur réelle hors plage (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+  } else {
+    printf("This real number is correct: %s\n", yytext);  // Print message for valid real number
   }
-  printf("This real number is correct: %s\n", yytext);  // Print message for valid real number
-  nb_colonne += strlen(yytext);}
-
+  nb_colonne += strlen(yytext);  // Always update the column number
+}
 
 {SIGNEDREAL} {
-  double val = atof(yytext);  // Convert string to double using atof
+  double val = atof(yytext);  // Convert string to double
   if (val < -32768.0 || val > 32767.0) {  // Range check for SIGNEDREAL
-    printf("Erreur: Valeur réelle signée hors plage à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);  // Print error message
-    return 0;  // Return 0 to indicate error
+    printf("Erreur: Valeur réelle signée hors plage (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+  } else {
+    printf("This signed real number is correct: %s\n", yytext);  // Print message for valid signed real number
   }
-  printf("This signed real number is correct: %s\n", yytext);  // Print message for valid signed real number
-  nb_colonne += strlen(yytext);}
+  nb_colonne += strlen(yytext);  // Always update the column number
+}
+
 
 {IDF} { 
   if (strlen(yytext) > 10) {  // Check if the identifier length is greater than 10
