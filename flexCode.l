@@ -1,4 +1,5 @@
 %{
+#include<ctype.h>
 #include<stdio.h>
 int nb_ligne=1;
 int nb_colonne=1;    
@@ -115,13 +116,28 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 
-{IDF} {
-    if (strlen(yytext) > 10) {
-        printf("Erreur: Identificateur trop long (%s) a la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
-    } else {
-        printf("Valid identifier: %s\n", yytext);
+{IDF} { 
+    int underscore_count = 0;
+    size_t len = strlen(yytext);
+
+    // Count underscores
+    for (int i = 0; yytext[i] != '\0'; i++) {
+        if (yytext[i] == '_') {
+            underscore_count++;
+        }
     }
-    nb_colonne += strlen(yytext);}
+
+    // Check conditions
+    if (len > 10) {  // Length check
+        printf("Erreur: Identificateur trop long (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+    } else if (underscore_count > 1) {  // More than one underscore
+        printf("Erreur: Identificateur contient plus d'un underscore (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+    } else {
+        printf("Valid identifier: %s\n", yytext);  // Identifier is valid
+    }
+
+    nb_colonne += len;  }
+
 
 [ \t] { 
 	nb_colonne += strlen(yytext); }
