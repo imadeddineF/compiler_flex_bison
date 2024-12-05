@@ -5,16 +5,16 @@ int nb_colonne=1;
 %}
 /* -- Partie : Expressions régulières -- */
 lettre [a-zA-Z]  
-
+lettre_maj [A-Z] 
 underscore _
 chiffre [0-9]
-IDF ({lettre}|{chiffre}|{underscore})*
+IDF {lettre_maj}({lettre}|{chiffre}|{underscore})* 
 NUM 0|[1-9][0-9]*
 SIGNEDNUM [+-]?{NUM}
 REAL 0\.[0-9]+|[1-9][0-9]*\.[0-9]+
 SIGNEDREAL [+-]?{REAL}
 
-LOGICAL "TRUE"|"FALSE"
+
 TEXT \"[^\"]*\"
 commentaire_sur_ligne --[^\n]*##
 commentaire_multi_lignes \{-(.|\n)*?-\}
@@ -59,9 +59,9 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 "!=" { nb_colonne += strlen(yytext); printf(" != reconnu\n"); }
 
 {commentaire_sur_ligne} {
-  nb_ligne += (strchr(yytext, '\n') != NULL);  // Increment line number if newline is in comment
-  nb_colonne = 1;  // Reset column to 1 at the start of the new line
+  nb_colonne += strlen(yytext);  // Update the column number based on the length of the comment
 }
+
 
 {commentaire_multi_lignes} {
   char* ptr = yytext;  // Pointer to start of the matched text
@@ -69,10 +69,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     nb_ligne++;  // Increment the line number for each newline
     ptr++;  // Move past the newline character
   }
-  nb_colonne = 1;  // Reset column to 1 at the start of a new line
-}
-
-{LOGICAL} {printf("This logical value is correct: %s\n", yytext);/* Print the logical value*/nb_colonne += strlen(yytext);}
+  nb_colonne = 1;  }
 
 {TEXT} {printf("This text is correct: %s\n", yytext); /* Print the text literal*/ nb_colonne += strlen(yytext);}
 
@@ -110,7 +107,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 {SIGNEDREAL} {
   double val = atof(yytext);  // Convert string to double
   if (val < -32768.0 || val > 32767.0) {  // Range check for SIGNEDREAL
-    printf("Erreur: Valeur réelle signée hors plage (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+    printf("Erreur: Valeur reelle signee hors plage (%s) a la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
   } else {
     printf("This signed real number is correct: %s\n", yytext);  // Print message for valid signed real number
   }
@@ -118,16 +115,13 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 
-{IDF} { 
-  if (strlen(yytext) > 10) {  // Check if the identifier length is greater than 10
-    printf("Erreur: Identificateur trop long à la ligne %d, colonne %d\n", nb_ligne, nb_colonne);  // Print error message
-    return 0;  // Return 0 to indicate error
-  }
-  printf("Valid identifier: %s\n", yytext);  // Print the valid identifier
-  nb_colonne += strlen(yytext);  // Update the column number with the length of the identifier
-}
-
-
+{IDF} {
+    if (strlen(yytext) > 10) {
+        printf("Erreur: Identificateur trop long (%s) a la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+    } else {
+        printf("Valid identifier: %s\n", yytext);
+    }
+    nb_colonne += strlen(yytext);}
 
 [ \t] { 
 	nb_colonne += strlen(yytext); }
