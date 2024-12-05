@@ -1,5 +1,15 @@
 .vscode
 lex.yy.c
+/src/lex.yy.c
+/playground/lex.yy.c
 output
+/src/output
+/playground/output
 syntaxical.tab.c
+/src/syntaxical.tab.c
+/playground/syntaxical.tab.c
 syntaxical.tab.h
+/src/syntaxical.tab.h
+/playground/syntaxical.tab.h
+resultat.exe
+output.exe
