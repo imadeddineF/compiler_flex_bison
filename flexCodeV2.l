@@ -117,25 +117,24 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 
 
 {IDF} { 
-    int underscore_count = 0;
+    int consecutive_underscores = 0;
     size_t len = strlen(yytext);
 
-    // Count underscores
-    int i;
-    for ( i = 0; yytext[i] != '\0'; i++) {
-        if (yytext[i] == '_') {
-            underscore_count++;
+   for (int i = 1; yytext[i] != '\0'; i++) {
+        if (yytext[i] == '_' && yytext[i-1] == '_') {
+            consecutive_underscores = 1;  // Found two consecutive underscores
+            break;  // No need to check further
         }
     }
 
     // Check conditions
     if (len > 10) {  // Length check
         printf("Erreur: Identificateur trop long (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
-    } else if (underscore_count > 1) {  // More than one underscore
-        printf("Erreur: Identificateur contient plus d'un underscore (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
-    } else if (!isupper(yytext[0])) {  // First character uppercase check
+        } else if (consecutive_underscores) {  // Check for consecutive underscores
+        printf("Erreur: Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+        } else if (!isupper(yytext[0])) {  // First character uppercase check
         printf("Erreur: Identificateur ne commence pas par une lettre majuscule (%s) à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
-    } else {
+        } else {
         printf("Valid identifier: %s\n", yytext);  // Identifier is valid
     }
 
