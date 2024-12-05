@@ -1,6 +1,7 @@
 %{
 #include<ctype.h>
 #include<stdio.h>
+#include <string.h>
 int nb_ligne=1;
 int nb_colonne=1;    
 %}
@@ -120,7 +121,8 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     size_t len = strlen(yytext);
 
     // Count underscores
-    for (int i = 0; yytext[i] != '\0'; i++) {
+    int i;
+    for ( i = 0; yytext[i] != '\0'; i++) {
         if (yytext[i] == '_') {
             underscore_count++;
         }
