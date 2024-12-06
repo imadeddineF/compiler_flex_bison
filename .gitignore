@@ -5,11 +5,11 @@ lex.yy.c
 output
 /src/output
 /playground/output
-syntaxical.tab.c
-/src/syntaxical.tab.c
-/playground/syntaxical.tab.c
-syntaxical.tab.h
-/src/syntaxical.tab.h
-/playground/syntaxical.tab.h
+syntaxique.tab.c
+/src/syntaxique.tab.c
+/playground/syntaxique.tab.c
+syntaxiquel.tab.h
+/src/syntaxique.tab.h
+/playground/syntaxique.tab.h
 resultat.exe
 output.exe
