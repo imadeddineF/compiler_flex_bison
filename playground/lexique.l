@@ -129,7 +129,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 {IDF} { 
   int consecutive_underscores = 0;
   size_t len = strlen(yytext);
-  
   int i;
   for ( i = 1; yytext[i] != '\0'; i++) {
     if (yytext[i] == '_' && yytext[i-1] == '_') {
