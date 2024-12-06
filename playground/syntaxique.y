@@ -1,11 +1,14 @@
 %{
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <string.h>
-	extern int yylex();
-	extern int yylineno;
-	extern char* yytext;
-	void yyerror(const char *s);
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
+  #include "ts.h"
+  extern int yylex();
+  extern int yylineno;
+  extern char* yytext;
+  void yyerror(const char *s);
+  // Global symbol table
+  SymbolTable* symbol_table;
 %}
 
 // Define token types
@@ -23,7 +26,7 @@
 %token TYPE_NUM TYPE_REAL TYPE_TEXT
 %token MOINS_EGALE PLUS_EGALE INF_EGALE SUP_EGALE DIFFERENT
 %token ET OU NON
-%token ASSIGNMENT  // New token for assignment operator
+%token ASSIGNMENT  // Assignment operator
 
 // Define token types from lexical analyzer
 %token <sval> IDENTIFICATEUR
@@ -49,9 +52,23 @@
 %%
 // Grammar rules start here
 programme: 
-    DEBUT liste_declarations EXECUTION '{' liste_instructions '}' FIN 
-    { printf("Programme syntactically correct\n"); }
-    ;
+    DEBUT {
+      // Initialize symbol table when program starts
+      symbol_table = create_symbol_table();
+    }
+    liste_declarations 
+    EXECUTION 
+    '{' 
+    liste_instructions 
+    '}' 
+    FIN {
+      // Print symbol table for debugging
+      print_symbol_table(symbol_table);
+      // Free symbol table at end of program
+      free_symbol_table(symbol_table);
+      printf("Programme syntactically correct\n"); 
+    }
+		;
 
 liste_declarations:
     declaration
@@ -59,13 +76,88 @@ liste_declarations:
     ;
 
 declaration:
-    TYPE_NUM ':' IDENTIFICATEUR ';'
-    | TYPE_REAL ':' IDENTIFICATEUR ';'
-    | TYPE_TEXT ':' IDENTIFICATEUR ';'
+    TYPE_NUM ':' IDENTIFICATEUR ';' 
+    {
+      // Insert integer variable
+      if (!insert_symbol(symbol_table, $3, ST_TYPE_INTEGER, 0)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate or invalid variable declaration: %s", $3);
+        yyerror(error_msg);
+      }
+      free($3);  // Free the string after use
+    }
+    | TYPE_REAL ':' IDENTIFICATEUR ';' 
+    {
+      // Insert real variable
+      if (!insert_symbol(symbol_table, $3, ST_TYPE_REAL, 0)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate or invalid variable declaration: %s", $3);
+        yyerror(error_msg);
+      }
+      free($3);  // Free the string after use
+    }
+    | TYPE_TEXT ':' IDENTIFICATEUR ';' 
+    {
+      // Insert text variable
+      if (!insert_symbol(symbol_table, $3, ST_TYPE_STRING, 0)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate or invalid variable declaration: %s", $3);
+        yyerror(error_msg);
+      }
+      free($3);  // Free the string after use
+    }
     | FIXE TYPE_NUM ':' IDENTIFICATEUR '=' NOMBRE_ENTIER ';'
+    {
+      // Insert constant integer
+      if (!insert_symbol(symbol_table, $4, ST_TYPE_CONSTANT, 1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate constant declaration: %s", $4);
+        yyerror(error_msg);
+      } else {
+        // Update constant value
+        int val = $6;
+        update_symbol_value(symbol_table, $4, &val);
+      }
+      free($4);  // Free the string after use
+    }
     | FIXE TYPE_REAL ':' IDENTIFICATEUR '=' NOMBRE_REEL ';'
+    {
+      // Insert constant real
+      if (!insert_symbol(symbol_table, $4, ST_TYPE_REAL, 1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate constant declaration: %s", $4);
+        yyerror(error_msg);
+      } else {
+        // Update constant value
+        double val = $6;
+        update_symbol_value(symbol_table, $4, &val);
+      }
+      free($4);  // Free the string after use
+    }
     | FIXE TYPE_TEXT ':' IDENTIFICATEUR '=' CHAINE_TEXTE ';'
+    {
+      // Insert constant text
+      if (!insert_symbol(symbol_table, $4, ST_TYPE_STRING, 1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate constant declaration: %s", $4);
+        yyerror(error_msg);
+      } else {
+        // Update constant value
+        update_symbol_value(symbol_table, $4, $6);
+        free($6);  // Free the string literal
+      }
+      free($4);  // Free the identifier
+    }
     | TYPE_NUM ':' IDENTIFICATEUR '[' NOMBRE_ENTIER ']' ';'
+    {
+      // Insert integer array
+      if (!insert_symbol(symbol_table, $3, ST_TYPE_INTEGER_ARRAY, 0)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Duplicate array declaration: %s", $3);
+        yyerror(error_msg);
+      }
+      free($3);  // Free the string after use
+    }
     ;
 
 liste_instructions:
@@ -82,7 +174,25 @@ instruction:
 
 affectation:
     IDENTIFICATEUR ASSIGNMENT expression ';'
+    {
+      // Check if variable exists before assignment
+      if (!check_symbol_exists(symbol_table, $1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Variable not declared: %s", $1);
+        yyerror(error_msg);
+      }
+      free($1);  // Free the identifier after use
+    }
     | IDENTIFICATEUR '[' expression ']' ASSIGNMENT expression ';'
+    {
+      // Check if array exists before assignment
+      if (!check_symbol_exists(symbol_table, $1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Array not declared: %s", $1);
+        yyerror(error_msg);
+      }
+      free($1);  // Free the identifier after use
+    }
     ;
 
 selection:
@@ -110,12 +220,33 @@ expression:
     NOMBRE_ENTIER
     | NOMBRE_REEL
     | CHAINE_TEXTE
-    | IDENTIFICATEUR
+    | IDENTIFICATEUR 
+    {
+      // Check if variable exists when used
+      if (!check_symbol_exists(symbol_table, $1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Variable not declared: %s", $1);
+        yyerror(error_msg);
+      }
+      free($1);  // Free the identifier after use
+    }
     | IDENTIFICATEUR '[' expression ']'
+    {
+      // Check if array exists when used
+      if (!check_symbol_exists(symbol_table, $1)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Array not declared: %s", $1);
+        yyerror(error_msg);
+      }
+      free($1);  // Free the identifier after use
+    }
     | expression '+' expression
     | expression '-' expression
     | expression '*' expression
     | expression '/' expression
+    {
+      // Optional: Maybe we will add division by zero check
+    }
     | '(' expression ')'
     | '-' expression %prec MOINS_UNAIRE
     ;
@@ -123,20 +254,30 @@ expression:
 entree_sortie:
     AFFICHE '(' expression ')' ';'
     | LIRE '(' IDENTIFICATEUR ')' ';'
+    {
+      // Check if variable exists before reading
+      if (!check_symbol_exists(symbol_table, $3)) {
+        char error_msg[100];
+        snprintf(error_msg, sizeof(error_msg), "Variable not declared: %s", $3);
+        yyerror(error_msg);
+      }
+      free($3);  // Free the identifier after use
+    }
     ;
 
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, "Syntax Error: %s at line %d, near token '%s'\n", s, yylineno, yytext);
+  fprintf(stderr, "Semantic Error: %s at line %d, near token '%s'\n", s, yylineno, yytext);
+  exit(1);
 }
 
 int main() {
-  printf("\n\033[34m======================== Compilation Start ========================\033[0m\n");
-  printf("Starting syntactic analysis...\n");
+  printf("\n\033[34m================================== Compilation Start ==================================\033[0m\n");
+  printf("Starting syntactic and semantic analysis...\n");
   printf("Enter your code file path: ");
   yyparse();
-  printf("Syntactic analysis complete.\n");
-  printf("\033[34m======================== Compilation End ========================== \033[0m\n");
+  printf("Syntactic and semantic analysis complete.\n");
+  printf("\033[34m================================== Compilation End ==================================== \033[0m\n");
   return 0;
 }
