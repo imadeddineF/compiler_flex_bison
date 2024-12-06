@@ -63,7 +63,8 @@ SymbolTable* create_symbol_table() {
   }
 
   // Initialize all entries to NULL
-  for (int i = 0; i < TABLE_SIZE; i++) {
+  int i;
+  for ( i = 0; i < TABLE_SIZE; i++) {
     table->entries[i] = NULL;
   }
   table->count = 0;
@@ -72,7 +73,8 @@ SymbolTable* create_symbol_table() {
 }
 
 void free_symbol_table(SymbolTable* table) {
-  for (int i = 0; i < TABLE_SIZE; i++) {
+  int i;
+  for ( i = 0; i < TABLE_SIZE; i++) {
     if (table->entries[i] != NULL) {
       // Free any dynamically allocated memory
       if (table->entries[i]->type == ST_TYPE_STRING ||
@@ -95,7 +97,8 @@ void free_symbol_table(SymbolTable* table) {
 
 unsigned int hash(const char* key) {
   unsigned int hash = 0;
-  for (int i = 0; key[i] != '\0'; i++) {
+  int i;
+  for (i = 0; key[i] != '\0'; i++) {
     hash = 31 * hash + key[i];
   }
   return hash % TABLE_SIZE;
@@ -212,7 +215,8 @@ int check_symbol_exists(SymbolTable* table, const char* name) {
 
 void print_symbol_table(SymbolTable* table) {
   printf("\n===== Symbol Table =====\n");
-  for (int i = 0; i < TABLE_SIZE; i++) {
+  int i;
+  for (i = 0; i < TABLE_SIZE; i++) {
     if (table->entries[i] != NULL) {
       SymbolTableEntry* entry = table->entries[i];
       printf("Name: %s, Type: %d, Constant: %d, Initialized: %d\n", entry->name, entry->type, entry->is_constant, entry->is_initialized);

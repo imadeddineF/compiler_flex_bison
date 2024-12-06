@@ -1,3 +1,4 @@
+%option yylineno
 /* Importation C */
 %{
   #include<ctype.h>
@@ -175,3 +176,4 @@ int yywrap() {
   yylex();
   printf("\033[34m======================== Compilation End ========================== \033[0m\n");
 }*/ 
+
