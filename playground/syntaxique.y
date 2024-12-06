@@ -268,14 +268,14 @@ entree_sortie:
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, "Semantic Error: %s at line %d, near token '%s'\n", s, yylineno, yytext);
+  fprintf(stderr, "\033[31m[ERROR] Semantic Error: %s at line %d, near token '%s'\033[0m\n", s, yylineno, yytext);
   exit(1);
 }
 
 int main() {
   printf("\n\033[34m================================== Compilation Start ==================================\033[0m\n");
   printf("Starting syntactic and semantic analysis...\n");
-  printf("Enter your code file path: ");
+  printf("Enter your code: ");
   yyparse();
   printf("Syntactic and semantic analysis complete.\n");
   printf("\033[34m================================== Compilation End ==================================== \033[0m\n");
