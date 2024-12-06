@@ -3,6 +3,7 @@
   #include<ctype.h>
   #include<stdio.h>
   #include <string.h>
+  #include "syntaxique.tab.h" 
   int nb_ligne=1;
   int nb_colonne=1;    
 %}
@@ -40,6 +41,9 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 "FIXE" {nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS]  KeyWord:FIXE reconnu\033[0m\n");}
 "affiche" {nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS]  KeyWord:affiche reconnu\033[0m\n");}
 "lire" {nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS]  KeyWord:lire reconnu\033[0m\n");}
+"OU" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] KeyWord:OU reconnu\033[0m\n"); }
+"ET" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] KeyWord:ET reconnu\033[0m\n"); }
+"NON" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] KeyWord:NON reconnu\033[0m\n"); }
 "{" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] LFBRA reconnu\033[0m\n");}
 "}" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] RTBRA reconnu\033[0m\n"); }
 "[" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] LFSQBRA reconnu\033[0m\n"); }
@@ -50,9 +54,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 "+" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] PLS reconnu\033[0m\n"); }
 "*" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] MULT reconnu\033[0m\n"); }
 "/" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] DIV reconnu\033[0m\n"); }
-"OU" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] KeyWord:OU reconnu\033[0m\n"); }
-"ET" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] KeyWord:ET reconnu\033[0m\n"); }
-"NON" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] KeyWord:NON reconnu\033[0m\n"); }
 "," { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] ',' reconnu\033[0m\n"); }
 ";" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '; reconnu\033[0m\n"); }
 "=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '=' reconnu\033[0m\n"); }
@@ -134,13 +135,16 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   }
   // Check conditions
   if (len > 10) {  // Length check
-  printf("\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-    } else if (consecutive_underscores) {  // Check for consecutive underscores
-  printf("\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-    } else if (!isupper(yytext[0])) {  // First character uppercase check
-  printf("\033[31m[ERROR] Identificateur ne commence pas par une lettre majuscule (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-    } else {
+    printf("\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  } else if (consecutive_underscores) {  // Check for consecutive underscores
+    printf("\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  } else if (!isupper(yytext[0])) {  // First character uppercase check
+    printf("\033[31m[ERROR] Identificateur ne commence pas par une lettre majuscule (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  } else {
     printf("\033[32m[SUCCESS]Valid identifier: %s\033[0m\n", yytext);  // Identifier is valid
+    yylval.sval = strdup(yytext);
+    nb_colonne += len;
+    return IDENTIFICATEUR;
   }
   nb_colonne += len;  
 }
@@ -160,9 +164,13 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 %%
 
 
+int yywrap() {
+  return 1;
+}
 
-int main() {
+/* Only use it if you are dealing with lexical code without the syntaxical */
+/* int main() {
   printf("\n\033[34m======================== Compilation Start ========================\033[0m\n");
   yylex();
   printf("\033[34m======================== Compilation End ========================== \033[0m\n");
-}
+} */
