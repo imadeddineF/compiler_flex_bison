@@ -13,9 +13,10 @@
 
 /* Expressions régulières */
 lettre [a-zA-Z]  
+lettreMaj[A-Z]
 underscore _
 chiffre [0-9]
-IDF ({lettre}|{chiffre}|{underscore})+
+IDF {lettreMaj}({lettre}|{chiffre}|{underscore})*
 NUM 0|[1-9][0-9]*
 SIGNEDNUM [+-]?{NUM}
 REAL 0\.[0-9]+|[1-9][0-9]*\.[0-9]+
@@ -140,8 +141,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     printf("\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
   } else if (consecutive_underscores) {  // Check for consecutive underscores
     printf("\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-  } else if (!isupper(yytext[0])) {  // First character uppercase check
-    printf("\033[31m[ERROR] Identificateur ne commence pas par une lettre majuscule (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
   } else {
     printf("\033[32m[SUCCESS]Valid identifier: %s\033[0m\n", yytext);  // Identifier is valid
     yylval.sval = strdup(yytext);
