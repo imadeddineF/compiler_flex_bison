@@ -1,3 +1,4 @@
+%option yylineno
 /* Importation C */
 %{
   #include<ctype.h>
