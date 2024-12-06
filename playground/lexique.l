@@ -127,7 +127,8 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 {IDF} { 
   int consecutive_underscores = 0;
   size_t len = strlen(yytext);
-  for (int i = 1; yytext[i] != '\0'; i++) {
+  int i;
+  for ( i = 1; yytext[i] != '\0'; i++) {
     if (yytext[i] == '_' && yytext[i-1] == '_') {
       consecutive_underscores = 1;  // Found two consecutive underscores
       break;  // No need to check further
@@ -169,8 +170,8 @@ int yywrap() {
 }
 
 /* Only use it if you are dealing with lexical code without the syntaxical */
-/* int main() {
+/*int main() {
   printf("\n\033[34m======================== Compilation Start ========================\033[0m\n");
   yylex();
   printf("\033[34m======================== Compilation End ========================== \033[0m\n");
-} */
+}*/ 
