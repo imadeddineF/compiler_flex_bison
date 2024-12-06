@@ -1,24 +1,21 @@
 DEBUT
-  --Déclaration des variables ##
-  NUM : age
-  REAL : salaire
-  FIXE NUM : MAX_AGE = 65
-
-  EXECUTION {
-    affiche("Entrez votre âge :")
-    lire(age)
-
-    SI (age < MAX_AGE) ALORS {
-      affiche("Vous pouvez encore travailler.")
-    } SINON {
-      affiche("Vous êtes en âge de retraite.")
-    }
-
-    compteur <- 0
-
-    TANTQUE (compteur < 5) FAIRE {
-      affiche("Compteur TANTQUE : ", compteur)
-      compteur <- compteur + 1
-    }
+  FIXE ID1 <- 100;  /* Assign a number to an identifier */
+  FIXE ID2 <- -250; /* Signed integer */
+  FIXE ID3 <- 12.34; /* Real number */
+  FIXE ID4 <- -0.567; /* Signed real */
+  affiche "Hello, World!";
+  SI (ID1 < ID2) ALORS {
+    affiche "Condition met";
+  } SINON {
+    affiche "Condition not met";
   }
+  TANTQUE (ID1 > 0) FAIRE {
+    ID1 <- ID1 - 1;
+  }
+  lire ID5;
+  affiche "Final Value: ", ID1;
 FIN
+
+-- This is a single-line comment ##
+{- This is a
+   multi-line comment -}
