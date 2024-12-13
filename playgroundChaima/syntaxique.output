@@ -1,0 +1,1283 @@
+Terminals unused in grammar
+
+   FIXE
+
+
+Grammar
+
+    0 $accept: programme $end
+
+    1 $@1: /* empty */
+
+    2 programme: DEBUT $@1 liste_declarations EXECUTION '{' liste_instructions '}' FIN
+
+    3 bloc: '{' liste_instructions '}'
+
+    4 liste_declarations: declaration
+    5                   | liste_declarations declaration
+
+    6 declaration: TYPE_NUM ':' IDENTIFICATEUR ';'
+    7            | TYPE_REAL ':' IDENTIFICATEUR ';'
+    8            | TYPE_TEXT ':' IDENTIFICATEUR ';'
+
+    9 liste_instructions: instruction
+   10                   | liste_instructions instruction
+
+   11 instruction: affectation
+   12            | selection
+   13            | iteration
+   14            | entree_sortie
+
+   15 affectation: IDENTIFICATEUR ASSIGNMENT expression ';'
+   16            | IDENTIFICATEUR '[' expression ']' ASSIGNMENT expression ';'
+
+   17 selection: SI '(' condition ')' ALORS bloc
+   18          | SI '(' condition ')' ALORS bloc SINON bloc
+
+   19 iteration: TANTQUE condition FAIRE bloc
+
+   20 condition: expression '<' expression
+   21          | expression '>' expression
+   22          | expression INF_EGALE expression
+   23          | expression SUP_EGALE expression
+   24          | expression '=' expression
+   25          | expression DIFFERENT expression
+   26          | condition ET condition
+   27          | condition OU condition
+   28          | NON condition
+
+   29 expression: NOMBRE_ENTIER
+   30           | NOMBRE_REEL
+   31           | CHAINE_TEXTE
+   32           | IDENTIFICATEUR
+   33           | IDENTIFICATEUR '[' expression ']'
+   34           | expression '+' expression
+   35           | expression '-' expression
+   36           | expression '*' expression
+   37           | expression '/' expression
+   38           | '(' expression ')'
+   39           | '-' expression
+
+   40 entree_sortie: AFFICHE '(' expression ')' ';'
+   41              | LIRE '(' IDENTIFICATEUR ')' ';'
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 17 18 38 40 41
+')' (41) 17 18 38 40 41
+'*' (42) 36
+'+' (43) 34
+'-' (45) 35 39
+'/' (47) 37
+':' (58) 6 7 8
+';' (59) 6 7 8 15 16 40 41
+'<' (60) 20
+'=' (61) 24
+'>' (62) 21
+'[' (91) 16 33
+']' (93) 16 33
+'{' (123) 2 3
+'}' (125) 2 3
+error (256)
+DEBUT (258) 2
+FIN (259) 2
+EXECUTION (260) 2
+SI (261) 17 18
+ALORS (262) 17 18
+SINON (263) 18
+TANTQUE (264) 19
+FAIRE (265) 19
+FIXE (266)
+AFFICHE (267) 40
+LIRE (268) 41
+TYPE_NUM (269) 6
+TYPE_REAL (270) 7
+TYPE_TEXT (271) 8
+INF_EGALE (272) 22
+SUP_EGALE (273) 23
+DIFFERENT (274) 25
+ET (275) 26
+OU (276) 27
+NON (277) 28
+ASSIGNMENT (278) 15 16
+IDENTIFICATEUR (279) 6 7 8 15 16 32 33 41
+NOMBRE_ENTIER (280) 29
+NOMBRE_REEL (281) 30
+CHAINE_TEXTE (282) 31
+MOINS_UNAIRE (283)
+
+
+Nonterminals, with rules where they appear
+
+$accept (44)
+    on left: 0
+programme (45)
+    on left: 2, on right: 0
+$@1 (46)
+    on left: 1, on right: 2
+bloc (47)
+    on left: 3, on right: 17 18 19
+liste_declarations (48)
+    on left: 4 5, on right: 2 5
+declaration (49)
+    on left: 6 7 8, on right: 4 5
+liste_instructions (50)
+    on left: 9 10, on right: 2 3 10
+instruction (51)
+    on left: 11 12 13 14, on right: 9 10
+affectation (52)
+    on left: 15 16, on right: 11
+selection (53)
+    on left: 17 18, on right: 12
+iteration (54)
+    on left: 19, on right: 13
+condition (55)
+    on left: 20 21 22 23 24 25 26 27 28, on right: 17 18 19 26 27 28
+expression (56)
+    on left: 29 30 31 32 33 34 35 36 37 38 39, on right: 15 16 20 21
+    22 23 24 25 33 34 35 36 37 38 39 40
+entree_sortie (57)
+    on left: 40 41, on right: 14
+
+
+state 0
+
+    0 $accept: . programme $end
+
+    DEBUT  shift, and go to state 1
+
+    programme  go to state 2
+
+
+state 1
+
+    2 programme: DEBUT . $@1 liste_declarations EXECUTION '{' liste_instructions '}' FIN
+
+    $default  reduce using rule 1 ($@1)
+
+    $@1  go to state 3
+
+
+state 2
+
+    0 $accept: programme . $end
+
+    $end  shift, and go to state 4
+
+
+state 3
+
+    2 programme: DEBUT $@1 . liste_declarations EXECUTION '{' liste_instructions '}' FIN
+
+    TYPE_NUM   shift, and go to state 5
+    TYPE_REAL  shift, and go to state 6
+    TYPE_TEXT  shift, and go to state 7
+
+    liste_declarations  go to state 8
+    declaration         go to state 9
+
+
+state 4
+
+    0 $accept: programme $end .
+
+    $default  accept
+
+
+state 5
+
+    6 declaration: TYPE_NUM . ':' IDENTIFICATEUR ';'
+
+    ':'  shift, and go to state 10
+
+
+state 6
+
+    7 declaration: TYPE_REAL . ':' IDENTIFICATEUR ';'
+
+    ':'  shift, and go to state 11
+
+
+state 7
+
+    8 declaration: TYPE_TEXT . ':' IDENTIFICATEUR ';'
+
+    ':'  shift, and go to state 12
+
+
+state 8
+
+    2 programme: DEBUT $@1 liste_declarations . EXECUTION '{' liste_instructions '}' FIN
+    5 liste_declarations: liste_declarations . declaration
+
+    EXECUTION  shift, and go to state 13
+    TYPE_NUM   shift, and go to state 5
+    TYPE_REAL  shift, and go to state 6
+    TYPE_TEXT  shift, and go to state 7
+
+    declaration  go to state 14
+
+
+state 9
+
+    4 liste_declarations: declaration .
+
+    $default  reduce using rule 4 (liste_declarations)
+
+
+state 10
+
+    6 declaration: TYPE_NUM ':' . IDENTIFICATEUR ';'
+
+    IDENTIFICATEUR  shift, and go to state 15
+
+
+state 11
+
+    7 declaration: TYPE_REAL ':' . IDENTIFICATEUR ';'
+
+    IDENTIFICATEUR  shift, and go to state 16
+
+
+state 12
+
+    8 declaration: TYPE_TEXT ':' . IDENTIFICATEUR ';'
+
+    IDENTIFICATEUR  shift, and go to state 17
+
+
+state 13
+
+    2 programme: DEBUT $@1 liste_declarations EXECUTION . '{' liste_instructions '}' FIN
+
+    '{'  shift, and go to state 18
+
+
+state 14
+
+    5 liste_declarations: liste_declarations declaration .
+
+    $default  reduce using rule 5 (liste_declarations)
+
+
+state 15
+
+    6 declaration: TYPE_NUM ':' IDENTIFICATEUR . ';'
+
+    ';'  shift, and go to state 19
+
+
+state 16
+
+    7 declaration: TYPE_REAL ':' IDENTIFICATEUR . ';'
+
+    ';'  shift, and go to state 20
+
+
+state 17
+
+    8 declaration: TYPE_TEXT ':' IDENTIFICATEUR . ';'
+
+    ';'  shift, and go to state 21
+
+
+state 18
+
+    2 programme: DEBUT $@1 liste_declarations EXECUTION '{' . liste_instructions '}' FIN
+
+    SI              shift, and go to state 22
+    TANTQUE         shift, and go to state 23
+    AFFICHE         shift, and go to state 24
+    LIRE            shift, and go to state 25
+    IDENTIFICATEUR  shift, and go to state 26
+
+    liste_instructions  go to state 27
+    instruction         go to state 28
+    affectation         go to state 29
+    selection           go to state 30
+    iteration           go to state 31
+    entree_sortie       go to state 32
+
+
+state 19
+
+    6 declaration: TYPE_NUM ':' IDENTIFICATEUR ';' .
+
+    $default  reduce using rule 6 (declaration)
+
+
+state 20
+
+    7 declaration: TYPE_REAL ':' IDENTIFICATEUR ';' .
+
+    $default  reduce using rule 7 (declaration)
+
+
+state 21
+
+    8 declaration: TYPE_TEXT ':' IDENTIFICATEUR ';' .
+
+    $default  reduce using rule 8 (declaration)
+
+
+state 22
+
+   17 selection: SI . '(' condition ')' ALORS bloc
+   18          | SI . '(' condition ')' ALORS bloc SINON bloc
+
+    '('  shift, and go to state 33
+
+
+state 23
+
+   19 iteration: TANTQUE . condition FAIRE bloc
+
+    NON             shift, and go to state 34
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    condition   go to state 41
+    expression  go to state 42
+
+
+state 24
+
+   40 entree_sortie: AFFICHE . '(' expression ')' ';'
+
+    '('  shift, and go to state 43
+
+
+state 25
+
+   41 entree_sortie: LIRE . '(' IDENTIFICATEUR ')' ';'
+
+    '('  shift, and go to state 44
+
+
+state 26
+
+   15 affectation: IDENTIFICATEUR . ASSIGNMENT expression ';'
+   16            | IDENTIFICATEUR . '[' expression ']' ASSIGNMENT expression ';'
+
+    ASSIGNMENT  shift, and go to state 45
+    '['         shift, and go to state 46
+
+
+state 27
+
+    2 programme: DEBUT $@1 liste_declarations EXECUTION '{' liste_instructions . '}' FIN
+   10 liste_instructions: liste_instructions . instruction
+
+    SI              shift, and go to state 22
+    TANTQUE         shift, and go to state 23
+    AFFICHE         shift, and go to state 24
+    LIRE            shift, and go to state 25
+    IDENTIFICATEUR  shift, and go to state 26
+    '}'             shift, and go to state 47
+
+    instruction    go to state 48
+    affectation    go to state 29
+    selection      go to state 30
+    iteration      go to state 31
+    entree_sortie  go to state 32
+
+
+state 28
+
+    9 liste_instructions: instruction .
+
+    $default  reduce using rule 9 (liste_instructions)
+
+
+state 29
+
+   11 instruction: affectation .
+
+    $default  reduce using rule 11 (instruction)
+
+
+state 30
+
+   12 instruction: selection .
+
+    $default  reduce using rule 12 (instruction)
+
+
+state 31
+
+   13 instruction: iteration .
+
+    $default  reduce using rule 13 (instruction)
+
+
+state 32
+
+   14 instruction: entree_sortie .
+
+    $default  reduce using rule 14 (instruction)
+
+
+state 33
+
+   17 selection: SI '(' . condition ')' ALORS bloc
+   18          | SI '(' . condition ')' ALORS bloc SINON bloc
+
+    NON             shift, and go to state 34
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    condition   go to state 49
+    expression  go to state 42
+
+
+state 34
+
+   28 condition: NON . condition
+
+    NON             shift, and go to state 34
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    condition   go to state 50
+    expression  go to state 42
+
+
+state 35
+
+   32 expression: IDENTIFICATEUR .
+   33           | IDENTIFICATEUR . '[' expression ']'
+
+    '['  shift, and go to state 51
+
+    $default  reduce using rule 32 (expression)
+
+
+state 36
+
+   29 expression: NOMBRE_ENTIER .
+
+    $default  reduce using rule 29 (expression)
+
+
+state 37
+
+   30 expression: NOMBRE_REEL .
+
+    $default  reduce using rule 30 (expression)
+
+
+state 38
+
+   31 expression: CHAINE_TEXTE .
+
+    $default  reduce using rule 31 (expression)
+
+
+state 39
+
+   39 expression: '-' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 52
+
+
+state 40
+
+   38 expression: '(' . expression ')'
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 53
+
+
+state 41
+
+   19 iteration: TANTQUE condition . FAIRE bloc
+   26 condition: condition . ET condition
+   27          | condition . OU condition
+
+    FAIRE  shift, and go to state 54
+    ET     shift, and go to state 55
+    OU     shift, and go to state 56
+
+
+state 42
+
+   20 condition: expression . '<' expression
+   21          | expression . '>' expression
+   22          | expression . INF_EGALE expression
+   23          | expression . SUP_EGALE expression
+   24          | expression . '=' expression
+   25          | expression . DIFFERENT expression
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    INF_EGALE  shift, and go to state 57
+    SUP_EGALE  shift, and go to state 58
+    DIFFERENT  shift, and go to state 59
+    '<'        shift, and go to state 60
+    '>'        shift, and go to state 61
+    '='        shift, and go to state 62
+    '+'        shift, and go to state 63
+    '-'        shift, and go to state 64
+    '*'        shift, and go to state 65
+    '/'        shift, and go to state 66
+
+
+state 43
+
+   40 entree_sortie: AFFICHE '(' . expression ')' ';'
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 67
+
+
+state 44
+
+   41 entree_sortie: LIRE '(' . IDENTIFICATEUR ')' ';'
+
+    IDENTIFICATEUR  shift, and go to state 68
+
+
+state 45
+
+   15 affectation: IDENTIFICATEUR ASSIGNMENT . expression ';'
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 69
+
+
+state 46
+
+   16 affectation: IDENTIFICATEUR '[' . expression ']' ASSIGNMENT expression ';'
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 70
+
+
+state 47
+
+    2 programme: DEBUT $@1 liste_declarations EXECUTION '{' liste_instructions '}' . FIN
+
+    FIN  shift, and go to state 71
+
+
+state 48
+
+   10 liste_instructions: liste_instructions instruction .
+
+    $default  reduce using rule 10 (liste_instructions)
+
+
+state 49
+
+   17 selection: SI '(' condition . ')' ALORS bloc
+   18          | SI '(' condition . ')' ALORS bloc SINON bloc
+   26 condition: condition . ET condition
+   27          | condition . OU condition
+
+    ET   shift, and go to state 55
+    OU   shift, and go to state 56
+    ')'  shift, and go to state 72
+
+
+state 50
+
+   26 condition: condition . ET condition
+   27          | condition . OU condition
+   28          | NON condition .
+
+    $default  reduce using rule 28 (condition)
+
+
+state 51
+
+   33 expression: IDENTIFICATEUR '[' . expression ']'
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 73
+
+
+state 52
+
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+   39           | '-' expression .
+
+    $default  reduce using rule 39 (expression)
+
+
+state 53
+
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+   38           | '(' expression . ')'
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    ')'  shift, and go to state 74
+
+
+state 54
+
+   19 iteration: TANTQUE condition FAIRE . bloc
+
+    '{'  shift, and go to state 75
+
+    bloc  go to state 76
+
+
+state 55
+
+   26 condition: condition ET . condition
+
+    NON             shift, and go to state 34
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    condition   go to state 77
+    expression  go to state 42
+
+
+state 56
+
+   27 condition: condition OU . condition
+
+    NON             shift, and go to state 34
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    condition   go to state 78
+    expression  go to state 42
+
+
+state 57
+
+   22 condition: expression INF_EGALE . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 79
+
+
+state 58
+
+   23 condition: expression SUP_EGALE . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 80
+
+
+state 59
+
+   25 condition: expression DIFFERENT . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 81
+
+
+state 60
+
+   20 condition: expression '<' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 82
+
+
+state 61
+
+   21 condition: expression '>' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 83
+
+
+state 62
+
+   24 condition: expression '=' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 84
+
+
+state 63
+
+   34 expression: expression '+' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 85
+
+
+state 64
+
+   35 expression: expression '-' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 86
+
+
+state 65
+
+   36 expression: expression '*' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 87
+
+
+state 66
+
+   37 expression: expression '/' . expression
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 88
+
+
+state 67
+
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+   40 entree_sortie: AFFICHE '(' expression . ')' ';'
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    ')'  shift, and go to state 89
+
+
+state 68
+
+   41 entree_sortie: LIRE '(' IDENTIFICATEUR . ')' ';'
+
+    ')'  shift, and go to state 90
+
+
+state 69
+
+   15 affectation: IDENTIFICATEUR ASSIGNMENT expression . ';'
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    ';'  shift, and go to state 91
+
+
+state 70
+
+   16 affectation: IDENTIFICATEUR '[' expression . ']' ASSIGNMENT expression ';'
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    ']'  shift, and go to state 92
+
+
+state 71
+
+    2 programme: DEBUT $@1 liste_declarations EXECUTION '{' liste_instructions '}' FIN .
+
+    $default  reduce using rule 2 (programme)
+
+
+state 72
+
+   17 selection: SI '(' condition ')' . ALORS bloc
+   18          | SI '(' condition ')' . ALORS bloc SINON bloc
+
+    ALORS  shift, and go to state 93
+
+
+state 73
+
+   33 expression: IDENTIFICATEUR '[' expression . ']'
+   34           | expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    ']'  shift, and go to state 94
+
+
+state 74
+
+   38 expression: '(' expression ')' .
+
+    $default  reduce using rule 38 (expression)
+
+
+state 75
+
+    3 bloc: '{' . liste_instructions '}'
+
+    SI              shift, and go to state 22
+    TANTQUE         shift, and go to state 23
+    AFFICHE         shift, and go to state 24
+    LIRE            shift, and go to state 25
+    IDENTIFICATEUR  shift, and go to state 26
+
+    liste_instructions  go to state 95
+    instruction         go to state 28
+    affectation         go to state 29
+    selection           go to state 30
+    iteration           go to state 31
+    entree_sortie       go to state 32
+
+
+state 76
+
+   19 iteration: TANTQUE condition FAIRE bloc .
+
+    $default  reduce using rule 19 (iteration)
+
+
+state 77
+
+   26 condition: condition . ET condition
+   26          | condition ET condition .
+   27          | condition . OU condition
+
+    $default  reduce using rule 26 (condition)
+
+
+state 78
+
+   26 condition: condition . ET condition
+   27          | condition . OU condition
+   27          | condition OU condition .
+
+    ET  shift, and go to state 55
+
+    $default  reduce using rule 27 (condition)
+
+
+state 79
+
+   22 condition: expression INF_EGALE expression .
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 22 (condition)
+
+
+state 80
+
+   23 condition: expression SUP_EGALE expression .
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 23 (condition)
+
+
+state 81
+
+   25 condition: expression DIFFERENT expression .
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 25 (condition)
+
+
+state 82
+
+   20 condition: expression '<' expression .
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 20 (condition)
+
+
+state 83
+
+   21 condition: expression '>' expression .
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 21 (condition)
+
+
+state 84
+
+   24 condition: expression '=' expression .
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 24 (condition)
+
+
+state 85
+
+   34 expression: expression . '+' expression
+   34           | expression '+' expression .
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 34 (expression)
+
+
+state 86
+
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   35           | expression '-' expression .
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 35 (expression)
+
+
+state 87
+
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   36           | expression '*' expression .
+   37           | expression . '/' expression
+
+    $default  reduce using rule 36 (expression)
+
+
+state 88
+
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+   37           | expression '/' expression .
+
+    $default  reduce using rule 37 (expression)
+
+
+state 89
+
+   40 entree_sortie: AFFICHE '(' expression ')' . ';'
+
+    ';'  shift, and go to state 96
+
+
+state 90
+
+   41 entree_sortie: LIRE '(' IDENTIFICATEUR ')' . ';'
+
+    ';'  shift, and go to state 97
+
+
+state 91
+
+   15 affectation: IDENTIFICATEUR ASSIGNMENT expression ';' .
+
+    $default  reduce using rule 15 (affectation)
+
+
+state 92
+
+   16 affectation: IDENTIFICATEUR '[' expression ']' . ASSIGNMENT expression ';'
+
+    ASSIGNMENT  shift, and go to state 98
+
+
+state 93
+
+   17 selection: SI '(' condition ')' ALORS . bloc
+   18          | SI '(' condition ')' ALORS . bloc SINON bloc
+
+    '{'  shift, and go to state 75
+
+    bloc  go to state 99
+
+
+state 94
+
+   33 expression: IDENTIFICATEUR '[' expression ']' .
+
+    $default  reduce using rule 33 (expression)
+
+
+state 95
+
+    3 bloc: '{' liste_instructions . '}'
+   10 liste_instructions: liste_instructions . instruction
+
+    SI              shift, and go to state 22
+    TANTQUE         shift, and go to state 23
+    AFFICHE         shift, and go to state 24
+    LIRE            shift, and go to state 25
+    IDENTIFICATEUR  shift, and go to state 26
+    '}'             shift, and go to state 100
+
+    instruction    go to state 48
+    affectation    go to state 29
+    selection      go to state 30
+    iteration      go to state 31
+    entree_sortie  go to state 32
+
+
+state 96
+
+   40 entree_sortie: AFFICHE '(' expression ')' ';' .
+
+    $default  reduce using rule 40 (entree_sortie)
+
+
+state 97
+
+   41 entree_sortie: LIRE '(' IDENTIFICATEUR ')' ';' .
+
+    $default  reduce using rule 41 (entree_sortie)
+
+
+state 98
+
+   16 affectation: IDENTIFICATEUR '[' expression ']' ASSIGNMENT . expression ';'
+
+    IDENTIFICATEUR  shift, and go to state 35
+    NOMBRE_ENTIER   shift, and go to state 36
+    NOMBRE_REEL     shift, and go to state 37
+    CHAINE_TEXTE    shift, and go to state 38
+    '-'             shift, and go to state 39
+    '('             shift, and go to state 40
+
+    expression  go to state 101
+
+
+state 99
+
+   17 selection: SI '(' condition ')' ALORS bloc .
+   18          | SI '(' condition ')' ALORS bloc . SINON bloc
+
+    SINON  shift, and go to state 102
+
+    $default  reduce using rule 17 (selection)
+
+
+state 100
+
+    3 bloc: '{' liste_instructions '}' .
+
+    $default  reduce using rule 3 (bloc)
+
+
+state 101
+
+   16 affectation: IDENTIFICATEUR '[' expression ']' ASSIGNMENT expression . ';'
+   34 expression: expression . '+' expression
+   35           | expression . '-' expression
+   36           | expression . '*' expression
+   37           | expression . '/' expression
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+    ';'  shift, and go to state 103
+
+
+state 102
+
+   18 selection: SI '(' condition ')' ALORS bloc SINON . bloc
+
+    '{'  shift, and go to state 75
+
+    bloc  go to state 104
+
+
+state 103
+
+   16 affectation: IDENTIFICATEUR '[' expression ']' ASSIGNMENT expression ';' .
+
+    $default  reduce using rule 16 (affectation)
+
+
+state 104
+
+   18 selection: SI '(' condition ')' ALORS bloc SINON bloc .
+
+    $default  reduce using rule 18 (selection)
