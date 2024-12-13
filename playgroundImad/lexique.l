@@ -169,7 +169,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 	nb_ligne++; nb_colonne = 1; 
 }
 
-. { 
+. {
   printf("\033[31m[ERROR]  Lexicale: %s à la ligne: %d, colonne : %d\033[0m\n", yytext, nb_ligne, nb_colonne); 
 	nb_colonne += strlen(yytext); 
 }
