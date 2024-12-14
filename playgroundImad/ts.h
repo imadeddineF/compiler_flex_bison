@@ -64,7 +64,7 @@ SymbolTable* create_symbol_table() {
 
   // Initialize all entries to NULL
   int i;
-  for ( i = 0; i < TABLE_SIZE; i++) {
+  for (i = 0; i < TABLE_SIZE; i++) {
     table->entries[i] = NULL;
   }
   table->count = 0;
@@ -74,7 +74,7 @@ SymbolTable* create_symbol_table() {
 
 void free_symbol_table(SymbolTable* table) {
   int i;
-  for ( i = 0; i < TABLE_SIZE; i++) {
+  for (i = 0; i < TABLE_SIZE; i++) {
     if (table->entries[i] != NULL) {
       // Free any dynamically allocated memory
       if (table->entries[i]->type == ST_TYPE_STRING ||
