@@ -176,9 +176,9 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 %%
 
 
-int yywrap() {
+/* int yywrap() {
   return 1;
-}
+} */
 
 /* Only use it if you are dealing with lexical code without the syntaxical */
 /*int main() {
