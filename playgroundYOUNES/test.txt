@@ -1,0 +1,10 @@
+DEBUT
+NUM: x;
+REAL: y;
+FIXE NUM: z <- 42;
+EXECUTION {
+    x <- 10;
+    affiche(x);
+    lire(y);
+}
+FIN
