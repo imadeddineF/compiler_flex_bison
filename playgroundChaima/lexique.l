@@ -1,13 +1,13 @@
-%option yylineno
-
 /* Importation C */
 %{
-  #include<ctype.h>
-  #include<stdio.h>
-  #include <string.h>
-  #include "syntaxique.tab.h" 
-  int nb_ligne = 1;
-  int nb_colonne = 1;
+extern YYSTYPE yylval;
+#include<ctype.h>
+#include<stdio.h>
+#include <string.h>
+#include "syntaxique.tab.h" 
+#include "ts.h"
+extern  int nb_ligne;
+extern  int nb_colonne;
 %}
 
 /* Expressions régulières */
@@ -21,11 +21,13 @@ SIGNEDNUM [+-]?{NUM}
 REAL 0\.[0-9]+|[1-9][0-9]*\.[0-9]+
 SIGNEDREAL [+-]?{REAL}
 TEXT \"[^\"]*\"
+cst [1-9][0-9]*|0 
 commentaire_sur_ligne --[^\n]*##
 commentaire_multi_lignes \{-(.|\n)*?-\}
 
 /* Règles de production */
 %%
+
 "DEBUT" {
   nb_colonne += strlen(yytext);
   return DEBUT;  // Retourne le token DEBUT
@@ -94,88 +96,17 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   nb_colonne += strlen(yytext);
   return NON;  // Retourne le token NON
 }
-"{" {
-  nb_colonne += strlen(yytext);
-  return LFBRA;  // Retourne le token LFBRA
-}
-"}" {
-  nb_colonne += strlen(yytext);
-  return RTBRA;  // Retourne le token RTBRA
-}
-"[" {
-  nb_colonne += strlen(yytext);
-  return LFSQBRA;  // Retourne le token LFSQBRA
-}
-"]" {
-  nb_colonne += strlen(yytext);
-  return RTSQBRA;  // Retourne le token RTSQBRA
-}
-"(" {
-  nb_colonne += strlen(yytext);
-  return LFPar;  // Retourne le token LFPar
-}
-")" {
-  nb_colonne += strlen(yytext);
-  return RTPar;  // Retourne le token RTPar
-}
-"-" {
-  nb_colonne += strlen(yytext);
-  return MINS;  // Retourne le token MINS
-}
-"+" {
-  nb_colonne += strlen(yytext);
-  return PLS;  // Retourne le token PLS
-}
-"*" {
-  nb_colonne += strlen(yytext);
-  return MULT;  // Retourne le token MULT
-}
-"/" {
-  nb_colonne += strlen(yytext);
-  return DIV;  // Retourne le token DIV
-}
-"," {
-  nb_colonne += strlen(yytext);
-  return VIRG;  // Retourne le token VIRG
-}
-";" {
-  nb_colonne += strlen(yytext);
-  return PVIRG;  // Retourne le token PVIRG
-}
-"=" {
-  nb_colonne += strlen(yytext);
-  return AFFA;  // Retourne le token AFFA
-}
-":" {
-  nb_colonne += strlen(yytext);
-  return DEUXPOINTS;  // Retourne le token DEUXPOINTS
-}
-"<-" {
-  nb_colonne += strlen(yytext);
-  return MOINS_G;  // Retourne le token MOINS_G
-}
-"<" {
-  nb_colonne += strlen(yytext);
-  return INF;  // Retourne le token INF
-}
-"<=" {
-  nb_colonne += strlen(yytext);
-  return INFEG;  // Retourne le token INFEG
-}
-">" {
-  nb_colonne += strlen(yytext);
-  return SUP;  // Retourne le token SUP
-}
-">=" {
-  nb_colonne += strlen(yytext);
-  return SUPEG;  // Retourne le token SUPEG
-}
-"!=" {
-  nb_colonne += strlen(yytext);
-  return DIFF;  // Retourne le token DIFF
-}
+["{""}""[""]""("")""-""+""*""/"","";""="":""<-""<""<="">"">=""!="] {return yytext[0];} 
 
-/* Règles de traitement des commentaires */
+
+
+{IDF} {
+  yylval.str=strdup(yytext); inserer(yytext,"idf"); 
+  return IDF;  // Retourne le token IDF
+}
+{cst} {yylval.entier=atoi(yytext); return cst;}
+
+
 {commentaire_sur_ligne} {
   nb_colonne += strlen(yytext);  // Update the column number based on the length of the comment
 }
@@ -189,7 +120,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   nb_colonne = 1;  
 }
 
-/* Règles pour les autres tokens */
+
 {TEXT} {
   nb_colonne += strlen(yytext);
   return TEXT;  // Retourne le token TEXT
@@ -231,7 +162,4 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   }
 }
 
-{IDF} {
-  return IDF;  // Retourne le token IDF
-}
 %%
