@@ -1,263 +1,204 @@
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
-  #include "ts.h"
-  extern int yylineno;
-  extern char* yytext;
-  void yyerror(const char *s);
-  SymbolTable* symbol_table; // Global symbol table
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "ts.h"
+
+extern int yylineno;
+extern int nb_colonne;
+
+void yyerror(const char* s) {
+    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, yylineno, nb_colonne);
+}
 %}
 
-// Déclaration des types
+/* Déclaration des types de données */
 %union {
-  int ival;
-  double rval;
-  char* sval;
+    int entier;
+    double reel;
+    char* texte;
+    int bool_val;  // Déclarez un type pour les conditions (valeur booléenne)
 }
 
-// Tokens
+%token <entier> NUM
+%token <reel> REAL
+%token <texte> TEXT
+%token IDF
+
+%token SI ALORS SINON
+%token TANTQUE FAIRE
 %token DEBUT FIN EXECUTION
-%token SI ALORS SINON TANTQUE FAIRE
 %token FIXE AFFICHE LIRE
-%token TYPE_NUM TYPE_REAL TYPE_TEXT
-%token INF_EGALE SUP_EGALE DIFFERENT PVIRG AFFA
 %token ET OU NON
-%token ASSIGNMENT
-%token <sval> IDENTIFICATEUR
-%token <ival> NOMBRE_ENTIER
-%token <rval> NOMBRE_REEL
-%token <sval> CHAINE_TEXTE
+%token EGAL DIFFERENT INF INF_EGAL SUP SUP_EGAL
+%token PLUS MOINS MULT DIV
 
-// Types des non-terminaux
-%type <sval> programme bloc liste_declarations
-%type <sval> instruction liste_instructions condition
-%type <sval> affectation selection iteration entree_sortie
-%type <sval> expression declaration
+%type <entier> declaration
+%type <entier> expression
+%type <bool_val> condition
+%type <texte> type constante
 
-// Priorité des opérateurs
+
+/* Priorités et associativité */
 %left OU
 %left ET
-%left NON
-%left '<' '>' INF_EGALE SUP_EGALE '=' DIFFERENT
-%left '+' '-'
-%left '*' '/'
-%right MOINS_UNAIRE
+%right NON
+%nonassoc EGAL DIFFERENT INF INF_EGAL SUP SUP_EGAL
+%left PLUS MOINS
+%left MULT DIV
+
+/* Point de départ */
+%start programme
 
 %%
 
-// Début du programme
-programme:
-    DEBUT {
-        symbol_table = create_symbol_table();
-    }
-    liste_declarations
-    EXECUTION '{' liste_instructions '}' FIN {
-        print_symbol_table(symbol_table);
-        free_symbol_table(symbol_table);
-        printf("Programme syntaxiquement correct.\n");
-        $$ = NULL;
-    }
+programme
+    : DEBUT declarations EXECUTION bloc FIN
+        { printf("Programme valide\n"); }
     ;
 
-// Bloc d'instructions
-bloc:
-    '{' liste_instructions '}' {
-        $$ = NULL;
-    }
+declarations
+    : declaration declarations
+    | /* vide */
     ;
 
-// Déclarations
-liste_declarations:
-    declaration {
-        $$ = NULL;
-    }
-    | liste_declarations declaration {
-        $$ = NULL;
-    }
-    ;
-
-    fixe_declaration:
-    FIXE IDENTIFICATEUR AFFA expression PVIRG { printf("Déclaration de %s avec valeur %d\n", $2, $4); }
-;
-
-declaration:
-    TYPE_NUM ':' IDENTIFICATEUR ';' {
-        if (!insert_symbol(symbol_table, $3, ST_TYPE_INTEGER, 0)) {
-            yyerror("Variable déjà déclarée.");
+declaration
+    : type ':' IDF ';'
+        { if (verifier_double_declaration($3)) {
+              fprintf(stderr, "Erreur: double déclaration de la variable %s\n", $3);
+              YYERROR;
+          } else {
+              inserer($3, $1);
+          }
         }
-        free($3);
-        $$ = NULL;
-    }
-    | TYPE_REAL ':' IDENTIFICATEUR ';' {
-        if (!insert_symbol(symbol_table, $3, ST_TYPE_REAL, 0)) {
-            yyerror("Variable déjà déclarée.");
+    | FIXE type ':' IDF '=' constante ';'
+        { if (verifier_double_declaration($4)) {
+              fprintf(stderr, "Erreur: double déclaration de la constante %s\n", $4);
+              YYERROR;
+          } else {
+              inserer_constante($4, $2, $6);
+          }
         }
-        free($3);
-        $$ = NULL;
-    }
-    | TYPE_TEXT ':' IDENTIFICATEUR ';' {
-        if (!insert_symbol(symbol_table, $3, ST_TYPE_STRING, 0)) {
-            yyerror("Variable déjà déclarée.");
+    | type ':' IDF '[' NUM ']' ';'
+        { if ($5 <= 0) {
+              fprintf(stderr, "Erreur: taille de tableau non valide (%d)\n", $5);
+              YYERROR;
+          } else if (verifier_double_declaration($3)) {
+              fprintf(stderr, "Erreur: double déclaration du tableau %s\n", $3);
+              YYERROR;
+          } else {
+              inserer_tableau($3, $1, $5);
+          }
         }
-        free($3);
-        $$ = NULL;
-    }
     ;
 
-// Liste des instructions
-liste_instructions:
-    instruction {
-        $$ = NULL;
-    }
-    | liste_instructions instruction {
-        $$ = NULL;
-    }
+type
+    : TEXT
+        { $$ = TEXT; }
+    | NUM
+        { $$ = NUM; }
+    | REAL
+        { $$ = REAL; }
     ;
 
-instruction:
-    affectation
-    | selection
-    | iteration
-    | entree_sortie
+constante
+    : NUM
+        { $$ = $1; }
+    | REAL
+        { $$ = $1; }
+    | TEXT
+        { $$ = $1; }
     ;
 
-// Affectation
-affectation:
-    IDENTIFICATEUR ASSIGNMENT expression ';' {
-        if (!check_symbol_exists(symbol_table, $1)) {
-            yyerror("Variable non déclarée.");
+bloc
+    : '{' instructions '}'
+    ;
+
+instructions
+    : instruction instructions
+    | /* vide */
+    ;
+
+instruction
+    : IDF '<-' expression ';'
+        { if (!verifier_declaration($1)) {
+              fprintf(stderr, "Erreur: variable non déclarée (%s)\n", $1);
+              YYERROR;
+          } else if (est_constante($1)) {
+              fprintf(stderr, "Erreur: modification de la valeur d'une constante (%s)\n", $1);
+              YYERROR;
+          } else {
+              /* Affectation correcte, on peut effectuer l'affectation ici */
+              printf("Affectation: %s <- %d\n", $1, $3);
+          }
         }
-        free($1);
-        $$ = NULL;
-    }
-    | IDENTIFICATEUR '[' expression ']' ASSIGNMENT expression ';' {
-        if (!check_symbol_exists(symbol_table, $1)) {
-            yyerror("Tableau non déclaré.");
+    | AFFICHE '(' expression ')' ';'
+    | LIRE '(' IDF ')' ';'
+        { if (!verifier_declaration($3)) {
+              fprintf(stderr, "Erreur: variable non déclarée (%s)\n", $3);
+              YYERROR;
+          }
         }
-        free($1);
-        $$ = NULL;
-    }
+    | SI '(' condition ')' ALORS bloc SINON bloc
+        { /* Code pour l'instruction SI avec SINON */ }
+    | SI '(' condition ')' ALORS bloc
+        { /* Code pour l'instruction SI sans SINON */ }
+    | TANTQUE '(' condition ')' FAIRE bloc
+        { /* Code pour l'instruction TANTQUE FAIRE */ }
     ;
 
-// Sélection
-selection:
-    SI '(' condition ')' ALORS bloc {
-        $$ = NULL;
-    }
-    | SI '(' condition ')' ALORS bloc SINON bloc {
-        $$ = NULL;
-    }
-    ;
-
-// Itération
-iteration:
-    TANTQUE condition FAIRE bloc {
-        $$ = NULL;
-    }
-    ;
-
-// Condition
-condition:
-    expression '<' expression {
-        $$ = NULL;
-    }
-    | expression '>' expression {
-        $$ = NULL;
-    }
-    | expression INF_EGALE expression {
-        $$ = NULL;
-    }
-    | expression SUP_EGALE expression {
-        $$ = NULL;
-    }
-    | expression '=' expression {
-        $$ = NULL;
-    }
-    | expression DIFFERENT expression {
-        $$ = NULL;
-    }
-    | condition ET condition {
-        $$ = NULL;
-    }
-    | condition OU condition {
-        $$ = NULL;
-    }
-    | NON condition {
-        $$ = NULL;
-    }
-    ;
-
-// Expression
-expression:
-    NOMBRE_ENTIER {
-        $$ = NULL;
-    }
-    | NOMBRE_REEL {
-        $$ = NULL;
-    }
-    | CHAINE_TEXTE {
-        $$ = NULL;
-    }
-    | IDENTIFICATEUR {
-        if (!check_symbol_exists(symbol_table, $1)) {
-            yyerror("Variable non déclarée.");
+expression
+    : expression PLUS expression
+        { $$ = $1 + $3; }
+    | expression MOINS expression
+        { $$ = $1 - $3; }
+    | expression MULT expression
+        { $$ = $1 * $3; }
+    | expression DIV expression
+        { if ($3 == 0) {
+              fprintf(stderr, "Erreur: division par 0\n");
+              YYERROR;
+          }
+          $$ = $1 / $3; }
+    | '(' expression ')'
+        { $$ = $2; }
+    | NUM
+        { $$ = $1; }
+    | REAL
+        { $$ = $1; }
+    | IDF
+        { if (!verifier_declaration($1)) {
+              fprintf(stderr, "Erreur: variable non déclarée (%s)\n", $1);
+              YYERROR;
+          } 
+          $$ = recuperer_valeur($1); /* On récupère la valeur de la variable */
         }
-        free($1);
-        $$ = NULL;
-    }
-    | IDENTIFICATEUR '[' expression ']' {
-        if (!check_symbol_exists(symbol_table, $1)) {
-            yyerror("Tableau non déclaré.");
-        }
-        free($1);
-        $$ = NULL;
-    }
-    | expression '+' expression {
-        $$ = NULL;
-    }
-    | expression '-' expression {
-        $$ = NULL;
-    }
-    | expression '*' expression {
-        $$ = NULL;
-    }
-    | expression '/' expression {
-        $$ = NULL;
-    }
-    | '(' expression ')' {
-        $$ = NULL;
-    }
-    | '-' expression %prec MOINS_UNAIRE {
-        $$ = NULL;
-    }
     ;
 
-// Entrée/Sortie
-entree_sortie:
-    AFFICHE '(' expression ')' ';' {
-        $$ = NULL;
-    }
-    | LIRE '(' IDENTIFICATEUR ')' ';' {
-        if (!check_symbol_exists(symbol_table, $3)) {
-            yyerror("Variable non déclarée.");
-        }
-        free($3);
-        $$ = NULL;
-    }
+condition
+    : expression INF expression
+        { $$ = $1 < $3; }
+    | expression INF_EGAL expression
+        { $$ = $1 <= $3; }
+    | expression SUP expression
+        { $$ = $1 > $3; }
+    | expression SUP_EGAL expression
+        { $$ = $1 >= $3; }
+    | expression EGAL expression
+        { $$ = $1 == $3; }
+    | expression DIFFERENT expression
+        { $$ = $1 != $3; }
+    | NON condition
+        { $$ = !$2; }
+    | condition ET condition
+        { $$ = $1 && $3; }
+    | condition OU condition
+        { $$ = $1 || $3; }
     ;
 
 %%
 
-// Gestion des erreurs
-void yyerror(const char *s) {
-    fprintf(stderr, "[Erreur] %s à la ligne %d, près de '%s'.\n", s, yylineno, yytext);
-}
-
-// Point d'entrée
 int main() {
-    printf("Début de l'analyse syntaxique...\n");
-    yyparse();
-    printf("Analyse terminée.\n");
-    return 0;
+    printf("Début de l'analyse syntaxique\n");
+    return yyparse();
 }
