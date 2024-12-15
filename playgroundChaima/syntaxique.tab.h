@@ -39,34 +39,34 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     DEBUT = 258,
-     FIN = 259,
-     EXECUTION = 260,
-     SI = 261,
-     ALORS = 262,
-     SINON = 263,
-     TANTQUE = 264,
-     FAIRE = 265,
-     FIXE = 266,
-     AFFICHE = 267,
-     LIRE = 268,
-     TYPE_NUM = 269,
-     TYPE_REAL = 270,
-     TYPE_TEXT = 271,
-     MOINS_EGALE = 272,
-     PLUS_EGALE = 273,
-     INF_EGALE = 274,
-     SUP_EGALE = 275,
-     DIFFERENT = 276,
-     ET = 277,
-     OU = 278,
-     NON = 279,
-     ASSIGNMENT = 280,
-     IDENTIFICATEUR = 281,
-     NOMBRE_ENTIER = 282,
-     NOMBRE_REEL = 283,
-     CHAINE_TEXTE = 284,
-     MOINS_UNAIRE = 285
+     NUM = 258,
+     REAL = 259,
+     TEXT = 260,
+     IDF = 261,
+     SI = 262,
+     ALORS = 263,
+     SINON = 264,
+     TANTQUE = 265,
+     FAIRE = 266,
+     DEBUT = 267,
+     FIN = 268,
+     EXECUTION = 269,
+     FIXE = 270,
+     AFFICHE = 271,
+     LIRE = 272,
+     ET = 273,
+     OU = 274,
+     NON = 275,
+     EGAL = 276,
+     DIFFERENT = 277,
+     INF = 278,
+     INF_EGAL = 279,
+     SUP = 280,
+     SUP_EGAL = 281,
+     PLUS = 282,
+     MOINS = 283,
+     MULT = 284,
+     DIV = 285
    };
 #endif
 
@@ -77,16 +77,17 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 13 "syntaxique.y"
+#line 16 "syntaxique.y"
 
-  int ival;
-  double rval;
-  char* sval;
+    int entier;
+    double reel;
+    char* texte;
+    int bool_val;  
 
 
 
 /* Line 1676 of yacc.c  */
-#line 90 "syntaxique.tab.h"
+#line 91 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
