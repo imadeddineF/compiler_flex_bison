@@ -97,7 +97,27 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   return NON;  // Retourne le token NON
 }
 
-[{}\[()-+*/,;=:<-<<=>>=!=\]] {return yytext[0];} 
+"{"      { return ACCOLADE_OUVRANTE; }
+"}"      { return ACCOLADE_FERMANTE; }
+"["      { return CROCHET_OUVRANT; }
+"]"      { return CROCHET_FERMANT; }
+"("      { return PARENTHOISE_OUVRANTE; }
+")"      { return PARENTHOISE_FERMANTE; }
+"+"      { return PLUS; }
+"-"      { return MOINS; }
+"*"      { return MULT; }
+"/"      { return DIV; }
+","      { return VIRGULE; }
+";"      { return POINT_VIRGULE; }
+":"      { return DEUX_POINTS; }
+"="      { return EGAL; }
+"<"      { return INF; }
+">"      { return SUP; }
+"!="    { return DIFFERENT; }
+"<="    { return INF_EGAL; }
+">="    { return SUP_EGAL; }
+"->"    { return AFFECTION; }
+
 
 {IDF} {
   yylval.str=strdup(yytext); inserer(yytext,"idf"); 
@@ -160,5 +180,5 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     return SIGNEDREAL;  // Retourne le token SIGNEDREAL
   }
 }
-
+. {printf ("erreur lexical sur l'entite %s a la ligne %d a la colonne %d",yytext,nb_ligne,col); return err;}
 %%
