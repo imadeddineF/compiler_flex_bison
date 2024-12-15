@@ -82,51 +82,38 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 {TEXT} {
-  printf("This text is correct: %s\n", yytext); /* Print the text literal*/ 
   nb_colonne += strlen(yytext);
   return TEXT; 
 }
 
 {NUM} {
   int val = atoi(yytext);  // Convert string to integer
-  if (val < 0 || val > 32767) {  // Range check for NUM
+  if (val < 0 || val > 32767)   // Range check for NUM
     printf("\033[31m[ERROR] Valeur d'entier hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-  } else {
-    printf("\033[32m[SUCCESS]This number is correct: %s\033[0m\n", yytext);  // Print message for valid number
-  }
   nb_colonne += strlen(yytext);  // Always update the column number
   return NUM;
 }
 
 {SIGNEDNUM} {
   int val = atoi(yytext);  // Convert string to integer
-  if (val < -32768 || val > 32767) {  // Range check for SIGNEDNUM
+  if (val < -32768 || val > 32767)  // Range check for SIGNEDNUM
     printf("\033[31m[ERROR] Valeur d'entier signé hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-  } else {
-    printf("\033[32m[SUCCESS]This signed number is correct: %s\033[0m\n", yytext);  // Print message for valid signed number
-  }
   nb_colonne += strlen(yytext);  // Always update the column number
   return SIGNEDNUM;
 }
 
 {REAL} {
   double val = atof(yytext);  // Convert string to double
-  if (val < 0.0 || val > 32767.0) {  // Range check for REAL
+  if (val < 0.0 || val > 32767.0)  // Range check for REAL
     printf("\033[31m[ERROR] Valeur réelle hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-  } else {
-    printf("\033[32m[SUCCESS]This real number is correct: %s\033[0m\n", yytext);  // Print message for valid real number
-  }
   nb_colonne += strlen(yytext);  // Always update the column number
   return REAL;
 }
 
 {SIGNEDREAL} {
   double val = atof(yytext);  // Convert string to double
-  if (val < -32768.0 || val > 32767.0) {  // Range check for SIGNEDREAL
+  if (val < -32768.0 || val > 32767.0)   // Range check for SIGNEDREAL
     printf("\033[31m[ERROR] Valeur réelle signée hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-  } else {
-    printf("\033[32m[SUCCESS]This signed real number is correct: %s\033[0m\n", yytext);  // Print message for valid signed real number
-  }
   nb_colonne += strlen(yytext);  // Always update the column number
   return SIGNEDREAL;
 }
@@ -156,9 +143,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     if (recherche(yytext) == -1) {
         inserer(yytext, "IDF"); // Insert identifier into the symbol table
     }
-
-    // Pass identifier to Bison and update column
-    printf("\033[32m[SUCCESS] Valid identifier: %s\033[0m\n", yytext);
     yylval.texte = strdup(yytext); // Assign yytext to yylval for Bison
     nb_colonne += len;
     return IDF;
