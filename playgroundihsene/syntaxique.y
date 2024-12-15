@@ -5,10 +5,11 @@
   #include "ts.h"
   extern int yylineno;
   extern char* yytext;
-  extern  int nb_ligne;
-  extern int nb_colonne; 
   void yyerror(const char *s);
   SymbolTable* symbol_table; // Global symbol table
+  int nb_ligne=1;
+  int col=1;
+ void yyerror(char *msg);
 %}
 
 // Déclaration des types
