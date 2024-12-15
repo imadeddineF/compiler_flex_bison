@@ -48,7 +48,7 @@
 %left '<' '>' INF_EGALE SUP_EGALE '=' DIFFERENT 
 %left '+' '-'
 %left '*' '/'
-%precedence MOINS_UNAIRE
+%right MOINS_UNAIRE
 
 %%
 // Grammar rules start here

@@ -96,15 +96,14 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   nb_colonne += strlen(yytext);
   return NON;  // Retourne le token NON
 }
-["{""}""[""]""("")""-""+""*""/"","";""="":""<-""<""<="">"">=""!="] {return yytext[0];} 
 
-
+[{}\[()-+*/,;=:<-<<=>>=!=\]] {return yytext[0];} 
 
 {IDF} {
   yylval.str=strdup(yytext); inserer(yytext,"idf"); 
   return IDF;  // Retourne le token IDF
 }
-{cst} {yylval.entier=atoi(yytext); return cst;}
+
 
 
 {commentaire_sur_ligne} {
