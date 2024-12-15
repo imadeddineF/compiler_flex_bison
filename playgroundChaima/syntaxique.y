@@ -85,7 +85,8 @@ expression
     ;
 
 %%
+
 int main() {
-    printf("Debut de l'analyse.\n");
+    printf("Début de l'analyse.\n");
     return yyparse();
 }

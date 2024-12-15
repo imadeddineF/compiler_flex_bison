@@ -25,60 +25,64 @@ commentaire_multi_lignes "\\{-([^-]|-)*-\\}"
 
 /* Règles de production */
 %%
-"DEBUT"          { return DEBUT; }
-"FIN"            { return FIN; }
-"EXECUTION"      { return EXECUTION; }
-"SI"             { return SI; }
-"ALORS"          { return ALORS; }
-"SINON"          { return SINON; }
-"TANTQUE"        { return TANTQUE; }
-"FAIRE"          { return FAIRE; }
-"FIXE"           { return FIXE; }
-"affiche"        { return AFFICHE; }
-"lire"           { return LIRE; }
-"OU"             { return OU; }
-"ET"             { return ET; }
-"NON"            { return NON; }
-"{"              { return ACCOLADE_OUVRANTE; }
-"}"              { return ACCOLADE_FERMANTE; }
-"("              { return PARENTHOISE_OUVRANTE; }
-")"              { return PARENTHOISE_FERMANTE; }
-"+"              { return PLUS; }
-"-"              { return MOINS; }
-"*"              { return MULT; }
-"/"              { return DIV; }
-","              { return VIRGULE; }
-";"              { return POINT_VIRGULE; }
-":"              { return DEUX_POINTS; }
-"="              { return EGAL; }
-"<"              { return INF; }
-">"              { return SUP; }
-"!="             { return DIFFERENT; }
-"<="             { return INF_EGAL; }
-">="             { return SUP_EGAL; }
-"<-"             { return AFFECTION; }
+"DEBUT"          { printf("Token: DEBUT\n"); return DEBUT; }
+"FIN"            { printf("Token: FIN\n"); return FIN; }
+"EXECUTION"      { printf("Token: EXECUTION\n"); return EXECUTION; }
+"SI"             { printf("Token: SI\n"); return SI; }
+"ALORS"          { printf("Token: ALORS\n"); return ALORS; }
+"SINON"          { printf("Token: SINON\n"); return SINON; }
+"TANTQUE"        { printf("Token: TANTQUE\n"); return TANTQUE; }
+"FAIRE"          { printf("Token: FAIRE\n"); return FAIRE; }
+"FIXE"           { printf("Token: FIXE\n"); return FIXE; }
+"affiche"        { printf("Token: AFFICHE\n"); return AFFICHE; }
+"lire"           { printf("Token: LIRE\n"); return LIRE; }
+"OU"             { printf("Token: OU\n"); return OU; }
+"ET"             { printf("Token: ET\n"); return ET; }
+"NON"            { printf("Token: NON\n"); return NON; }
+"{"              { printf("Token: ACCOLADE_OUVRANTE\n"); return ACCOLADE_OUVRANTE; }
+"}"              { printf("Token: ACCOLADE_FERMANTE\n"); return ACCOLADE_FERMANTE; }
+"("              { printf("Token: PARENTHOISE_OUVRANTE\n"); return PARENTHOISE_OUVRANTE; }
+")"              { printf("Token: PARENTHOISE_FERMANTE\n"); return PARENTHOISE_FERMANTE; }
+"+"              { printf("Token: PLUS\n"); return PLUS; }
+"-"              { printf("Token: MOINS\n"); return MOINS; }
+"*"              { printf("Token: MULT\n"); return MULT; }
+"/"              { printf("Token: DIV\n"); return DIV; }
+","              { printf("Token: VIRGULE\n"); return VIRGULE; }
+";"              { printf("Token: POINT_VIRGULE\n"); return POINT_VIRGULE; }
+":"              { printf("Token: DEUX_POINTS\n"); return DEUX_POINTS; }
+"="              { printf("Token: EGAL\n"); return EGAL; }
+"<"              { printf("Token: INF\n"); return INF; }
+">"              { printf("Token: SUP\n"); return SUP; }
+"!="             { printf("Token: DIFFERENT\n"); return DIFFERENT; }
+"<="             { printf("Token: INF_EGAL\n"); return INF_EGAL; }
+">="             { printf("Token: SUP_EGAL\n"); return SUP_EGAL; }
+"<-"             { printf("Token: AFFECTION\n"); return AFFECTION; }
 
 {IDF} {
+  printf("Token: IDF (%s)\n", yytext); 
   yylval.texte = strdup(yytext);
   return IDF;
 }
 
 {TEXT} {
+  printf("Token: TEXT (%s)\n", yytext);
   yylval.texte = strdup(yytext);
   return TEXT;
 }
 
 {NUM} {
+  printf("Token: NUM (%s)\n", yytext);
   yylval.entier = atoi(yytext);
   return NUM;
 }
 
 {REAL} {
+  printf("Token: REAL (%s)\n", yytext);
   yylval.reel = atof(yytext);
   return REAL;
 }
 
-{commentaire_sur_ligne} { /* Ignorer les commentaires sur une ligne */ }
+{commentaire_sur_ligne}  { /* Ignorer les commentaires sur une ligne */ }
 
 {commentaire_multi_lignes} {
   char* ptr = yytext;
@@ -88,8 +92,8 @@ commentaire_multi_lignes "\\{-([^-]|-)*-\\}"
   }
 }
 
-[ \t]+          { nb_colonne += yyleng; }  /* Compter les espaces/tabulations */
-\n              { nb_ligne++; nb_colonne = 1; }  /* Avancer à la ligne suivante */
+[ \t]+  { /* Ignorer les espaces et tabulations sans affecter la colonne */ }
+\n      { nb_ligne++; nb_colonne = 1; }  /* Avancer à la ligne suivante */
 
 . {
   fprintf(stderr, "Erreur lexicale sur '%s' à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
