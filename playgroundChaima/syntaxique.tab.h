@@ -54,19 +54,28 @@
      FIXE = 270,
      AFFICHE = 271,
      LIRE = 272,
-     ET = 273,
-     OU = 274,
-     NON = 275,
-     EGAL = 276,
-     DIFFERENT = 277,
-     INF = 278,
-     INF_EGAL = 279,
-     SUP = 280,
-     SUP_EGAL = 281,
-     PLUS = 282,
-     MOINS = 283,
-     MULT = 284,
-     DIV = 285
+     ACCOLADE_OUVRANTE = 273,
+     ACCOLADE_FERMANTE = 274,
+     PARENTHOISE_OUVRANTE = 275,
+     PARENTHOISE_FERMANTE = 276,
+     PLUS = 277,
+     MOINS = 278,
+     MULT = 279,
+     DIV = 280,
+     VIRGULE = 281,
+     POINT_VIRGULE = 282,
+     DEUX_POINTS = 283,
+     EGAL = 284,
+     INF = 285,
+     SUP = 286,
+     DIFFERENT = 287,
+     INF_EGAL = 288,
+     SUP_EGAL = 289,
+     AFFECTION = 290,
+     OU = 291,
+     ET = 292,
+     NON = 293,
+     ERR = 294
    };
 #endif
 
@@ -77,17 +86,16 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 16 "syntaxique.y"
+#line 15 "syntaxique.y"
 
     int entier;
     double reel;
     char* texte;
-    int bool_val;  
 
 
 
 /* Line 1676 of yacc.c  */
-#line 91 "syntaxique.tab.h"
+#line 99 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
