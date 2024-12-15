@@ -14,9 +14,9 @@
 
 // Define token types
 %union {
-  int ival;       // For integer values
-  double rval;    // For real values
-  char* sval;     // For string values and identifiers
+  int ival;       // for integer values
+  double rval;    // for real values
+  char* sval;     // for string values and identifiers
 }
 
 // Token definitions
@@ -50,8 +50,9 @@
 %left '*' '/'
 %right MOINS_UNAIRE
 
-%%
+
 // Grammar rules start here
+%%
 programme: 
     DEBUT {
       // Initialize symbol table when program starts
@@ -279,4 +280,8 @@ int main() {
   printf("\n\033[34m================================== Compilation Start ==================================\033[0m\n");
   yyparse();
   return 0;
+}
+
+int yywrap() {
+  return 1;
 }
