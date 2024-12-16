@@ -1,3 +1,8 @@
+Terminals unused in grammar
+
+   ERR
+
+
 Grammar
 
     0 $accept: programme $end
@@ -7,68 +12,65 @@ Grammar
     2 declarations: declaration declarations
     3             | /* empty */
 
-    4 declaration: type ':' IDF ';'
-    5            | FIXE type ':' IDF '=' constante ';'
-    6            | type ':' IDF '[' NUM ']' ';'
+    4 declaration: FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
 
-    7 type: TEXT
-    8     | NUM
-    9     | REAL
+    5 type_variable: NUM
+    6              | REAL
+    7              | TEXT
 
-   10 constante: NUM
-   11          | REAL
-   12          | TEXT
+    8 affect: FIXE IDF AFFECTION expression POINT_VIRGULE
+    9       | FIXE IDF AFFECTION TEXT POINT_VIRGULE
 
-   13 bloc: '{' instructions '}'
+   10 bloc: ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
 
-   14 instructions: instruction instructions
-   15             | /* empty */
+   11 instructions: instruction instructions
+   12             | /* empty */
 
-   16 instruction: IDF '<' expression ';'
-   17            | AFFICHE '(' expression ')' ';'
-   18            | LIRE '(' IDF ')' ';'
-   19            | SI '(' condition ')' ALORS bloc SINON bloc
-   20            | SI '(' condition ')' ALORS bloc
-   21            | TANTQUE '(' condition ')' FAIRE bloc
+   13 instruction: IDF AFFECTION expression POINT_VIRGULE
+   14            | AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
+   15            | LIRE IDF POINT_VIRGULE
+   16            | condition
+   17            | boucle
+   18            | affect
 
-   22 expression: expression PLUS expression
-   23           | expression MOINS expression
-   24           | expression MULT expression
-   25           | expression DIV expression
-   26           | '(' expression ')'
-   27           | NUM
-   28           | REAL
-   29           | IDF
+   19 condition: SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+   20          | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc
 
-   30 condition: expression INF expression
-   31          | expression INF_EGAL expression
-   32          | expression SUP expression
-   33          | expression SUP_EGAL expression
-   34          | expression EGAL expression
-   35          | expression DIFFERENT expression
-   36          | NON condition
-   37          | condition ET condition
-   38          | condition OU condition
+   21 boucle: TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
+
+   22 liste_arguments: TEXT
+   23                | IDF
+   24                | liste_arguments VIRGULE TEXT
+   25                | liste_arguments VIRGULE IDF
+
+   26 expression: NUM
+   27           | REAL
+   28           | MOINS NUM
+   29           | MOINS REAL
+   30           | IDF
+   31           | expression PLUS expression
+   32           | expression MOINS expression
+   33           | expression MULT expression
+   34           | expression DIV expression
+   35           | expression EGAL expression
+   36           | expression INF expression
+   37           | expression SUP expression
+   38           | expression DIFFERENT expression
+   39           | expression INF_EGAL expression
+   40           | expression SUP_EGAL expression
+   41           | expression ET expression
+   42           | expression OU expression
+   43           | NON expression
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 17 18 19 20 21 26
-')' (41) 17 18 19 20 21 26
-':' (58) 4 5 6
-';' (59) 4 5 6 16 17 18
-'<' (60) 16
-'=' (61) 5
-'[' (91) 6
-']' (93) 6
-'{' (123) 13
-'}' (125) 13
 error (256)
-NUM (258) 6 8 10 27
-REAL (259) 9 11 28
-TEXT (260) 7 12
-IDF (261) 4 5 6 16 18 29
+NUM (258) 5 26 28
+REAL (259) 6 27 29
+TEXT (260) 7 9 22 24
+IDF (261) 4 8 9 13 15 23 25 30
 SI (262) 19 20
 ALORS (263) 19 20
 SINON (264) 19
@@ -77,49 +79,62 @@ FAIRE (266) 21
 DEBUT (267) 1
 FIN (268) 1
 EXECUTION (269) 1
-FIXE (270) 5
-AFFICHE (271) 17
-LIRE (272) 18
-ET (273) 37
-OU (274) 38
-NON (275) 36
-EGAL (276) 34
-DIFFERENT (277) 35
-INF (278) 30
-INF_EGAL (279) 31
-SUP (280) 32
-SUP_EGAL (281) 33
-PLUS (282) 22
-MOINS (283) 23
-MULT (284) 24
-DIV (285) 25
+FIXE (270) 4 8 9
+AFFICHE (271) 14
+LIRE (272) 15
+ACCOLADE_OUVRANTE (273) 10
+ACCOLADE_FERMANTE (274) 10
+PARENTHOISE_OUVRANTE (275) 14 19 20 21
+PARENTHOISE_FERMANTE (276) 14 19 20 21
+PLUS (277) 31
+MOINS (278) 28 29 32
+MULT (279) 33
+DIV (280) 34
+VIRGULE (281) 24 25
+POINT_VIRGULE (282) 4 8 9 13 14 15
+DEUX_POINTS (283) 4
+EGAL (284) 4 35
+INF (285) 36
+SUP (286) 37
+DIFFERENT (287) 38
+INF_EGAL (288) 39
+SUP_EGAL (289) 40
+AFFECTION (290) 8 9 13
+OU (291) 42
+ET (292) 41
+NON (293) 43
+ERR (294)
 
 
 Nonterminals, with rules where they appear
 
-$accept (41)
+$accept (40)
     on left: 0
-programme (42)
+programme (41)
     on left: 1, on right: 0
-declarations (43)
+declarations (42)
     on left: 2 3, on right: 1 2
-declaration (44)
-    on left: 4 5 6, on right: 2
-type (45)
-    on left: 7 8 9, on right: 4 5 6
-constante (46)
-    on left: 10 11 12, on right: 5
-bloc (47)
-    on left: 13, on right: 1 19 20 21
-instructions (48)
-    on left: 14 15, on right: 13 14
-instruction (49)
-    on left: 16 17 18 19 20 21, on right: 14
-expression (50)
-    on left: 22 23 24 25 26 27 28 29, on right: 16 17 22 23 24 25 26
-    30 31 32 33 34 35
-condition (51)
-    on left: 30 31 32 33 34 35 36 37 38, on right: 19 20 21 36 37 38
+declaration (43)
+    on left: 4, on right: 2
+type_variable (44)
+    on left: 5 6 7, on right: 4
+affect (45)
+    on left: 8 9, on right: 18
+bloc (46)
+    on left: 10, on right: 1 19 20 21
+instructions (47)
+    on left: 11 12, on right: 10 11
+instruction (48)
+    on left: 13 14 15 16 17 18, on right: 11
+condition (49)
+    on left: 19 20, on right: 16
+boucle (50)
+    on left: 21, on right: 17
+liste_arguments (51)
+    on left: 22 23 24 25, on right: 14 24 25
+expression (52)
+    on left: 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43,
+    on right: 4 8 13 19 20 21 31 32 33 34 35 36 37 38 39 40 41 42 43
 
 
 state 0
@@ -135,967 +150,1228 @@ state 1
 
     1 programme: DEBUT . declarations EXECUTION bloc FIN
 
-    NUM   shift, and go to state 3
-    REAL  shift, and go to state 4
-    TEXT  shift, and go to state 5
-    FIXE  shift, and go to state 6
+    FIXE  shift, and go to state 3
 
     $default  reduce using rule 3 (declarations)
 
-    declarations  go to state 7
-    declaration   go to state 8
-    type          go to state 9
+    declarations  go to state 4
+    declaration   go to state 5
 
 
 state 2
 
     0 $accept: programme . $end
 
-    $end  shift, and go to state 10
+    $end  shift, and go to state 6
 
 
 state 3
 
-    8 type: NUM .
+    4 declaration: FIXE . type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
 
-    $default  reduce using rule 8 (type)
+    NUM   shift, and go to state 7
+    REAL  shift, and go to state 8
+    TEXT  shift, and go to state 9
+
+    type_variable  go to state 10
 
 
 state 4
 
-    9 type: REAL .
+    1 programme: DEBUT declarations . EXECUTION bloc FIN
 
-    $default  reduce using rule 9 (type)
+    EXECUTION  shift, and go to state 11
 
 
 state 5
 
-    7 type: TEXT .
-
-    $default  reduce using rule 7 (type)
-
-
-state 6
-
-    5 declaration: FIXE . type ':' IDF '=' constante ';'
-
-    NUM   shift, and go to state 3
-    REAL  shift, and go to state 4
-    TEXT  shift, and go to state 5
-
-    type  go to state 11
-
-
-state 7
-
-    1 programme: DEBUT declarations . EXECUTION bloc FIN
-
-    EXECUTION  shift, and go to state 12
-
-
-state 8
-
     2 declarations: declaration . declarations
 
-    NUM   shift, and go to state 3
-    REAL  shift, and go to state 4
-    TEXT  shift, and go to state 5
-    FIXE  shift, and go to state 6
+    FIXE  shift, and go to state 3
 
     $default  reduce using rule 3 (declarations)
 
-    declarations  go to state 13
-    declaration   go to state 8
-    type          go to state 9
+    declarations  go to state 12
+    declaration   go to state 5
 
 
-state 9
-
-    4 declaration: type . ':' IDF ';'
-    6            | type . ':' IDF '[' NUM ']' ';'
-
-    ':'  shift, and go to state 14
-
-
-state 10
+state 6
 
     0 $accept: programme $end .
 
     $default  accept
 
 
+state 7
+
+    5 type_variable: NUM .
+
+    $default  reduce using rule 5 (type_variable)
+
+
+state 8
+
+    6 type_variable: REAL .
+
+    $default  reduce using rule 6 (type_variable)
+
+
+state 9
+
+    7 type_variable: TEXT .
+
+    $default  reduce using rule 7 (type_variable)
+
+
+state 10
+
+    4 declaration: FIXE type_variable . DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+
+    DEUX_POINTS  shift, and go to state 13
+
+
 state 11
-
-    5 declaration: FIXE type . ':' IDF '=' constante ';'
-
-    ':'  shift, and go to state 15
-
-
-state 12
 
     1 programme: DEBUT declarations EXECUTION . bloc FIN
 
-    '{'  shift, and go to state 16
+    ACCOLADE_OUVRANTE  shift, and go to state 14
 
-    bloc  go to state 17
+    bloc  go to state 15
 
 
-state 13
+state 12
 
     2 declarations: declaration declarations .
 
     $default  reduce using rule 2 (declarations)
 
 
+state 13
+
+    4 declaration: FIXE type_variable DEUX_POINTS . IDF EGAL expression POINT_VIRGULE
+
+    IDF  shift, and go to state 16
+
+
 state 14
 
-    4 declaration: type ':' . IDF ';'
-    6            | type ':' . IDF '[' NUM ']' ';'
+   10 bloc: ACCOLADE_OUVRANTE . instructions ACCOLADE_FERMANTE
 
-    IDF  shift, and go to state 18
+    IDF      shift, and go to state 17
+    SI       shift, and go to state 18
+    TANTQUE  shift, and go to state 19
+    FIXE     shift, and go to state 20
+    AFFICHE  shift, and go to state 21
+    LIRE     shift, and go to state 22
+
+    $default  reduce using rule 12 (instructions)
+
+    affect        go to state 23
+    instructions  go to state 24
+    instruction   go to state 25
+    condition     go to state 26
+    boucle        go to state 27
 
 
 state 15
 
-    5 declaration: FIXE type ':' . IDF '=' constante ';'
+    1 programme: DEBUT declarations EXECUTION bloc . FIN
 
-    IDF  shift, and go to state 19
+    FIN  shift, and go to state 28
 
 
 state 16
 
-   13 bloc: '{' . instructions '}'
+    4 declaration: FIXE type_variable DEUX_POINTS IDF . EGAL expression POINT_VIRGULE
 
-    IDF      shift, and go to state 20
-    SI       shift, and go to state 21
-    TANTQUE  shift, and go to state 22
-    AFFICHE  shift, and go to state 23
-    LIRE     shift, and go to state 24
-
-    $default  reduce using rule 15 (instructions)
-
-    instructions  go to state 25
-    instruction   go to state 26
+    EGAL  shift, and go to state 29
 
 
 state 17
 
-    1 programme: DEBUT declarations EXECUTION bloc . FIN
+   13 instruction: IDF . AFFECTION expression POINT_VIRGULE
 
-    FIN  shift, and go to state 27
+    AFFECTION  shift, and go to state 30
 
 
 state 18
 
-    4 declaration: type ':' IDF . ';'
-    6            | type ':' IDF . '[' NUM ']' ';'
+   19 condition: SI . PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+   20          | SI . PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc
 
-    ';'  shift, and go to state 28
-    '['  shift, and go to state 29
+    PARENTHOISE_OUVRANTE  shift, and go to state 31
 
 
 state 19
 
-    5 declaration: FIXE type ':' IDF . '=' constante ';'
+   21 boucle: TANTQUE . PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
 
-    '='  shift, and go to state 30
+    PARENTHOISE_OUVRANTE  shift, and go to state 32
 
 
 state 20
 
-   16 instruction: IDF . '<' expression ';'
+    8 affect: FIXE . IDF AFFECTION expression POINT_VIRGULE
+    9       | FIXE . IDF AFFECTION TEXT POINT_VIRGULE
 
-    '<'  shift, and go to state 31
+    IDF  shift, and go to state 33
 
 
 state 21
 
-   19 instruction: SI . '(' condition ')' ALORS bloc SINON bloc
-   20            | SI . '(' condition ')' ALORS bloc
+   14 instruction: AFFICHE . PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
 
-    '('  shift, and go to state 32
+    PARENTHOISE_OUVRANTE  shift, and go to state 34
 
 
 state 22
 
-   21 instruction: TANTQUE . '(' condition ')' FAIRE bloc
+   15 instruction: LIRE . IDF POINT_VIRGULE
 
-    '('  shift, and go to state 33
+    IDF  shift, and go to state 35
 
 
 state 23
 
-   17 instruction: AFFICHE . '(' expression ')' ';'
+   18 instruction: affect .
 
-    '('  shift, and go to state 34
+    $default  reduce using rule 18 (instruction)
 
 
 state 24
 
-   18 instruction: LIRE . '(' IDF ')' ';'
+   10 bloc: ACCOLADE_OUVRANTE instructions . ACCOLADE_FERMANTE
 
-    '('  shift, and go to state 35
+    ACCOLADE_FERMANTE  shift, and go to state 36
 
 
 state 25
 
-   13 bloc: '{' instructions . '}'
+   11 instructions: instruction . instructions
 
-    '}'  shift, and go to state 36
+    IDF      shift, and go to state 17
+    SI       shift, and go to state 18
+    TANTQUE  shift, and go to state 19
+    FIXE     shift, and go to state 20
+    AFFICHE  shift, and go to state 21
+    LIRE     shift, and go to state 22
+
+    $default  reduce using rule 12 (instructions)
+
+    affect        go to state 23
+    instructions  go to state 37
+    instruction   go to state 25
+    condition     go to state 26
+    boucle        go to state 27
 
 
 state 26
 
-   14 instructions: instruction . instructions
+   16 instruction: condition .
 
-    IDF      shift, and go to state 20
-    SI       shift, and go to state 21
-    TANTQUE  shift, and go to state 22
-    AFFICHE  shift, and go to state 23
-    LIRE     shift, and go to state 24
-
-    $default  reduce using rule 15 (instructions)
-
-    instructions  go to state 37
-    instruction   go to state 26
+    $default  reduce using rule 16 (instruction)
 
 
 state 27
+
+   17 instruction: boucle .
+
+    $default  reduce using rule 17 (instruction)
+
+
+state 28
 
     1 programme: DEBUT declarations EXECUTION bloc FIN .
 
     $default  reduce using rule 1 (programme)
 
 
-state 28
-
-    4 declaration: type ':' IDF ';' .
-
-    $default  reduce using rule 4 (declaration)
-
-
 state 29
 
-    6 declaration: type ':' IDF '[' . NUM ']' ';'
+    4 declaration: FIXE type_variable DEUX_POINTS IDF EGAL . expression POINT_VIRGULE
 
-    NUM  shift, and go to state 38
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
+
+    expression  go to state 43
 
 
 state 30
 
-    5 declaration: FIXE type ':' IDF '=' . constante ';'
+   13 instruction: IDF AFFECTION . expression POINT_VIRGULE
 
-    NUM   shift, and go to state 39
-    REAL  shift, and go to state 40
-    TEXT  shift, and go to state 41
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
-    constante  go to state 42
+    expression  go to state 44
 
 
 state 31
 
-   16 instruction: IDF '<' . expression ';'
+   19 condition: SI PARENTHOISE_OUVRANTE . expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+   20          | SI PARENTHOISE_OUVRANTE . expression PARENTHOISE_FERMANTE ALORS bloc
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
-    expression  go to state 47
+    expression  go to state 45
 
 
 state 32
 
-   19 instruction: SI '(' . condition ')' ALORS bloc SINON bloc
-   20            | SI '(' . condition ')' ALORS bloc
+   21 boucle: TANTQUE PARENTHOISE_OUVRANTE . expression PARENTHOISE_FERMANTE FAIRE bloc
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    NON   shift, and go to state 48
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
-    expression  go to state 49
-    condition   go to state 50
+    expression  go to state 46
 
 
 state 33
 
-   21 instruction: TANTQUE '(' . condition ')' FAIRE bloc
+    8 affect: FIXE IDF . AFFECTION expression POINT_VIRGULE
+    9       | FIXE IDF . AFFECTION TEXT POINT_VIRGULE
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    NON   shift, and go to state 48
-    '('   shift, and go to state 46
-
-    expression  go to state 49
-    condition   go to state 51
+    AFFECTION  shift, and go to state 47
 
 
 state 34
 
-   17 instruction: AFFICHE '(' . expression ')' ';'
+   14 instruction: AFFICHE PARENTHOISE_OUVRANTE . liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    TEXT  shift, and go to state 48
+    IDF   shift, and go to state 49
 
-    expression  go to state 52
+    liste_arguments  go to state 50
 
 
 state 35
 
-   18 instruction: LIRE '(' . IDF ')' ';'
+   15 instruction: LIRE IDF . POINT_VIRGULE
 
-    IDF  shift, and go to state 53
+    POINT_VIRGULE  shift, and go to state 51
 
 
 state 36
 
-   13 bloc: '{' instructions '}' .
+   10 bloc: ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE .
 
-    $default  reduce using rule 13 (bloc)
+    $default  reduce using rule 10 (bloc)
 
 
 state 37
 
-   14 instructions: instruction instructions .
+   11 instructions: instruction instructions .
 
-    $default  reduce using rule 14 (instructions)
+    $default  reduce using rule 11 (instructions)
 
 
 state 38
 
-    6 declaration: type ':' IDF '[' NUM . ']' ';'
+   26 expression: NUM .
 
-    ']'  shift, and go to state 54
+    $default  reduce using rule 26 (expression)
 
 
 state 39
 
-   10 constante: NUM .
-
-    $default  reduce using rule 10 (constante)
-
-
-state 40
-
-   11 constante: REAL .
-
-    $default  reduce using rule 11 (constante)
-
-
-state 41
-
-   12 constante: TEXT .
-
-    $default  reduce using rule 12 (constante)
-
-
-state 42
-
-    5 declaration: FIXE type ':' IDF '=' constante . ';'
-
-    ';'  shift, and go to state 55
-
-
-state 43
-
-   27 expression: NUM .
+   27 expression: REAL .
 
     $default  reduce using rule 27 (expression)
 
 
+state 40
+
+   30 expression: IDF .
+
+    $default  reduce using rule 30 (expression)
+
+
+state 41
+
+   28 expression: MOINS . NUM
+   29           | MOINS . REAL
+
+    NUM   shift, and go to state 52
+    REAL  shift, and go to state 53
+
+
+state 42
+
+   43 expression: NON . expression
+
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
+
+    expression  go to state 54
+
+
+state 43
+
+    4 declaration: FIXE type_variable DEUX_POINTS IDF EGAL expression . POINT_VIRGULE
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
+
+    PLUS           shift, and go to state 55
+    MOINS          shift, and go to state 56
+    MULT           shift, and go to state 57
+    DIV            shift, and go to state 58
+    POINT_VIRGULE  shift, and go to state 59
+    EGAL           shift, and go to state 60
+    INF            shift, and go to state 61
+    SUP            shift, and go to state 62
+    DIFFERENT      shift, and go to state 63
+    INF_EGAL       shift, and go to state 64
+    SUP_EGAL       shift, and go to state 65
+    OU             shift, and go to state 66
+    ET             shift, and go to state 67
+
+
 state 44
 
-   28 expression: REAL .
+   13 instruction: IDF AFFECTION expression . POINT_VIRGULE
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    $default  reduce using rule 28 (expression)
+    PLUS           shift, and go to state 55
+    MOINS          shift, and go to state 56
+    MULT           shift, and go to state 57
+    DIV            shift, and go to state 58
+    POINT_VIRGULE  shift, and go to state 68
+    EGAL           shift, and go to state 60
+    INF            shift, and go to state 61
+    SUP            shift, and go to state 62
+    DIFFERENT      shift, and go to state 63
+    INF_EGAL       shift, and go to state 64
+    SUP_EGAL       shift, and go to state 65
+    OU             shift, and go to state 66
+    ET             shift, and go to state 67
 
 
 state 45
 
-   29 expression: IDF .
+   19 condition: SI PARENTHOISE_OUVRANTE expression . PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+   20          | SI PARENTHOISE_OUVRANTE expression . PARENTHOISE_FERMANTE ALORS bloc
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    $default  reduce using rule 29 (expression)
+    PARENTHOISE_FERMANTE  shift, and go to state 69
+    PLUS                  shift, and go to state 55
+    MOINS                 shift, and go to state 56
+    MULT                  shift, and go to state 57
+    DIV                   shift, and go to state 58
+    EGAL                  shift, and go to state 60
+    INF                   shift, and go to state 61
+    SUP                   shift, and go to state 62
+    DIFFERENT             shift, and go to state 63
+    INF_EGAL              shift, and go to state 64
+    SUP_EGAL              shift, and go to state 65
+    OU                    shift, and go to state 66
+    ET                    shift, and go to state 67
 
 
 state 46
 
-   26 expression: '(' . expression ')'
+   21 boucle: TANTQUE PARENTHOISE_OUVRANTE expression . PARENTHOISE_FERMANTE FAIRE bloc
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
-
-    expression  go to state 56
+    PARENTHOISE_FERMANTE  shift, and go to state 70
+    PLUS                  shift, and go to state 55
+    MOINS                 shift, and go to state 56
+    MULT                  shift, and go to state 57
+    DIV                   shift, and go to state 58
+    EGAL                  shift, and go to state 60
+    INF                   shift, and go to state 61
+    SUP                   shift, and go to state 62
+    DIFFERENT             shift, and go to state 63
+    INF_EGAL              shift, and go to state 64
+    SUP_EGAL              shift, and go to state 65
+    OU                    shift, and go to state 66
+    ET                    shift, and go to state 67
 
 
 state 47
 
-   16 instruction: IDF '<' expression . ';'
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
+    8 affect: FIXE IDF AFFECTION . expression POINT_VIRGULE
+    9       | FIXE IDF AFFECTION . TEXT POINT_VIRGULE
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
-    ';'    shift, and go to state 61
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    TEXT   shift, and go to state 71
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
+
+    expression  go to state 72
 
 
 state 48
 
-   36 condition: NON . condition
+   22 liste_arguments: TEXT .
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    NON   shift, and go to state 48
-    '('   shift, and go to state 46
-
-    expression  go to state 49
-    condition   go to state 62
+    $default  reduce using rule 22 (liste_arguments)
 
 
 state 49
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   30 condition: expression . INF expression
-   31          | expression . INF_EGAL expression
-   32          | expression . SUP expression
-   33          | expression . SUP_EGAL expression
-   34          | expression . EGAL expression
-   35          | expression . DIFFERENT expression
+   23 liste_arguments: IDF .
 
-    EGAL       shift, and go to state 63
-    DIFFERENT  shift, and go to state 64
-    INF        shift, and go to state 65
-    INF_EGAL   shift, and go to state 66
-    SUP        shift, and go to state 67
-    SUP_EGAL   shift, and go to state 68
-    PLUS       shift, and go to state 57
-    MOINS      shift, and go to state 58
-    MULT       shift, and go to state 59
-    DIV        shift, and go to state 60
+    $default  reduce using rule 23 (liste_arguments)
 
 
 state 50
 
-   19 instruction: SI '(' condition . ')' ALORS bloc SINON bloc
-   20            | SI '(' condition . ')' ALORS bloc
-   37 condition: condition . ET condition
-   38          | condition . OU condition
+   14 instruction: AFFICHE PARENTHOISE_OUVRANTE liste_arguments . PARENTHOISE_FERMANTE POINT_VIRGULE
+   24 liste_arguments: liste_arguments . VIRGULE TEXT
+   25                | liste_arguments . VIRGULE IDF
 
-    ET   shift, and go to state 69
-    OU   shift, and go to state 70
-    ')'  shift, and go to state 71
+    PARENTHOISE_FERMANTE  shift, and go to state 73
+    VIRGULE               shift, and go to state 74
 
 
 state 51
 
-   21 instruction: TANTQUE '(' condition . ')' FAIRE bloc
-   37 condition: condition . ET condition
-   38          | condition . OU condition
+   15 instruction: LIRE IDF POINT_VIRGULE .
 
-    ET   shift, and go to state 69
-    OU   shift, and go to state 70
-    ')'  shift, and go to state 72
+    $default  reduce using rule 15 (instruction)
 
 
 state 52
 
-   17 instruction: AFFICHE '(' expression . ')' ';'
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
+   28 expression: MOINS NUM .
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
-    ')'    shift, and go to state 73
+    $default  reduce using rule 28 (expression)
 
 
 state 53
 
-   18 instruction: LIRE '(' IDF . ')' ';'
+   29 expression: MOINS REAL .
 
-    ')'  shift, and go to state 74
+    $default  reduce using rule 29 (expression)
 
 
 state 54
 
-    6 declaration: type ':' IDF '[' NUM ']' . ';'
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
+   43           | NON expression .
 
-    ';'  shift, and go to state 75
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    INF        shift, and go to state 61
+    SUP        shift, and go to state 62
+    DIFFERENT  shift, and go to state 63
+    INF_EGAL   shift, and go to state 64
+    SUP_EGAL   shift, and go to state 65
+
+    $default  reduce using rule 43 (expression)
 
 
 state 55
 
-    5 declaration: FIXE type ':' IDF '=' constante ';' .
+   31 expression: expression PLUS . expression
 
-    $default  reduce using rule 5 (declaration)
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
+
+    expression  go to state 75
 
 
 state 56
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   26           | '(' expression . ')'
+   32 expression: expression MOINS . expression
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
-    ')'    shift, and go to state 76
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
+
+    expression  go to state 76
 
 
 state 57
 
-   22 expression: expression PLUS . expression
+   33 expression: expression MULT . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 77
 
 
 state 58
 
-   23 expression: expression MOINS . expression
+   34 expression: expression DIV . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 78
 
 
 state 59
 
-   24 expression: expression MULT . expression
+    4 declaration: FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE .
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
-
-    expression  go to state 79
+    $default  reduce using rule 4 (declaration)
 
 
 state 60
 
-   25 expression: expression DIV . expression
+   35 expression: expression EGAL . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
-    expression  go to state 80
+    expression  go to state 79
 
 
 state 61
 
-   16 instruction: IDF '<' expression ';' .
+   36 expression: expression INF . expression
 
-    $default  reduce using rule 16 (instruction)
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
+
+    expression  go to state 80
 
 
 state 62
 
-   36 condition: NON condition .
-   37          | condition . ET condition
-   38          | condition . OU condition
+   37 expression: expression SUP . expression
 
-    $default  reduce using rule 36 (condition)
-
-
-state 63
-
-   34 condition: expression EGAL . expression
-
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 81
 
 
-state 64
+state 63
 
-   35 condition: expression DIFFERENT . expression
+   38 expression: expression DIFFERENT . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 82
 
 
-state 65
+state 64
 
-   30 condition: expression INF . expression
+   39 expression: expression INF_EGAL . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 83
 
 
-state 66
+state 65
 
-   31 condition: expression INF_EGAL . expression
+   40 expression: expression SUP_EGAL . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 84
 
 
-state 67
+state 66
 
-   32 condition: expression SUP . expression
+   42 expression: expression OU . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 85
 
 
-state 68
+state 67
 
-   33 condition: expression SUP_EGAL . expression
+   41 expression: expression ET . expression
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    '('   shift, and go to state 46
+    NUM    shift, and go to state 38
+    REAL   shift, and go to state 39
+    IDF    shift, and go to state 40
+    MOINS  shift, and go to state 41
+    NON    shift, and go to state 42
 
     expression  go to state 86
 
 
+state 68
+
+   13 instruction: IDF AFFECTION expression POINT_VIRGULE .
+
+    $default  reduce using rule 13 (instruction)
+
+
 state 69
 
-   37 condition: condition ET . condition
+   19 condition: SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE . ALORS bloc SINON bloc
+   20          | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE . ALORS bloc
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    NON   shift, and go to state 48
-    '('   shift, and go to state 46
-
-    expression  go to state 49
-    condition   go to state 87
+    ALORS  shift, and go to state 87
 
 
 state 70
 
-   38 condition: condition OU . condition
+   21 boucle: TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE . FAIRE bloc
 
-    NUM   shift, and go to state 43
-    REAL  shift, and go to state 44
-    IDF   shift, and go to state 45
-    NON   shift, and go to state 48
-    '('   shift, and go to state 46
-
-    expression  go to state 49
-    condition   go to state 88
+    FAIRE  shift, and go to state 88
 
 
 state 71
 
-   19 instruction: SI '(' condition ')' . ALORS bloc SINON bloc
-   20            | SI '(' condition ')' . ALORS bloc
+    9 affect: FIXE IDF AFFECTION TEXT . POINT_VIRGULE
 
-    ALORS  shift, and go to state 89
+    POINT_VIRGULE  shift, and go to state 89
 
 
 state 72
 
-   21 instruction: TANTQUE '(' condition ')' . FAIRE bloc
+    8 affect: FIXE IDF AFFECTION expression . POINT_VIRGULE
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    FAIRE  shift, and go to state 90
+    PLUS           shift, and go to state 55
+    MOINS          shift, and go to state 56
+    MULT           shift, and go to state 57
+    DIV            shift, and go to state 58
+    POINT_VIRGULE  shift, and go to state 90
+    EGAL           shift, and go to state 60
+    INF            shift, and go to state 61
+    SUP            shift, and go to state 62
+    DIFFERENT      shift, and go to state 63
+    INF_EGAL       shift, and go to state 64
+    SUP_EGAL       shift, and go to state 65
+    OU             shift, and go to state 66
+    ET             shift, and go to state 67
 
 
 state 73
 
-   17 instruction: AFFICHE '(' expression ')' . ';'
+   14 instruction: AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE . POINT_VIRGULE
 
-    ';'  shift, and go to state 91
+    POINT_VIRGULE  shift, and go to state 91
 
 
 state 74
 
-   18 instruction: LIRE '(' IDF ')' . ';'
+   24 liste_arguments: liste_arguments VIRGULE . TEXT
+   25                | liste_arguments VIRGULE . IDF
 
-    ';'  shift, and go to state 92
+    TEXT  shift, and go to state 92
+    IDF   shift, and go to state 93
 
 
 state 75
 
-    6 declaration: type ':' IDF '[' NUM ']' ';' .
+   31 expression: expression . PLUS expression
+   31           | expression PLUS expression .
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    $default  reduce using rule 6 (declaration)
+    MULT  shift, and go to state 57
+    DIV   shift, and go to state 58
+
+    $default  reduce using rule 31 (expression)
 
 
 state 76
 
-   26 expression: '(' expression ')' .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   32           | expression MOINS expression .
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    $default  reduce using rule 26 (expression)
+    MULT  shift, and go to state 57
+    DIV   shift, and go to state 58
+
+    $default  reduce using rule 32 (expression)
 
 
 state 77
 
-   22 expression: expression . PLUS expression
-   22           | expression PLUS expression .
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   33           | expression MULT expression .
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    MULT  shift, and go to state 59
-    DIV   shift, and go to state 60
-
-    $default  reduce using rule 22 (expression)
+    $default  reduce using rule 33 (expression)
 
 
 state 78
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   23           | expression MOINS expression .
-   24           | expression . MULT expression
-   25           | expression . DIV expression
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   34           | expression DIV expression .
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    MULT  shift, and go to state 59
-    DIV   shift, and go to state 60
-
-    $default  reduce using rule 23 (expression)
+    $default  reduce using rule 34 (expression)
 
 
 state 79
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   24           | expression MULT expression .
-   25           | expression . DIV expression
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   35           | expression EGAL expression .
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    $default  reduce using rule 24 (expression)
+    PLUS   shift, and go to state 55
+    MOINS  shift, and go to state 56
+    MULT   shift, and go to state 57
+    DIV    shift, and go to state 58
+
+    $default  reduce using rule 35 (expression)
 
 
 state 80
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   25           | expression DIV expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   36           | expression INF expression .
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    $default  reduce using rule 25 (expression)
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    DIFFERENT  shift, and go to state 63
+
+    INF       error (nonassociative)
+    SUP       error (nonassociative)
+    INF_EGAL  error (nonassociative)
+    SUP_EGAL  error (nonassociative)
+
+    $default  reduce using rule 36 (expression)
 
 
 state 81
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   34 condition: expression EGAL expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   37           | expression SUP expression .
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    DIFFERENT  shift, and go to state 63
 
-    $default  reduce using rule 34 (condition)
+    INF       error (nonassociative)
+    SUP       error (nonassociative)
+    INF_EGAL  error (nonassociative)
+    SUP_EGAL  error (nonassociative)
+
+    $default  reduce using rule 37 (expression)
 
 
 state 82
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   35 condition: expression DIFFERENT expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   38           | expression DIFFERENT expression .
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
+    PLUS   shift, and go to state 55
+    MOINS  shift, and go to state 56
+    MULT   shift, and go to state 57
+    DIV    shift, and go to state 58
 
-    $default  reduce using rule 35 (condition)
+    $default  reduce using rule 38 (expression)
 
 
 state 83
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   30 condition: expression INF expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   39           | expression INF_EGAL expression .
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    DIFFERENT  shift, and go to state 63
 
-    $default  reduce using rule 30 (condition)
+    INF       error (nonassociative)
+    SUP       error (nonassociative)
+    INF_EGAL  error (nonassociative)
+    SUP_EGAL  error (nonassociative)
+
+    $default  reduce using rule 39 (expression)
 
 
 state 84
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   31 condition: expression INF_EGAL expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   40           | expression SUP_EGAL expression .
+   41           | expression . ET expression
+   42           | expression . OU expression
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    DIFFERENT  shift, and go to state 63
 
-    $default  reduce using rule 31 (condition)
+    INF       error (nonassociative)
+    SUP       error (nonassociative)
+    INF_EGAL  error (nonassociative)
+    SUP_EGAL  error (nonassociative)
+
+    $default  reduce using rule 40 (expression)
 
 
 state 85
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   32 condition: expression SUP expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   42           | expression . OU expression
+   42           | expression OU expression .
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    INF        shift, and go to state 61
+    SUP        shift, and go to state 62
+    DIFFERENT  shift, and go to state 63
+    INF_EGAL   shift, and go to state 64
+    SUP_EGAL   shift, and go to state 65
+    ET         shift, and go to state 67
 
-    $default  reduce using rule 32 (condition)
+    $default  reduce using rule 42 (expression)
 
 
 state 86
 
-   22 expression: expression . PLUS expression
-   23           | expression . MOINS expression
-   24           | expression . MULT expression
-   25           | expression . DIV expression
-   33 condition: expression SUP_EGAL expression .
+   31 expression: expression . PLUS expression
+   32           | expression . MOINS expression
+   33           | expression . MULT expression
+   34           | expression . DIV expression
+   35           | expression . EGAL expression
+   36           | expression . INF expression
+   37           | expression . SUP expression
+   38           | expression . DIFFERENT expression
+   39           | expression . INF_EGAL expression
+   40           | expression . SUP_EGAL expression
+   41           | expression . ET expression
+   41           | expression ET expression .
+   42           | expression . OU expression
 
-    PLUS   shift, and go to state 57
-    MOINS  shift, and go to state 58
-    MULT   shift, and go to state 59
-    DIV    shift, and go to state 60
+    PLUS       shift, and go to state 55
+    MOINS      shift, and go to state 56
+    MULT       shift, and go to state 57
+    DIV        shift, and go to state 58
+    EGAL       shift, and go to state 60
+    INF        shift, and go to state 61
+    SUP        shift, and go to state 62
+    DIFFERENT  shift, and go to state 63
+    INF_EGAL   shift, and go to state 64
+    SUP_EGAL   shift, and go to state 65
 
-    $default  reduce using rule 33 (condition)
+    $default  reduce using rule 41 (expression)
 
 
 state 87
 
-   37 condition: condition . ET condition
-   37          | condition ET condition .
-   38          | condition . OU condition
+   19 condition: SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS . bloc SINON bloc
+   20          | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS . bloc
 
-    $default  reduce using rule 37 (condition)
-
-
-state 88
-
-   37 condition: condition . ET condition
-   38          | condition . OU condition
-   38          | condition OU condition .
-
-    ET  shift, and go to state 69
-
-    $default  reduce using rule 38 (condition)
-
-
-state 89
-
-   19 instruction: SI '(' condition ')' ALORS . bloc SINON bloc
-   20            | SI '(' condition ')' ALORS . bloc
-
-    '{'  shift, and go to state 16
-
-    bloc  go to state 93
-
-
-state 90
-
-   21 instruction: TANTQUE '(' condition ')' FAIRE . bloc
-
-    '{'  shift, and go to state 16
+    ACCOLADE_OUVRANTE  shift, and go to state 14
 
     bloc  go to state 94
 
 
+state 88
+
+   21 boucle: TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE . bloc
+
+    ACCOLADE_OUVRANTE  shift, and go to state 14
+
+    bloc  go to state 95
+
+
+state 89
+
+    9 affect: FIXE IDF AFFECTION TEXT POINT_VIRGULE .
+
+    $default  reduce using rule 9 (affect)
+
+
+state 90
+
+    8 affect: FIXE IDF AFFECTION expression POINT_VIRGULE .
+
+    $default  reduce using rule 8 (affect)
+
+
 state 91
 
-   17 instruction: AFFICHE '(' expression ')' ';' .
+   14 instruction: AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE .
 
-    $default  reduce using rule 17 (instruction)
+    $default  reduce using rule 14 (instruction)
 
 
 state 92
 
-   18 instruction: LIRE '(' IDF ')' ';' .
+   24 liste_arguments: liste_arguments VIRGULE TEXT .
 
-    $default  reduce using rule 18 (instruction)
+    $default  reduce using rule 24 (liste_arguments)
 
 
 state 93
 
-   19 instruction: SI '(' condition ')' ALORS bloc . SINON bloc
-   20            | SI '(' condition ')' ALORS bloc .
+   25 liste_arguments: liste_arguments VIRGULE IDF .
 
-    SINON  shift, and go to state 95
-
-    $default  reduce using rule 20 (instruction)
+    $default  reduce using rule 25 (liste_arguments)
 
 
 state 94
 
-   21 instruction: TANTQUE '(' condition ')' FAIRE bloc .
+   19 condition: SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc . SINON bloc
+   20          | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc .
 
-    $default  reduce using rule 21 (instruction)
+    SINON  shift, and go to state 96
+
+    $default  reduce using rule 20 (condition)
 
 
 state 95
 
-   19 instruction: SI '(' condition ')' ALORS bloc SINON . bloc
+   21 boucle: TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc .
 
-    '{'  shift, and go to state 16
-
-    bloc  go to state 96
+    $default  reduce using rule 21 (boucle)
 
 
 state 96
 
-   19 instruction: SI '(' condition ')' ALORS bloc SINON bloc .
+   19 condition: SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON . bloc
 
-    $default  reduce using rule 19 (instruction)
+    ACCOLADE_OUVRANTE  shift, and go to state 14
+
+    bloc  go to state 97
+
+
+state 97
+
+   19 condition: SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc .
+
+    $default  reduce using rule 19 (condition)

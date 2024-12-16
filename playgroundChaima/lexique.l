@@ -41,6 +41,11 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 "OU"             { printf("Token: OU\n"); return OU; }
 "ET"             { printf("Token: ET\n"); return ET; }
 "NON"            { printf("Token: NON\n"); return NON; }
+">"              { printf("Token: SUP\n"); return SUP; }
+"!="             { printf("Token: DIFFERENT\n"); return DIFFERENT; }
+"<="             { printf("Token: INF_EGAL\n"); return INF_EGAL; }
+">="             { printf("Token: SUP_EGAL\n"); return SUP_EGAL; }
+"<-"             { printf("Token: AFFECTION\n"); return AFFECTION; }
 "{"              { printf("Token: ACCOLADE_OUVRANTE\n"); return ACCOLADE_OUVRANTE; }
 "}"              { printf("Token: ACCOLADE_FERMANTE\n"); return ACCOLADE_FERMANTE; }
 "("              { printf("Token: PARENTHOISE_OUVRANTE\n"); return PARENTHOISE_OUVRANTE; }
@@ -54,11 +59,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 ":"              { printf("Token: DEUX_POINTS\n"); return DEUX_POINTS; }
 "="              { printf("Token: EGAL\n"); return EGAL; }
 "<"              { printf("Token: INF\n"); return INF; }
-">"              { printf("Token: SUP\n"); return SUP; }
-"!="             { printf("Token: DIFFERENT\n"); return DIFFERENT; }
-"<="             { printf("Token: INF_EGAL\n"); return INF_EGAL; }
-">="             { printf("Token: SUP_EGAL\n"); return SUP_EGAL; }
-"<-"             { printf("Token: AFFECTION\n"); return AFFECTION; }
 
 {IDF} {
   printf("Token: IDF (%s)\n", yytext); 
