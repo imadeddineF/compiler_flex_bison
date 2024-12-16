@@ -26,12 +26,17 @@ void yyerror(const char* s) {
 %token ACCOLADE_OUVRANTE ACCOLADE_FERMANTE
 %token PARENTHOISE_OUVRANTE PARENTHOISE_FERMANTE
 %token PLUS MOINS MULT DIV VIRGULE POINT_VIRGULE
-%token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION
+%token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
 %token OU ET NON ERR
 
-%left PLUS MOINS
-%left MULT DIV
-%nonassoc INF INF_EGAL SUP SUP_EGAL EGAL DIFFERENT
+
+%left OU               
+%left ET                
+%right NON             
+%nonassoc INF INF_EGAL SUP SUP_EGAL
+%left EGAL DIFFERENT    
+%left PLUS MOINS        
+%left MULT DIV          
 
 %start programme
 
@@ -48,9 +53,19 @@ declarations
     ;
 
 declaration
-    : FIXE IDF AFFECTION expression POINT_VIRGULE
-    | FIXE IDF AFFECTION TEXT POINT_VIRGULE
+    : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
     ;
+
+type_variable
+    : NUM
+    | REAL
+    | TEXT
+    ;
+
+affect
+: FIXE IDF AFFECTION expression POINT_VIRGULE
+| FIXE IDF AFFECTION TEXT POINT_VIRGULE
+; 
 
 bloc
     : ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
@@ -65,11 +80,26 @@ instruction
     : IDF AFFECTION expression POINT_VIRGULE
     | AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
     | LIRE IDF POINT_VIRGULE
+    | condition
+    | boucle
+    | affect
+    ;
+
+condition
+    : SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc
+    ;
+
+boucle
+    : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
+        { printf("Boucle TANTQUE analysée avec succes.\n"); }
     ;
 
 liste_arguments
     : TEXT
-    | TEXT VIRGULE IDF
+    | IDF
+    | liste_arguments VIRGULE TEXT
+    | liste_arguments VIRGULE IDF
     ;
 
 expression
@@ -82,11 +112,20 @@ expression
     | expression MOINS expression
     | expression MULT expression
     | expression DIV expression
+    | expression EGAL expression
+    | expression INF expression
+    | expression SUP expression
+    | expression DIFFERENT expression
+    | expression INF_EGAL expression
+    | expression SUP_EGAL expression
+    | expression ET expression
+    | expression OU expression
+    | NON expression 
     ;
 
 %%
 
 int main() {
-    printf("Début de l'analyse.\n");
+    printf("Debut de l'analyse.\n");
     return yyparse();
 }
