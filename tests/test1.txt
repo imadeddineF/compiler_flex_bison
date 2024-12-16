@@ -1,22 +1,26 @@
 DEBUT
   -- Assign a number to an identifier ##
+  -- This is a single-line comment ##
+  {- This is a
+    multi-line comment -}
+
   FIXE ID1 <- 100;  
-  FIXE ID2 <- -250; /* Signed integer */
-  FIXE ID3 <- 12.34; /* Real number */
-  FIXE ID4 <- -0.567; /* Signed real */
-  affiche "Hello, World!";
-  SI (ID1 < ID2) ALORS {
-    affiche "Condition met";
-  } SINON {
-    affiche "Condition not met";
+  FIXE ID2 <- -250; -- Signed integer ##
+  FIXE ID3 <- 12.34; -- Real number ##
+  FIXE ID4 <- -0.567; -- Signed real ##
+
+  EXECUTION {
+    affiche ("Hello, World!");
+    SI (ID1 < ID2) ALORS {
+      affiche "Condition met";
+    } SINON {
+      affiche "Condition not met";
+    }
+    TANTQUE (ID1 > 0) FAIRE {
+      ID1 <- ID1 - 1;
+    }
+    lire ID5;
+    affiche "Final Value: ", ID1;
   }
-  TANTQUE (ID1 > 0) FAIRE {
-    ID1 <- ID1 - 1;
-  }
-  lire ID5;
-  affiche "Final Value: ", ID1;
 FIN
 
--- This is a single-line comment ##
-{- This is a
-   multi-line comment -}
