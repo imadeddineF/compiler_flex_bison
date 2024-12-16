@@ -20,8 +20,10 @@ IDF {lettreMaj}({lettre}|{chiffre}|{underscore})*
 NUM -?[0-9]+
 REAL -?[0-9]*\.[0-9]+
 TEXT \"[^\"]*\"
-commentaire_sur_ligne "--[^\n]*##"
-commentaire_multi_lignes "\\{-([^-]|-)*-\\}"
+/* commentaire_sur_ligne "--[^\n]*##" */
+/* commentaire_multi_lignes "\\{-([^-]|-)*-\\}" */
+commentaire_sur_ligne --[^\n]*##
+commentaire_multi_lignes \{-(.|\n)*?-\}
 
 /* Règles de production */
 %%
@@ -82,7 +84,9 @@ commentaire_multi_lignes "\\{-([^-]|-)*-\\}"
   return REAL;
 }
 
-{commentaire_sur_ligne}  { /* Ignorer les commentaires sur une ligne */ }
+{commentaire_sur_ligne}  { 
+  printf("-- Commentaire sur une ligne --\n");
+}
 
 {commentaire_multi_lignes} {
   char* ptr = yytext;
@@ -90,6 +94,7 @@ commentaire_multi_lignes "\\{-([^-]|-)*-\\}"
     nb_ligne++;
     ptr++;
   }
+  printf("{- Commentaire sur plusieurs lignes -}\n");
 }
 
 [ \t]+  { /* Ignorer les espaces et tabulations sans affecter la colonne */ }
