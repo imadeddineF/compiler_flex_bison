@@ -39,34 +39,45 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     DEBUT = 258,
-     FIN = 259,
-     EXECUTION = 260,
-     SI = 261,
-     ALORS = 262,
-     SINON = 263,
-     TANTQUE = 264,
-     FAIRE = 265,
-     FIXE = 266,
-     AFFICHE = 267,
-     LIRE = 268,
-     TYPE_NUM = 269,
-     TYPE_REAL = 270,
-     TYPE_TEXT = 271,
-     MOINS_EGALE = 272,
-     PLUS_EGALE = 273,
-     INF_EGALE = 274,
-     SUP_EGALE = 275,
-     DIFFERENT = 276,
-     ET = 277,
-     OU = 278,
-     NON = 279,
-     ASSIGNMENT = 280,
-     IDENTIFICATEUR = 281,
-     NOMBRE_ENTIER = 282,
-     NOMBRE_REEL = 283,
-     CHAINE_TEXTE = 284,
-     MOINS_UNAIRE = 285
+     NUM = 258,
+     SIGNEDNUM = 259,
+     REAL = 260,
+     SIGNEDREAL = 261,
+     TEXT = 262,
+     IDF = 263,
+     SI = 264,
+     ALORS = 265,
+     SINON = 266,
+     TANTQUE = 267,
+     FAIRE = 268,
+     DEBUT = 269,
+     FIN = 270,
+     EXECUTION = 271,
+     FIXE = 272,
+     AFFICHE = 273,
+     LIRE = 274,
+     ACCOLADE_OUVRANTE = 275,
+     ACCOLADE_FERMANTE = 276,
+     PARENTHOISE_OUVRANTE = 277,
+     PARENTHOISE_FERMANTE = 278,
+     PLUS = 279,
+     MOINS = 280,
+     MULT = 281,
+     DIV = 282,
+     VIRGULE = 283,
+     POINT_VIRGULE = 284,
+     DEUX_POINTS = 285,
+     EGAL = 286,
+     INF = 287,
+     SUP = 288,
+     DIFFERENT = 289,
+     INF_EGAL = 290,
+     SUP_EGAL = 291,
+     AFFECTION = 292,
+     OU = 293,
+     ET = 294,
+     NON = 295,
+     ERR = 296
    };
 #endif
 
@@ -77,16 +88,16 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 13 "syntaxique.y"
+#line 15 "syntaxique.y"
 
-  int ival;
-  double rval;
-  char* sval;
+    int entier;
+    double reel;
+    char* texte;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 90 "syntaxique.tab.h"
+#line 101 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

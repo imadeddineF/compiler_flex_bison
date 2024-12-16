@@ -1,237 +1,153 @@
-%option yylineno
-
-/* Importation C */
 %{
-  #include<ctype.h>
-  #include<stdio.h>
-  #include <string.h>
-  #include "syntaxique.tab.h" 
-  int nb_ligne = 1;
-  int nb_colonne = 1;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "syntaxique.tab.h"
+
+extern YYSTYPE yylval;
+extern int nb_ligne;
+extern int nb_colonne;
+
+#define YY_DECL int yylex(void)
 %}
 
 /* Expressions régulières */
-lettre [a-zA-Z]  
+lettre [a-zA-Z]
 lettreMaj [A-Z]
 underscore _
 chiffre [0-9]
 IDF {lettreMaj}({lettre}|{chiffre}|{underscore})*
-NUM 0|[1-9][0-9]*
-SIGNEDNUM [+-]?{NUM}
+NUM -?[0-9]+
+SIGNEDNUM [+-]({NUM})
 REAL 0\.[0-9]+|[1-9][0-9]*\.[0-9]+
-SIGNEDREAL [+-]?{REAL}
+SIGNEDREAL [+-]({REAL})
 TEXT \"[^\"]*\"
+
+/* commentaire_sur_ligne "--[^\n]*##" */
+/* commentaire_multi_lignes "\\{-([^-]|-)*-\\}" */
 commentaire_sur_ligne --[^\n]*##
 commentaire_multi_lignes \{-(.|\n)*?-\}
 
 /* Règles de production */
 %%
-"DEBUT" {
-  nb_colonne += strlen(yytext);
-  return DEBUT;  // Retourne le token DEBUT
-}
-"FIN" {
-  nb_colonne += strlen(yytext);
-  return FIN;  // Retourne le token FIN
-}
-"TEXT" {
-  nb_colonne += strlen(yytext);
-  return TEXT;  // Retourne le token TEXT
-}
-"NUM" {
-  nb_colonne += strlen(yytext);
-  return NUM;  // Retourne le token NUM
-}
-"REAL" {
-  nb_colonne += strlen(yytext);
-  return REAL;  // Retourne le token REAL
-}
-"EXECUTION" {
-  nb_colonne += strlen(yytext);
-  return EXECUTION;  // Retourne le token EXECUTION
-}
-"SI" {
-  nb_colonne += strlen(yytext);
-  return SI;  // Retourne le token SI
-}
-"ALORS" {
-  nb_colonne += strlen(yytext);
-  return ALORS;  // Retourne le token ALORS
-}
-"SINON" {
-  nb_colonne += strlen(yytext);
-  return SINON;  // Retourne le token SINON
-}
-"TANTQUE" {
-  nb_colonne += strlen(yytext);
-  return TANTQUE;  // Retourne le token TANTQUE
-}
-"FAIRE" {
-  nb_colonne += strlen(yytext);
-  return FAIRE;  // Retourne le token FAIRE
-}
-"FIXE" {
-  nb_colonne += strlen(yytext);
-  return FIXE;  // Retourne le token FIXE
-}
-"affiche" {
-  nb_colonne += strlen(yytext);
-  return AFFICHE;  // Retourne le token AFFICHE
-}
-"lire" {
-  nb_colonne += strlen(yytext);
-  return LIRE;  // Retourne le token LIRE
-}
-"OU" {
-  nb_colonne += strlen(yytext);
-  return OU;  // Retourne le token OU
-}
-"ET" {
-  nb_colonne += strlen(yytext);
-  return ET;  // Retourne le token ET
-}
-"NON" {
-  nb_colonne += strlen(yytext);
-  return NON;  // Retourne le token NON
-}
-"{" {
-  nb_colonne += strlen(yytext);
-  return LFBRA;  // Retourne le token LFBRA
-}
-"}" {
-  nb_colonne += strlen(yytext);
-  return RTBRA;  // Retourne le token RTBRA
-}
-"[" {
-  nb_colonne += strlen(yytext);
-  return LFSQBRA;  // Retourne le token LFSQBRA
-}
-"]" {
-  nb_colonne += strlen(yytext);
-  return RTSQBRA;  // Retourne le token RTSQBRA
-}
-"(" {
-  nb_colonne += strlen(yytext);
-  return LFPar;  // Retourne le token LFPar
-}
-")" {
-  nb_colonne += strlen(yytext);
-  return RTPar;  // Retourne le token RTPar
-}
-"-" {
-  nb_colonne += strlen(yytext);
-  return MINS;  // Retourne le token MINS
-}
-"+" {
-  nb_colonne += strlen(yytext);
-  return PLS;  // Retourne le token PLS
-}
-"*" {
-  nb_colonne += strlen(yytext);
-  return MULT;  // Retourne le token MULT
-}
-"/" {
-  nb_colonne += strlen(yytext);
-  return DIV;  // Retourne le token DIV
-}
-"," {
-  nb_colonne += strlen(yytext);
-  return VIRG;  // Retourne le token VIRG
-}
-";" {
-  nb_colonne += strlen(yytext);
-  return PVIRG;  // Retourne le token PVIRG
-}
-"=" {
-  nb_colonne += strlen(yytext);
-  return AFFA;  // Retourne le token AFFA
-}
-":" {
-  nb_colonne += strlen(yytext);
-  return DEUXPOINTS;  // Retourne le token DEUXPOINTS
-}
-"<-" {
-  nb_colonne += strlen(yytext);
-  return MOINS_G;  // Retourne le token MOINS_G
-}
-"<" {
-  nb_colonne += strlen(yytext);
-  return INF;  // Retourne le token INF
-}
-"<=" {
-  nb_colonne += strlen(yytext);
-  return INFEG;  // Retourne le token INFEG
-}
-">" {
-  nb_colonne += strlen(yytext);
-  return SUP;  // Retourne le token SUP
-}
-">=" {
-  nb_colonne += strlen(yytext);
-  return SUPEG;  // Retourne le token SUPEG
-}
-"!=" {
-  nb_colonne += strlen(yytext);
-  return DIFF;  // Retourne le token DIFF
+"DEBUT"          { nb_colonne += strlen(yytext); printf("Token: DEBUT\n"); return DEBUT; }
+"FIN"            { nb_colonne += strlen(yytext); printf("Token: FIN\n"); return FIN; }
+"EXECUTION"      { nb_colonne += strlen(yytext); printf("Token: EXECUTION\n"); return EXECUTION; }
+"SI"             { nb_colonne += strlen(yytext); printf("Token: SI\n"); return SI; }
+"ALORS"          { nb_colonne += strlen(yytext); printf("Token: ALORS\n"); return ALORS; }
+"SINON"          { nb_colonne += strlen(yytext); printf("Token: SINON\n"); return SINON; }
+"TANTQUE"        { nb_colonne += strlen(yytext); printf("Token: TANTQUE\n"); return TANTQUE; }
+"FAIRE"          { nb_colonne += strlen(yytext); printf("Token: FAIRE\n"); return FAIRE; }
+"FIXE"           { nb_colonne += strlen(yytext); printf("Token: FIXE\n"); return FIXE; }
+"affiche"        { nb_colonne += strlen(yytext); printf("Token: AFFICHE\n"); return AFFICHE; }
+"lire"           { nb_colonne += strlen(yytext); printf("Token: LIRE\n"); return LIRE; }
+"OU"             { nb_colonne += strlen(yytext);printf("Token: OU\n"); return OU; }
+"ET"             { nb_colonne += strlen(yytext); printf("Token: ET\n"); return ET; }
+"NON"            { nb_colonne += strlen(yytext); printf("Token: NON\n"); return NON; }
+">"              { nb_colonne += strlen(yytext); printf("Token: SUP\n"); return SUP; }
+"!="             { nb_colonne += strlen(yytext); printf("Token: DIFFERENT\n"); return DIFFERENT; }
+"<="             { nb_colonne += strlen(yytext); printf("Token: INF_EGAL\n"); return INF_EGAL; }
+">="             { nb_colonne += strlen(yytext); printf("Token: SUP_EGAL\n"); return SUP_EGAL; }
+"<-"             { nb_colonne += strlen(yytext); printf("Token: AFFECTION\n"); return AFFECTION; }
+"{"              { nb_colonne += strlen(yytext); printf("Token: ACCOLADE_OUVRANTE\n"); return ACCOLADE_OUVRANTE; }
+"}"              { nb_colonne += strlen(yytext); printf("Token: ACCOLADE_FERMANTE\n"); return ACCOLADE_FERMANTE; }
+"("              { nb_colonne += strlen(yytext); printf("Token: PARENTHOISE_OUVRANTE\n"); return PARENTHOISE_OUVRANTE; }
+")"              { nb_colonne += strlen(yytext); printf("Token: PARENTHOISE_FERMANTE\n"); return PARENTHOISE_FERMANTE; }
+"+"              { nb_colonne += strlen(yytext); printf("Token: PLUS\n"); return PLUS; }
+"-"              { nb_colonne += strlen(yytext); printf("Token: MOINS\n"); return MOINS; }
+"*"              { nb_colonne += strlen(yytext); printf("Token: MULT\n"); return MULT; }
+"/"              { nb_colonne += strlen(yytext); printf("Token: DIV\n"); return DIV; }
+","              { nb_colonne += strlen(yytext); printf("Token: VIRGULE\n"); return VIRGULE; }
+";"              { nb_colonne += strlen(yytext); printf("Token: POINT_VIRGULE\n"); return POINT_VIRGULE; }
+":"              { nb_colonne += strlen(yytext); printf("Token: DEUX_POINTS\n"); return DEUX_POINTS; }
+"="              { nb_colonne += strlen(yytext); printf("Token: EGAL\n"); return EGAL; }
+"<"              { nb_colonne += strlen(yytext); printf("Token: INF\n"); return INF; }
+
+{IDF} {
+  
+  int consecutive_underscores = 0;
+    size_t len = strlen(yytext);
+
+    // Check for consecutive underscores
+    int i;
+    for (i = 1; yytext[i] != '\0'; i++) {
+        if (yytext[i] == '_' && yytext[i - 1] == '_') {
+            consecutive_underscores = 1;
+            break;
+        }
+    }
+    
+    // Validate identifier length and underscores
+    if (len > 10) {
+        fprintf(stderr, "\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+        return ERR;  // Return an error token for invalid identifiers
+    } else if (consecutive_underscores) {
+        fprintf(stderr, "\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+        return ERR;  // Return an error token for invalid identifiers
+    }
+
+    // If valid, check the symbol table
+  printf("Token: IDF (%s)\n", yytext); 
+    yylval.texte = strdup(yytext); // Assign yytext to yylval for Bison
+    nb_colonne += len;
+    return IDF;
 }
 
-/* Règles de traitement des commentaires */
-{commentaire_sur_ligne} {
-  nb_colonne += strlen(yytext);  // Update the column number based on the length of the comment
-}
 
-{commentaire_multi_lignes} {
-  char* ptr = yytext;  // Pointer to start of the matched text
-  while ((ptr = strchr(ptr, '\n')) != NULL) {  // Loop through newlines
-    nb_ligne++;  // Increment the line number for each newline
-    ptr++;  // Move past the newline character
-  }
-  nb_colonne = 1;  
-}
-
-/* Règles pour les autres tokens */
 {TEXT} {
+  printf("Token: TEXT (%s)\n", yytext);
+  yylval.texte = strdup(yytext);
   nb_colonne += strlen(yytext);
-  return TEXT;  // Retourne le token TEXT
+  return TEXT;
 }
 
 {NUM} {
-  int val = atoi(yytext);  // Convert string to integer
-  if (val < 0 || val > 32767) {  // Range check for NUM
-    return ERR;  // Retourne une erreur pour une valeur hors de portée
-  } else {
-    return NUM;  // Retourne le token NUM
-  }
+  printf("Token: NUM (%s)\n", yytext);
+  yylval.entier = atoi(yytext);
+  nb_colonne += strlen(yytext);
+  return NUM;
 }
 
 {SIGNEDNUM} {
   int val = atoi(yytext);  // Convert string to integer
-  if (val < -32768 || val > 32767) {  // Range check for SIGNEDNUM
-    return ERR;  // Retourne une erreur pour une valeur hors de portée
-  } else {
-    return SIGNEDNUM;  // Retourne le token SIGNEDNUM
-  }
+  if (val < -32768 || val > 32767)  // Range check for SIGNEDNUM
+    printf("\033[31m[ERROR] Valeur d'entier signé hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  nb_colonne += strlen(yytext);  // Always update the column number
+  return SIGNEDNUM;
 }
 
 {REAL} {
-  double val = atof(yytext);  // Convert string to double
-  if (val < 0.0 || val > 32767.0) {  // Range check for REAL
-    return ERR;  // Retourne une erreur pour une valeur hors de portée
-  } else {
-    return REAL;  // Retourne le token REAL
-  }
+  printf("Token: REAL (%s)\n", yytext);
+  yylval.reel = atof(yytext);
+  nb_colonne += strlen(yytext);
+  return REAL;
 }
-
 {SIGNEDREAL} {
   double val = atof(yytext);  // Convert string to double
-  if (val < -32768.0 || val > 32767.0) {  // Range check for SIGNEDREAL
-    return ERR;  // Retourne une erreur pour une valeur hors de portée
-  } else {
-    return SIGNEDREAL;  // Retourne le token SIGNEDREAL
-  }
+  if (val < -32768.0 || val > 32767.0)   // Range check for SIGNEDREAL
+    printf("\033[31m[ERROR] Valeur réelle signée hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  nb_colonne += strlen(yytext);  // Always update the column number
+  return SIGNEDREAL;
+}
+{commentaire_sur_ligne}  { 
+  nb_colonne += strlen(yytext);
+  printf("-- Commentaire sur une ligne --\n");
 }
 
-{IDF} {
-  return IDF;  // Retourne le token IDF
+{commentaire_multi_lignes} {
+  char* ptr = yytext;
+  while ((ptr = strchr(ptr, '\n')) != NULL) {
+    nb_ligne++;
+    ptr++;
+  }
+  printf("{- Commentaire sur plusieurs lignes -}\n");
+}
+
+[ \t]+  { /* Ignorer les espaces et tabulations sans affecter la colonne */ }
+\n      { nb_ligne++; nb_colonne = 1; }  /* Avancer à la ligne suivante */
+
+. {
+  fprintf(stderr, "Erreur lexicale sur '%s' à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);
+  return ERR;
 }
 %%
