@@ -67,6 +67,8 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 ">" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '>' reconnu\033[0m\n",yytext); return GREATER; }
 ">=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '>=' reconnu\033[0m\n",yytext); return GREATER_EQ;}
 "!=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '!=' reconnu\033[0m\n",yytext);return NOT_EQUAL;}
+/* \" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] \" reconnu\033[0m\n");return QUOT; } */
+\"[^\"]*\" {yylval.texte[strlen(yylval.texte) - 1] = '\0';return QTEXT;/* Matches quoted text*/}
 
 {commentaire_sur_ligne} {
   nb_colonne += strlen(yytext);  // Update the column number based on the length of the comment
