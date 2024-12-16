@@ -55,42 +55,49 @@ extern int yydebug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     NUM = 258,                     /* NUM  */
-    REAL = 259,                    /* REAL  */
-    TEXT = 260,                    /* TEXT  */
-    IDF = 261,                     /* IDF  */
-    SI = 262,                      /* SI  */
-    ALORS = 263,                   /* ALORS  */
-    SINON = 264,                   /* SINON  */
-    TANTQUE = 265,                 /* TANTQUE  */
-    FAIRE = 266,                   /* FAIRE  */
-    DEBUT = 267,                   /* DEBUT  */
-    FIN = 268,                     /* FIN  */
-    EXECUTION = 269,               /* EXECUTION  */
-    FIXE = 270,                    /* FIXE  */
-    AFFICHE = 271,                 /* AFFICHE  */
-    LIRE = 272,                    /* LIRE  */
-    ACCOLADE_OUVRANTE = 273,       /* ACCOLADE_OUVRANTE  */
-    ACCOLADE_FERMANTE = 274,       /* ACCOLADE_FERMANTE  */
-    PARENTHOISE_OUVRANTE = 275,    /* PARENTHOISE_OUVRANTE  */
-    PARENTHOISE_FERMANTE = 276,    /* PARENTHOISE_FERMANTE  */
-    PLUS = 277,                    /* PLUS  */
-    MOINS = 278,                   /* MOINS  */
-    MULT = 279,                    /* MULT  */
-    DIV = 280,                     /* DIV  */
-    VIRGULE = 281,                 /* VIRGULE  */
-    POINT_VIRGULE = 282,           /* POINT_VIRGULE  */
-    DEUX_POINTS = 283,             /* DEUX_POINTS  */
-    EGAL = 284,                    /* EGAL  */
-    INF = 285,                     /* INF  */
-    SUP = 286,                     /* SUP  */
-    DIFFERENT = 287,               /* DIFFERENT  */
-    INF_EGAL = 288,                /* INF_EGAL  */
-    SUP_EGAL = 289,                /* SUP_EGAL  */
-    AFFECTION = 290,               /* AFFECTION  */
-    OU = 291,                      /* OU  */
-    ET = 292,                      /* ET  */
-    NON = 293,                     /* NON  */
-    ERR = 294                      /* ERR  */
+    SIGNEDNUM = 259,               /* SIGNEDNUM  */
+    REAL = 260,                    /* REAL  */
+    SIGNEDREAL = 261,              /* SIGNEDREAL  */
+    TEXT = 262,                    /* TEXT  */
+    IDF = 263,                     /* IDF  */
+    SI = 264,                      /* SI  */
+    ALORS = 265,                   /* ALORS  */
+    SINON = 266,                   /* SINON  */
+    TANTQUE = 267,                 /* TANTQUE  */
+    FAIRE = 268,                   /* FAIRE  */
+    DEBUT = 269,                   /* DEBUT  */
+    FIN = 270,                     /* FIN  */
+    EXECUTION = 271,               /* EXECUTION  */
+    FIXE = 272,                    /* FIXE  */
+    AFFICHE = 273,                 /* AFFICHE  */
+    LIRE = 274,                    /* LIRE  */
+    ACCOLADE_OUVRANTE = 275,       /* ACCOLADE_OUVRANTE  */
+    ACCOLADE_FERMANTE = 276,       /* ACCOLADE_FERMANTE  */
+    PARENTHOISE_OUVRANTE = 277,    /* PARENTHOISE_OUVRANTE  */
+    PARENTHOISE_FERMANTE = 278,    /* PARENTHOISE_FERMANTE  */
+    PLUS = 279,                    /* PLUS  */
+    MOINS = 280,                   /* MOINS  */
+    MULT = 281,                    /* MULT  */
+    DIV = 282,                     /* DIV  */
+    VIRGULE = 283,                 /* VIRGULE  */
+    POINT_VIRGULE = 284,           /* POINT_VIRGULE  */
+    DEUX_POINTS = 285,             /* DEUX_POINTS  */
+    EGAL = 286,                    /* EGAL  */
+    INF = 287,                     /* INF  */
+    SUP = 288,                     /* SUP  */
+    DIFFERENT = 289,               /* DIFFERENT  */
+    INF_EGAL = 290,                /* INF_EGAL  */
+    SUP_EGAL = 291,                /* SUP_EGAL  */
+    AFFECTION = 292,               /* AFFECTION  */
+    OU = 293,                      /* OU  */
+    ET = 294,                      /* ET  */
+    NON = 295,                     /* NON  */
+    ERR = 296,                     /* ERR  */
+    TYPE_NUM = 297,                /* TYPE_NUM  */
+    TYPE_REAL = 298,               /* TYPE_REAL  */
+    TYPE_TEXT = 299,               /* TYPE_TEXT  */
+    TYPE_SIGNEDNUM = 300,          /* TYPE_SIGNEDNUM  */
+    TYPE_SIGNEDREAL = 301          /* TYPE_SIGNEDREAL  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -105,7 +112,7 @@ union YYSTYPE
     double reel;
     char* texte;
 
-#line 109 "syntaxique.tab.h"
+#line 116 "syntaxique.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
