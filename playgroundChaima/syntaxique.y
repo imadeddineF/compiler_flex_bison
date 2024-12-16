@@ -18,8 +18,8 @@ void yyerror(const char* s) {
     char* texte;
 }
 
-%token <entier> NUM
-%token <reel> REAL
+%token <entier> NUM SIGNEDNUM
+%token <reel> REAL SIGNEDREAL
 %token <texte> TEXT
 %token <texte> IDF
 %token SI ALORS SINON TANTQUE FAIRE DEBUT FIN EXECUTION FIXE AFFICHE LIRE
@@ -53,16 +53,6 @@ declarations
     ;
 
 declaration
-    : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
-    ;
-
-type_variable
-    : NUM
-    | REAL
-    | TEXT
-    ;
-
-affect
 : FIXE IDF AFFECTION expression POINT_VIRGULE
 | FIXE IDF AFFECTION TEXT POINT_VIRGULE
 ; 
@@ -82,7 +72,6 @@ instruction
     | LIRE IDF POINT_VIRGULE
     | condition
     | boucle
-    | affect
     ;
 
 condition
@@ -105,8 +94,8 @@ liste_arguments
 expression
     : NUM
     | REAL
-    | MOINS NUM
-    | MOINS REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
     | IDF
     | expression PLUS expression
     | expression MOINS expression
