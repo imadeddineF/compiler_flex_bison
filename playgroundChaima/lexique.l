@@ -52,13 +52,14 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 ","              { printf("Token: VIRGULE\n"); return VIRGULE; }
 ";"              { printf("Token: POINT_VIRGULE\n"); return POINT_VIRGULE; }
 ":"              { printf("Token: DEUX_POINTS\n"); return DEUX_POINTS; }
+"<="             { printf("Token: INF_EGAL\n"); return INF_EGAL; }
+">="             { printf("Token: SUP_EGAL\n"); return SUP_EGAL; }
+"<-"             { printf("Token: AFFECTION\n"); return AFFECTION; }
 "="              { printf("Token: EGAL\n"); return EGAL; }
 "<"              { printf("Token: INF\n"); return INF; }
 ">"              { printf("Token: SUP\n"); return SUP; }
 "!="             { printf("Token: DIFFERENT\n"); return DIFFERENT; }
-"<="             { printf("Token: INF_EGAL\n"); return INF_EGAL; }
-">="             { printf("Token: SUP_EGAL\n"); return SUP_EGAL; }
-"<-"             { printf("Token: AFFECTION\n"); return AFFECTION; }
+
 
 {IDF} {
   printf("Token: IDF (%s)\n", yytext); 
