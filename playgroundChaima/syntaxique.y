@@ -51,8 +51,17 @@ declarations
     : declaration declarations
     | /* vide */
     ;
+  declaration
+  :  FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+  ;
 
-declaration
+  type_variable
+    : NUM
+    | REAL
+    | TEXT
+    ;
+
+affect
 : FIXE IDF AFFECTION expression POINT_VIRGULE
 | FIXE IDF AFFECTION TEXT POINT_VIRGULE
 ; 
@@ -72,6 +81,7 @@ instruction
     | LIRE IDF POINT_VIRGULE
     | condition
     | boucle
+    | affect
     ;
 
 condition
