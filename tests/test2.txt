@@ -1,5 +1,5 @@
 DEBUT
-  FIXE ID1 <- 100;  /* Assign a number to an identifier */
+  FIXE ID1 <- 100;  -- Assign a number to an identifier ##
   FIXE ID2 <- -250; /* Signed integer */
   FIXE ID3 <- 12.34; /* Real number */
   FIXE ID4 <- -0.567; /* Signed real */

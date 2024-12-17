@@ -77,7 +77,12 @@
      OU = 293,
      ET = 294,
      NON = 295,
-     ERR = 296
+     ERR = 296,
+     TYPE_NUM = 297,
+     TYPE_REAL = 298,
+     TYPE_TEXT = 299,
+     TYPE_SIGNEDNUM = 300,
+     TYPE_SIGNEDREAL = 301
    };
 #endif
 
@@ -97,7 +102,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 101 "syntaxique.tab.h"
+#line 106 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
