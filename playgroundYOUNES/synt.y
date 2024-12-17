@@ -31,10 +31,10 @@ void yyerror(const char* s);
 %type <entier> constant
  
 
-%token DEBUT FIN EXECUTION SI ALORS SINON TANTQUE FAIRE FIXE
+%token DEBUT FIN EXECUTION SI ALORS SINON TANTQUE FAIRE FIXE QTEXT
 %token AFFICHE LIRE
-%token LFBRA RTBRA LFSQBRA RTSQBRA LFPar RTPar
-%token PLS MINS MULT DIV OU ET NON
+%token LFBRA RTBRA LFSQBRA RTSQBRA LFPar RTPar /*QUOT */
+%token PLS MINS MULT DIV OU ET NON 
 %token COMMA SEMICOLON COLON AFFECT LESS LESS_EQ GREATER GREATER_EQ EQUAL NOT_EQUAL
 
 /* Operator Precedence */
@@ -219,6 +219,20 @@ Affiche_Lire_operation:
             printf("Lecture: Variable %s\n", $3);
         }
     }
+    /*|AFFICHE LFPar QUOT TEXT QUOT RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }
+    |AFFICHE LFPar QUOT TEXT QUOT COMMA expression RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }<----- if i used the QUOT def */
+    
+    |AFFICHE LFPar QTEXT RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }
+    |AFFICHE LFPar QTEXT COMMA expression RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }
+    ;
 
 %%
 

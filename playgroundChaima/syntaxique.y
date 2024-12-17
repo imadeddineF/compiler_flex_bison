@@ -125,6 +125,8 @@ expression
     | expression ET expression
     | expression OU expression
     | NON expression 
+    |condition
+    |boucle
     ;
 
 %%

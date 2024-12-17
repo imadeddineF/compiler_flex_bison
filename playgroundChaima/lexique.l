@@ -89,7 +89,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   nb_colonne += strlen(yytext);
   return REAL;
 }
-
 {SIGNEDREAL} {
   double val = atof(yytext);  // Convert string to double
   if (val < -32768.0 || val > 32767.0)   // Range check for SIGNEDREAL
