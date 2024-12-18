@@ -52,6 +52,8 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 "}"              { nb_colonne += strlen(yytext); printf("Token: ACCOLADE_FERMANTE\n"); return ACCOLADE_FERMANTE; }
 "("              { nb_colonne += strlen(yytext); printf("Token: PARENTHOISE_OUVRANTE\n"); return PARENTHOISE_OUVRANTE; }
 ")"              { nb_colonne += strlen(yytext); printf("Token: PARENTHOISE_FERMANTE\n"); return PARENTHOISE_FERMANTE; }
+"["              { nb_colonne += strlen(yytext); printf("Token: CROCHET_OUVRANT\n"); return CROCHET_OUVRANT; }
+"]"              { nb_colonne += strlen(yytext); printf("Token: CROCHET_FERMANT\n"); return CROCHET_FERMANT; }
 "+"              { nb_colonne += strlen(yytext); printf("Token: PLUS\n"); return PLUS; }
 "-"              { nb_colonne += strlen(yytext); printf("Token: MOINS\n"); return MOINS; }
 "*"              { nb_colonne += strlen(yytext); printf("Token: MULT\n"); return MULT; }

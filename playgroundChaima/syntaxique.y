@@ -25,6 +25,7 @@ void yyerror(const char* s) {
 %token SI ALORS SINON TANTQUE FAIRE DEBUT FIN EXECUTION FIXE AFFICHE LIRE
 %token ACCOLADE_OUVRANTE ACCOLADE_FERMANTE
 %token PARENTHOISE_OUVRANTE PARENTHOISE_FERMANTE
+%token CROCHET_OUVRANT CROCHET_FERMANT
 %token PLUS MOINS MULT DIV VIRGULE POINT_VIRGULE
 %token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
 %token OU ET NON ERR
@@ -57,6 +58,7 @@ declarations
 declaration
     :  FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
     |  type_variable DEUX_POINTS IDF POINT_VIRGULE
+    |  table
     ;
 
 type_variable
@@ -69,6 +71,7 @@ type_variable
 
 affect
     : IDF AFFECTION expression POINT_VIRGULE
+    | table
     ; 
 
 bloc
@@ -88,15 +91,23 @@ instruction
     | affect
     ;
 
+
 condition
     : SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
-    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON expression
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON condition
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON boucle
     | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc
     ;
 
 boucle
     : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
+    | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE boucle
         { printf("Boucle TANTQUE analysée avec succes.\n"); }
+    ;
+
+table
+    : type_variable DEUX_POINTS IDF CROCHET_OUVRANT NUM CROCHET_FERMANT POINT_VIRGULE
+    | IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION valeur POINT_VIRGULE
     ;
 
 liste_arguments
@@ -106,13 +117,28 @@ liste_arguments
     | liste_arguments VIRGULE IDF
     ;
 
+chiffre
+    : NUM
+    | REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
+    ;
+
+valeur
+    : NUM
+    | REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
+    | TEXT
+    ;
+
 expression
     : NUM
     | REAL
     | SIGNEDNUM
     | SIGNEDREAL
-    |condition
-    |boucle
+    | condition
+    | boucle
     | IDF
     | TEXT
     | expression PLUS expression
@@ -129,6 +155,8 @@ expression
     | expression OU expression
     | NON expression 
     ;
+
+
 
 
 %%
