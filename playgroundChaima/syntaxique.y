@@ -110,6 +110,8 @@ expression
     | REAL
     | SIGNEDNUM
     | SIGNEDREAL
+    |condition
+    |boucle
     | IDF
     | TEXT
     | expression PLUS expression
@@ -125,8 +127,6 @@ expression
     | expression ET expression
     | expression OU expression
     | NON expression 
-    |condition
-    |boucle
     ;
 
 %%
