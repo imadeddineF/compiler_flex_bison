@@ -72,7 +72,7 @@ affect
     ; 
 
 bloc
-    : ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
+    :  ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE 
     ;
 
 instructions
@@ -90,6 +90,7 @@ instruction
 
 condition
     : SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON expression
     | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc
     ;
 
@@ -128,6 +129,7 @@ expression
     | expression OU expression
     | NON expression 
     ;
+
 
 %%
 
