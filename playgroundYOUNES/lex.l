@@ -67,7 +67,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 ">" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '>' reconnu\033[0m\n",yytext); return GREATER; }
 ">=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '>=' reconnu\033[0m\n",yytext); return GREATER_EQ;}
 "!=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '!=' reconnu\033[0m\n",yytext);return NOT_EQUAL;}
-\"[^\"]*\" {yylval.texte[strlen(yylval.texte) - 1] = '\0';return QTEXT;/* Matches quoted text*/}
+
 
 {commentaire_sur_ligne} {
   nb_colonne += strlen(yytext);  // Update the column number based on the length of the comment
@@ -120,34 +120,34 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 {IDF} {
-    int consecutive_underscores = 0;
-    size_t len = strlen(yytext);
+    int len = strlen(yytext);
+
+    // Length check
+    if (len > 10) {
+        fprintf(stderr, "\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+        return ERROR_TOKEN;
+    }
 
     // Check for consecutive underscores
     for (int i = 1; yytext[i] != '\0'; i++) {
         if (yytext[i] == '_' && yytext[i - 1] == '_') {
-            consecutive_underscores = 1;
-            break;
+            fprintf(stderr, "\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+            return ERROR_TOKEN;
         }
     }
 
-    // Validate identifier length and underscores
-    if (len > 10) {
-        fprintf(stderr, "\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-        return ERROR_TOKEN;  // Return an error token for invalid identifiers
-    } else if (consecutive_underscores) {
-        fprintf(stderr, "\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-        return ERROR_TOKEN;  // Return an error token for invalid identifiers
+    // Validate identifier in the symbol table
+    int index = recherche(yytext);
+    if (index == -1) {
+        fprintf(stderr, "\033[31m[ERROR] Identificateur non déclaré (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+        return ERROR_TOKEN;
+    } else {
+        strcpy(yylval.texte, ts[index].Type); // Assign the type from the symbol table to `yylval`
+        nb_colonne += len;
+        return IDF;
     }
-
-    // If valid, check the symbol table
-    if (recherche(yytext) == -1) {
-        inserer(yytext, "IDF"); // Insert identifier into the symbol table
-    }
-    yylval.texte = strdup(yytext); // Assign yytext to yylval for Bison
-    nb_colonne += len;
-    return IDF;
 }
+
 
 
 [ \t] { 

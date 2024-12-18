@@ -35,7 +35,7 @@ void yyerror(const char* s);
 %type <texte> expressionT
 
 
-%token DEBUT FIN EXECUTION SI ALORS SINON TANTQUE FAIRE FIXE QTEXT
+%token DEBUT FIN EXECUTION SI ALORS SINON TANTQUE FAIRE FIXE 
 %token AFFICHE LIRE
 %token LFBRA RTBRA LFSQBRA RTSQBRA LFPar RTPar /*QUOT */
 %token PLS MINS MULT DIV OU ET NON 
@@ -81,7 +81,7 @@ constantR://check
     | SIGNEDREAL { $$ = strdup(yytext); }
     ;
 
-constantT//Check
+constantT://Check
     TEXT { $$ = strdup(yytext); }
     |IDF
     ;
@@ -172,13 +172,15 @@ instruction://check
 //-----------------------------------------------------------------------------------------------------------
 affectation:
     IDF AFFECT expressionN SEMICOLON {
-        int index = recherche($1);
+        int index = recherche($1); 
         if (index == -1) {
             printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
         } else if (strcmp(ts[index].Constant, "Oui") == 0) {
             printf("Erreur: Tentative de modification de la constante '%s' à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].Type, "NUM") != 0) {
+            printf("Erreur: Type incompatible pour '%s' à la ligne %d.\n", $1, nb_ligne);
         } else {
-            printf("Affectation: '%s' reçoit une nouvelle valeur.\n", $1);
+            printf("Affectation: '%s' reçoit une nouvelle valeur de type NUM.\n", $1);
         }
     }
     |IDF AFFECT expressionR SEMICOLON {
@@ -187,8 +189,10 @@ affectation:
             printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
         } else if (strcmp(ts[index].Constant, "Oui") == 0) {
             printf("Erreur: Tentative de modification de la constante '%s' à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].Type, "REAL") != 0) {
+            printf("Erreur: Type incompatible pour '%s' à la ligne %d.\n", $1, nb_ligne);
         } else {
-            printf("Affectation: '%s' reçoit une nouvelle valeur.\n", $1);
+            printf("Affectation: '%s' reçoit une nouvelle valeur de type NUM.\n", $1);
         }
     }
     |IDF AFFECT expressionT SEMICOLON {
@@ -197,8 +201,10 @@ affectation:
             printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
         } else if (strcmp(ts[index].Constant, "Oui") == 0) {
             printf("Erreur: Tentative de modification de la constante '%s' à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].Type, "TEXT") != 0) {
+            printf("Erreur: Type incompatible pour '%s' à la ligne %d.\n", $1, nb_ligne);
         } else {
-            printf("Affectation: '%s' reçoit une nouvelle valeur.\n", $1);
+            printf("Affectation: '%s' reçoit une nouvelle valeur de type NUM.\n", $1);
         }
     }
     | array_access AFFECT expressionN SEMICOLON {
@@ -235,9 +241,20 @@ affectation:
 
 //-----------------------------------------------------------------------------------------------------------------------
 expressionN :
-    NUM
-    |IDF
-    |SIGNEDNUM
+    NUM { $$ = $1; }
+    | IDF {
+        int index = recherche($1);
+        if (index == -1) {
+            printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
+            $$ = 0; // Default value
+        } else if (strcmp(ts[index].Type, "NUM") != 0) {
+            printf("Erreur: Incompatibilité de type pour '%s' à la ligne %d.\n", $1, nb_ligne);
+            $$ = 0;
+        } else {
+            $$ = atoi(ts[index].Valeur); // Retrieve the value
+        }
+    }
+    |SIGNEDNUM { $$ = $1; }
     |expressionN DIV expressionN
     { 
             if ($3 == 0) { 
@@ -247,15 +264,26 @@ expressionN :
                 $$ = $1 / $3; 
             } 
         } 
-    |expressionN MULT expressionN
-    |expressionN PLS expressionN
-    |expressionN MINS expressionN
+    |expressionN MULT expressionN { $$ = $1*$3 }
+    |expressionN PLS expressionN { $$ = $1+$3 }
+    |expressionN MINS expressionN { $$ = $1-$3 }
     ;
 
 expressionR :
-    REAL
-    |IDF
-    |SIGNEDREAL
+    REAL { $$ = $1; }
+     | IDF {
+        int index = recherche($1);
+        if (index == -1) {
+            printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
+            $$ = 0; // Default value
+        } else if (strcmp(ts[index].Type, "REAL") != 0) {
+            printf("Erreur: Incompatibilité de type pour '%s' à la ligne %d.\n", $1, nb_ligne);
+            $$ = 0;
+        } else {
+            $$ = atoi(ts[index].Valeur); // Retrieve the value
+        }
+    }
+    |SIGNEDREAL { $$ = $1; }
     |expressionR DIV expressionR
     { 
             if ($3 == 0.000) { 
@@ -265,9 +293,9 @@ expressionR :
                 $$ = $1 / $3; 
             } 
         } 
-    |expressionR MULT expressionR
-    |expressionR PLS expressionR
-    |expressionR MINS expressionR
+    |expressionR MULT expressionR { $$ = $1*$3 }
+    |expressionR PLS expressionR { $$ = $1+$3 }
+    |expressionR MINS expressionR { $$ = $1-$3 }
     ;
 
 expressionT :
@@ -330,7 +358,7 @@ Affiche_Lire_operation:
     |AFFICHE LFPar TEXT COMMA expressionR RTPar SEMICOLON {
         printf("Affichage: Expression affichée.\n");
     }
-    
+
     ;
 
 %%

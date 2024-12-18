@@ -4,11 +4,15 @@
 
 // Structure for Symbol Table Entries
 typedef struct {
-    char NomEntite[20]; // Name of the entity
-    char CodeEntite[20]; // Type (NUM, REAL, TEXT)
-    char Type[20]; // Variable type (NUM, REAL, TEXT)
-    char Constant[5]; // "Oui" for constants, "Non" otherwise
+    char NomEntite[20];   // Name of the entity
+    char CodeEntite[20];  // Variable or Constant
+    char Type[20];        // NUM, REAL, TEXT
+    char Constant[5];     // Oui or Non
+    char Valeur[50];      // Value of the constant or variable
 } TypeTS;
+
+
+
 
 #define MAX_TS 100
 TypeTS ts[MAX_TS];
@@ -23,19 +27,18 @@ int recherche(char entite[]) {
     return -1; // Not found
 }
 
-/* Function to insert an entity into the symbol table */
-void inserer(char entite[], char code[], char type[], char constant[]) {
+void inserer(char entite[], char code[], char type[], char constant[], char valeur[]) {
     if (recherche(entite) == -1) {
         strcpy(ts[CpTS].NomEntite, entite);
         strcpy(ts[CpTS].CodeEntite, code);
         strcpy(ts[CpTS].Type, type);
-        strcpy(ts[CpTS].Constant, constant); // Store size for arrays
+        strcpy(ts[CpTS].Constant, constant);
+        strcpy(ts[CpTS].Valeur, valeur); // Add the value
         CpTS++;
     } else {
         printf("Erreur: Double déclaration de l'entité '%s'.\n", entite);
     }
 }
-
 
 /* Function to display the symbol table */
 void afficher() {
