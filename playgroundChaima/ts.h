@@ -2,231 +2,161 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef SYMBOL_TABLE_H
-#define SYMBOL_TABLE_H
+#define MAX_ENTITES 100
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// Rename enum to avoid conflicts
-typedef enum {
-  ST_TYPE_INTEGER,
-  ST_TYPE_REAL,
-  ST_TYPE_STRING,
-  ST_TYPE_INTEGER_ARRAY,
-  ST_TYPE_REAL_ARRAY,
-  ST_TYPE_STRING_ARRAY,
-  ST_TYPE_CONSTANT
-} SymbolTableType;
-
-// Structure to represent a symbol table entry
-typedef struct {
-  char name[11];         // Identifier name (max 10 chars + null terminator)
-  SymbolTableType type;  // Updated type reference
-  int is_initialized;    // Whether the variable has been initialized
-  int is_constant;       // Whether the symbol is a constant
-
-  union {
-    int int_value;       // For integer and constant integer
-    double real_value;   // For real and constant real
-    char* string_value;  // For string and constant string
-
-    // For array types
-    struct {
-      int size;      // Size of the array
-      void* values;  // Pointer to array values
-    } array_info;
-  } value;
-} SymbolTableEntry;
-
-// Hash table structure for symbol table
-#define TABLE_SIZE 100
+// Déclaration de la table des symboles
+typedef enum { VAR, CONST } TypeEntite;  // Type de l'entité (variable ou constante)
+typedef enum { INT, REAL, TEXT } TypeDonnee;  // Type de données (entier, réel, texte)
 
 typedef struct {
-  SymbolTableEntry* entries[TABLE_SIZE];
-  int count;
-} SymbolTable;
+    char NomEntite[20];   // Nom de l'entité
+    char CodeEntite[20];  // Code associé à l'entité (ex: TYPE_NUM, TYPE_REAL, etc.)
+    TypeEntite type;      // Type (variable ou constante)
+    TypeDonnee type_donnee; // Type de donnée (INT, REAL, TEXT)
+    int is_declared;      // Indicateur pour vérifier si l'entité est déclarée
+    union {
+        int entier;
+        double reel;
+        char* texte;
+    } valeur;              // Valeur de l'entité (selon son type)
+} TypeTS;
 
-// Function prototypes (update type references)
-SymbolTable* create_symbol_table();
-void free_symbol_table(SymbolTable* table);
-unsigned int hash(const char* key);
-int insert_symbol(SymbolTable* table, const char* name, SymbolTableType type, int is_constant);
-SymbolTableEntry* lookup_symbol(SymbolTable* table, const char* name);
-int update_symbol_value(SymbolTable* table, const char* name, void* value);
-int check_symbol_exists(SymbolTable* table, const char* name);
-void print_symbol_table(SymbolTable* table);
+TypeTS ts[MAX_ENTITES];  // Table des symboles
+int CpTS = 0;            // Compteur des entités dans la table
 
-// Implementations below remain the same, just replace SymbolTableType with SymbolTableType
-SymbolTable* create_symbol_table() {
-  SymbolTable* table = (SymbolTable*)malloc(sizeof(SymbolTable));
-  if (table == NULL) {
-    fprintf(stderr, "Memory allocation error for symbol table\n");
-    exit(1);
-  }
-
-  // Initialize all entries to NULL
+// Recherche d'une entité dans la table des symboles
+int recherche(char entite[]) {
   int i;
-  for ( i = 0; i < TABLE_SIZE; i++) {
-    table->entries[i] = NULL;
-  }
-  table->count = 0;
-
-  return table;
-}
-
-void free_symbol_table(SymbolTable* table) {
-  int i;
-  for ( i = 0; i < TABLE_SIZE; i++) {
-    if (table->entries[i] != NULL) {
-      // Free any dynamically allocated memory
-      if (table->entries[i]->type == ST_TYPE_STRING ||
-          table->entries[i]->type == ST_TYPE_STRING_ARRAY) {
-        free(table->entries[i]->value.string_value);
-      }
-
-      // Free array values if applicable
-      if (table->entries[i]->type == ST_TYPE_INTEGER_ARRAY ||
-          table->entries[i]->type == ST_TYPE_REAL_ARRAY ||
-          table->entries[i]->type == ST_TYPE_STRING_ARRAY) {
-        free(table->entries[i]->value.array_info.values);
-      }
-
-      free(table->entries[i]);
+    for (i = 0; i < CpTS; i++) {
+        if (strcmp(entite, ts[i].NomEntite) == 0) {
+            return i;  // Entité trouvée, retourne son index
+        }
     }
-  }
-  free(table);
+    return -1;  // Entité non trouvée
 }
 
-unsigned int hash(const char* key) {
-  unsigned int hash = 0;
-  int i;
-  for (i = 0; key[i] != '\0'; i++) {
-    hash = 31 * hash + key[i];
-  }
-  return hash % TABLE_SIZE;
-}
-
-int insert_symbol(SymbolTable* table, const char* name, SymbolTableType type, int is_constant) {
-  // Check for existing symbol
-  if (lookup_symbol(table, name) != NULL) {
-    fprintf(stderr, "Error: Symbol '%s' already exists\n", name);
-    return 0;
-  }
-
-  // Create new symbol table entry
-  SymbolTableEntry* entry = (SymbolTableEntry*)malloc(sizeof(SymbolTableEntry));
-  if (entry == NULL) {
-    fprintf(stderr, "Memory allocation error for symbol\n");
-    return 0;
-  }
-
-  // Copy name, ensuring it doesn't exceed 10 characters
-  strncpy(entry->name, name, 10);
-  entry->name[10] = '\0';
-
-  entry->type = type;
-  entry->is_constant = is_constant;
-  entry->is_initialized = 0;
-
-  // Initialize value based on type
-  switch (type) {
-    case ST_TYPE_INTEGER:
-    case ST_TYPE_CONSTANT:
-      entry->value.int_value = 0;
-      break;
-    case ST_TYPE_REAL:
-      entry->value.real_value = 0.0;
-      break;
-    case ST_TYPE_STRING:
-      entry->value.string_value = NULL;
-      break;
-    case ST_TYPE_INTEGER_ARRAY:
-    case ST_TYPE_REAL_ARRAY:
-    case ST_TYPE_STRING_ARRAY:
-      entry->value.array_info.size = 0;
-      entry->value.array_info.values = NULL;
-      break;
-  }
-
-  // Insert into hash table
-  unsigned int index = hash(name);
-  while (table->entries[index] != NULL) {
-    index = (index + 1) % TABLE_SIZE;
-  }
-
-  table->entries[index] = entry;
-  table->count++;
-
-  return 1;
-}
-
-SymbolTableEntry* lookup_symbol(SymbolTable* table, const char* name) {
-  unsigned int index = hash(name);
-  int original_index = index;
-
-  do {
-    if (table->entries[index] != NULL &&
-        strcmp(table->entries[index]->name, name) == 0) {
-      return table->entries[index];
+// Insertion d'une entité dans la table des symboles
+void inserer(char entite[], char code[], TypeEntite type, TypeDonnee type_donnee) {
+    if (recherche(entite) != -1) {
+        printf("Erreur : l'entité '%s' est déjà déclarée.\n", entite);
+        return;  // L'entité existe déjà, on ne l'ajoute pas
     }
 
-    index = (index + 1) % TABLE_SIZE;
-  } while (index != original_index && table->entries[index] != NULL);
-
-  return NULL;
-}
-
-int update_symbol_value(SymbolTable* table, const char* name, void* value) {
-  SymbolTableEntry* entry = lookup_symbol(table, name);
-
-  if (entry == NULL) {
-    fprintf(stderr, "Error: Symbol '%s' not found\n", name);
-    return 0;
-  }
-
-  if (entry->is_constant) {
-    fprintf(stderr, "Error: Cannot modify constant '%s'\n", name);
-    return 0;
-  }
-
-  switch (entry->type) {
-    case ST_TYPE_INTEGER:
-      entry->value.int_value = *(int*)value;
-      break;
-    case ST_TYPE_REAL:
-      entry->value.real_value = *(double*)value;
-      break;
-    case ST_TYPE_STRING:
-      if (entry->value.string_value != NULL) {
-        free(entry->value.string_value);
-      }
-      entry->value.string_value = strdup((char*)value);
-      break;
-    default:
-      fprintf(stderr, "Error: Unsupported type for update\n");
-      return 0;
-  }
-
-  entry->is_initialized = 1;
-  return 1;
-}
-
-int check_symbol_exists(SymbolTable* table, const char* name) {
-  return lookup_symbol(table, name) != NULL;
-}
-
-void print_symbol_table(SymbolTable* table) {
-  printf("\n===== Symbol Table =====\n");
-  int i;
-  for (i = 0; i < TABLE_SIZE; i++) {
-    if (table->entries[i] != NULL) {
-      SymbolTableEntry* entry = table->entries[i];
-      printf("Name: %s, Type: %d, Constant: %d, Initialized: %d\n", entry->name, entry->type, entry->is_constant, entry->is_initialized);
+    if (CpTS >= MAX_ENTITES) {
+        printf("Erreur : la table des symboles est pleine.\n");
+        return;  // La table des symboles est pleine, on ne peut pas ajouter d'autres entités
     }
-  }
-  printf("=======================\n");
+
+    // Ajouter l'entité dans la table des symboles
+    strcpy(ts[CpTS].NomEntite, entite);
+    strcpy(ts[CpTS].CodeEntite, code);
+    ts[CpTS].type = type;
+    ts[CpTS].type_donnee = type_donnee;
+    ts[CpTS].is_declared = 1;  // Marque l'entité comme déclarée
+
+    CpTS++;
 }
 
-#endif
+// Affichage de la table des symboles
+void afficher() {
+    printf("\n/*************** Table des symboles ******************/\n");
+    printf("____________________________________\n");
+    printf("\t| NomEntite |  CodeEntite  | Type | TypeDonnee | Valeur |\n");
+    printf("____________________________________\n");
+    int i;
+    for ( i = 0; i < CpTS; i++) {
+        printf("\t|%10s |%12s  | ", ts[i].NomEntite, ts[i].CodeEntite);
+        
+        // Affichage du type (variable ou constante)
+        if (ts[i].type == VAR) {
+            printf("Variable | ");
+        } else {
+            printf("Constante | ");
+        }
+        
+        // Affichage du type de données
+        if (ts[i].type_donnee == INT) {
+            printf("Entier    | ");
+        } else if (ts[i].type_donnee == REAL) {
+            printf("Réel      | ");
+        } else {
+            printf("Texte     | ");
+        }
+
+        // Affichage de la valeur
+        if (ts[i].type_donnee == INT) {
+            printf("%d |\n", ts[i].valeur.entier);
+        } else if (ts[i].type_donnee == REAL) {
+            printf("%f |\n", ts[i].valeur.reel);
+        } else {
+            printf("%s |\n", ts[i].valeur.texte);
+        }
+    }
+}
+
+// Affecter une valeur à une entité de type variable
+void affecter(char entite[], int is_int, double value) {
+    int index = recherche(entite);
+    if (index == -1) {
+        printf("Erreur : l'entité '%s' n'est pas déclarée.\n", entite);
+        return;
+    }
+
+    // Vérification du type de l'entité
+    if (ts[index].type == CONST) {
+        printf("Erreur : l'entité '%s' est une constante et ne peut pas être modifiée.\n", entite);
+        return;
+    }
+
+    // Affectation de la valeur selon le type de l'entité
+    if (is_int) {
+        if (ts[index].type_donnee == INT) {
+            ts[index].valeur.entier = (int)value;
+        } else {
+            printf("Erreur : tentative d'affectation d'un entier à une entité de type incompatible.\n");
+            return;
+        }
+    } else {
+        if (ts[index].type_donnee == REAL) {
+            ts[index].valeur.reel = value;
+        } else {
+            printf("Erreur : tentative d'affectation d'un réel à une entité de type incompatible.\n");
+            return;
+        }
+    }
+}
+
+// Affectation d'une chaîne de texte à une entité de type texte
+void affecter_texte(char entite[], const char* texte) {
+    int index = recherche(entite);
+    if (index == -1) {
+        printf("Erreur : l'entité '%s' n'est pas déclarée.\n", entite);
+        return;
+    }
+
+    // Vérification du type de l'entité
+    if (ts[index].type == CONST) {
+        printf("Erreur : l'entité '%s' est une constante et ne peut pas être modifiée.\n", entite);
+        return;
+    }
+
+    // Affectation de la valeur texte
+    if (ts[index].type_donnee == TEXT) {
+        ts[index].valeur.texte = strdup(texte);  // Allouer la mémoire pour le texte
+    } else {
+        printf("Erreur : tentative d'affectation d'un texte à une entité de type incompatible.\n");
+        return;
+    }
+}
+
+// Implémentation manuelle de strdup si elle n'est pas définie
+char* strdup(const char* str) {
+    size_t len = strlen(str) + 1;  // Taille de la chaîne + 1 pour le caractère nul
+    char* copy = (char*)malloc(len);  // Allocation de la mémoire
+    if (copy == NULL) {
+        fprintf(stderr, "Erreur d'allocation mémoire\n");
+        exit(1);  // Sortie en cas d'erreur d'allocation
+    }
+    memcpy(copy, str, len);  // Copie de la chaîne
+    return copy;
+}
