@@ -28,6 +28,7 @@ void yyerror(const char* s) {
 %token PLUS MOINS MULT DIV VIRGULE POINT_VIRGULE
 %token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
 %token OU ET NON ERR
+%token TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL
 
 
 %left OU               
@@ -51,20 +52,24 @@ declarations
     : declaration declarations
     | /* vide */
     ;
-  declaration
-  :  FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
-  ;
 
-  type_variable
-    : NUM
-    | REAL
-    | TEXT
+
+declaration
+    :  FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+    |  type_variable DEUX_POINTS IDF POINT_VIRGULE
+    ;
+
+type_variable
+    : TYPE_NUM
+    | TYPE_REAL
+    | TYPE_TEXT
+    | TYPE_SIGNEDNUM
+    | TYPE_SIGNEDREAL
     ;
 
 affect
-: FIXE IDF AFFECTION expression POINT_VIRGULE
-| FIXE IDF AFFECTION TEXT POINT_VIRGULE
-; 
+    : IDF AFFECTION expression POINT_VIRGULE
+    ; 
 
 bloc
     : ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
@@ -76,8 +81,7 @@ instructions
     ;
 
 instruction
-    : IDF AFFECTION expression POINT_VIRGULE
-    | AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
+    : AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
     | LIRE IDF POINT_VIRGULE
     | condition
     | boucle
@@ -106,7 +110,10 @@ expression
     | REAL
     | SIGNEDNUM
     | SIGNEDREAL
+    |condition
+    |boucle
     | IDF
+    | TEXT
     | expression PLUS expression
     | expression MOINS expression
     | expression MULT expression
