@@ -6,12 +6,17 @@
 int nb_ligne = 1;
 int nb_colonne = 1;
 
-void yyerror(const char* s) {
-    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
-}
+extern int yylex();
+void yyerror(const char* s);
+
+// Déclaration des fonctions de la table des symboles
+extern int recherche(char entite[]);
+extern void inserer(char entite[], char code[], int type, int type_donnee);
+extern void affecter(char entite[], int is_int, double value);
+extern void affecter_texte(char entite[], const char* texte);
+extern void afficher();
 %}
 
-/* Déclarations de types et tokens */
 %union {
     int entier;
     double reel;
@@ -30,7 +35,6 @@ void yyerror(const char* s) {
 %token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
 %token OU ET NON ERR
 %token TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL
-
 
 %left OU               
 %left ET                
@@ -54,11 +58,25 @@ declarations
     | /* vide */
     ;
 
-
 declaration
-    :  FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
-    |  type_variable DEUX_POINTS IDF POINT_VIRGULE
-    |  table
+    : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+        {
+            if (recherche($4) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($4, "FIXE", 0, $1);  // Insertion de la variable dans la table
+                affecter($4, 1, $6);  // Affectation de la valeur à la variable
+            }
+        }
+    | type_variable DEUX_POINTS IDF POINT_VIRGULE
+        {
+            if (recherche($3) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($3, "VARIABLE", 0, $1);
+            }
+        }
+    | table
     ;
 
 type_variable
@@ -71,11 +89,23 @@ type_variable
 
 affect
     : IDF AFFECTION expression POINT_VIRGULE
-    | table
-    ; 
+        {
+            int idx = recherche($1);
+            if (idx == -1) {
+                yyerror("Erreur: Variable non déclarée.");
+            } else {
+                // Vérification de la compatibilité des types
+                if (ts[idx].type_donnee != $3.type_donnee) {
+                    yyerror("Erreur: Incompatibilité de type.");
+                } else {
+                    affecter($1, 1, $3.reel);
+                }
+            }
+        }
+    ;
 
 bloc
-    :  ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE 
+    : ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
     ;
 
 instructions
@@ -91,7 +121,6 @@ instruction
     | affect
     ;
 
-
 condition
     : SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
     | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON condition
@@ -101,13 +130,21 @@ condition
 
 boucle
     : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
-    | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE boucle
-        { printf("Boucle TANTQUE analysée avec succes.\n"); }
+        {
+            if ($3.reel == 0) {
+                yyerror("Erreur: Division par zéro.");
+            }
+        }
     ;
 
 table
     : type_variable DEUX_POINTS IDF CROCHET_OUVRANT NUM CROCHET_FERMANT POINT_VIRGULE
-    | IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION valeur POINT_VIRGULE
+        {
+            if ($6 <= 0) {
+                yyerror("Erreur: Dépassement de la taille du tableau.");
+            }
+            inserer($3, "TABLEAU", 1, $1);  // Insertion dans la table des symboles
+        }
     ;
 
 liste_arguments
@@ -137,14 +174,17 @@ expression
     | REAL
     | SIGNEDNUM
     | SIGNEDREAL
-    | condition
-    | boucle
     | IDF
     | TEXT
     | expression PLUS expression
     | expression MOINS expression
     | expression MULT expression
     | expression DIV expression
+        {
+            if ($3 == 0) {
+                yyerror("Erreur: Division par zéro.");
+            }
+        }
     | expression EGAL expression
     | expression INF expression
     | expression SUP expression
@@ -153,15 +193,17 @@ expression
     | expression SUP_EGAL expression
     | expression ET expression
     | expression OU expression
-    | NON expression 
+    | NON expression
     ;
-
-
-
 
 %%
 
 int main() {
     printf("Debut de l'analyse.\n");
     return yyparse();
+}
+
+void yyerror(const char* s) {
+    fprintf(stderr, "Erreur: %s\n", s);
+    exit(1);
 }
