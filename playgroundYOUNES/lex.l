@@ -67,7 +67,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 ">" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '>' reconnu\033[0m\n",yytext); return GREATER; }
 ">=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '>=' reconnu\033[0m\n",yytext); return GREATER_EQ;}
 "!=" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] '!=' reconnu\033[0m\n",yytext);return NOT_EQUAL;}
-/* \" { nb_colonne += strlen(yytext); printf("\033[32m[SUCCESS] \" reconnu\033[0m\n");return QUOT; } */
 \"[^\"]*\" {yylval.texte[strlen(yylval.texte) - 1] = '\0';return QTEXT;/* Matches quoted text*/}
 
 {commentaire_sur_ligne} {
@@ -172,9 +171,3 @@ int yywrap() {
   return 1;
 }
 
-/* Only use it if you are dealing with lexical code without the syntaxical */
-/*int main() {
-  printf("\n\033[34m======================== Compilation Start ========================\033[0m\n");
-  yylex();
-  printf("\033[34m======================== Compilation End ========================== \033[0m\n");
-}*/ 
