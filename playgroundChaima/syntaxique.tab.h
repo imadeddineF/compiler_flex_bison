@@ -108,7 +108,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "syntaxique.y"
+#line 11 "syntaxique.y"
 
     int entier;
     double reel;

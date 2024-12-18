@@ -6,9 +6,11 @@
 int nb_ligne = 1;
 int nb_colonne = 1;
 
-void yyerror(const char* s) {
-    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
-}
+
+// why we declared this function here ?
+// void yyerror(const char* s) {
+//     fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
+// }
 %}
 
 /* Déclarations de types et tokens */
@@ -32,21 +34,23 @@ void yyerror(const char* s) {
 %token TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL
 
 
-%left OU               
+/* order is important for the priority (bottom >>>> top) */
+%left OU           // Lower precedence    
 %left ET                
 %right NON             
 %nonassoc INF INF_EGAL SUP SUP_EGAL
 %left EGAL DIFFERENT    
 %left PLUS MOINS        
-%left MULT DIV          
+%left MULT DIV         // Higher precedence
+/* nzido ! maybe ------- */
 
-%start programme
+%start programme      // the root non-terminal of the grammar
 
 %%
 
 programme
     : DEBUT declarations EXECUTION bloc FIN
-        { printf("Programme valide.\n"); }
+        { printf("Programme valide ✅\n"); }
     ;
 
 declarations
@@ -102,7 +106,6 @@ condition
 boucle
     : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
     | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE boucle
-        { printf("Boucle TANTQUE analysée avec succes.\n"); }
     ;
 
 table
@@ -156,12 +159,15 @@ expression
     | NON expression 
     ;
 
-
-
-
 %%
+
+yyerror(const char* s) {
+    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
+}
 
 int main() {
     printf("Debut de l'analyse.\n");
-    return yyparse();
+    /* return ttparse();  // why <e are returning yparse() ? */
+    yyparse();
+    return 0;
 }
