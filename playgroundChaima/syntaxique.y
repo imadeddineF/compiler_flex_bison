@@ -13,20 +13,22 @@ void yyerror(const char* s);
 extern int recherche(char entite[]);
 extern void inserer(char entite[], char code[], int type, int type_donnee);
 extern void affecter(char entite[], int is_int, double value);
-extern void affecter_texte(char entite[], const char* texte);
+extern void _affecter_texte(char entite[], const char* TS_TEXTe);
 extern void afficher();
 %}
 
 %union {
-    int entier;
-    double reel;
-    char* texte;
+    int entier;         // pour les entiers
+    double reel;        // pour les réels
+    char* texte;        // pour les chaînes de caractères
+    struct { int type_donnee; int taille; } tableau;  // pour les tableaux
 }
 
 %token <entier> NUM SIGNEDNUM
 %token <reel> REAL SIGNEDREAL
 %token <texte> TEXT
 %token <texte> IDF
+%token <texte> TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL type_variable
 %token SI ALORS SINON TANTQUE FAIRE DEBUT FIN EXECUTION FIXE AFFICHE LIRE
 %token ACCOLADE_OUVRANTE ACCOLADE_FERMANTE
 %token PARENTHOISE_OUVRANTE PARENTHOISE_FERMANTE
@@ -34,7 +36,6 @@ extern void afficher();
 %token PLUS MOINS MULT DIV VIRGULE POINT_VIRGULE
 %token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
 %token OU ET NON ERR
-%token TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL
 
 %left OU               
 %left ET                
@@ -59,47 +60,89 @@ declarations
     ;
 
 declaration
-    : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+    : FIXE NUM DEUX_POINTS IDF EGAL NUM POINT_VIRGULE
         {
             if (recherche($4) != -1) {
                 yyerror("Erreur: Double déclaration de variable.");
             } else {
-                inserer($4, "FIXE", 0, $1);  // Insertion de la variable dans la table
-                affecter($4, 1, $6);  // Affectation de la valeur à la variable
+                inserer($4, "FIXE", 0, NUM);
+                affecter($4, 1, $6);
             }
         }
-    | type_variable DEUX_POINTS IDF POINT_VIRGULE
+    | FIXE SIGNEDNUM DEUX_POINTS IDF EGAL SIGNEDNUM POINT_VIRGULE
+        {
+            if (recherche($4) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($4, "FIXE", 0, SIGNEDNUM);
+                affecter($4, 1, $6);
+            }
+        }
+    | FIXE REAL DEUX_POINTS IDF EGAL REAL POINT_VIRGULE
+        {
+            if (recherche($4) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($4, "FIXE", 0, REAL);
+                affecter($4, 0, $6);
+            }
+        }
+    | FIXE SIGNEDREAL DEUX_POINTS IDF EGAL SIGNEDREAL POINT_VIRGULE
+        {
+            if (recherche($4) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($4, "FIXE", 0, SIGNEDREAL);
+                affecter($4, 0, $6);
+            }
+        }
+    | FIXE TEXT DEUX_POINTS IDF EGAL TEXT POINT_VIRGULE
+        {
+            if (recherche($4) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($4, "FIXE", 0, TEXT);
+                _affecter_texte($4, $6);
+            }
+        }
+    | NUM DEUX_POINTS IDF POINT_VIRGULE
         {
             if (recherche($3) != -1) {
                 yyerror("Erreur: Double déclaration de variable.");
             } else {
-                inserer($3, "VARIABLE", 0, $1);
+                inserer($3, "VARIABLE", 0, NUM);
             }
         }
-    | table
-    ;
-
-type_variable
-    : TYPE_NUM
-    | TYPE_REAL
-    | TYPE_TEXT
-    | TYPE_SIGNEDNUM
-    | TYPE_SIGNEDREAL
-    ;
-
-affect
-    : IDF AFFECTION expression POINT_VIRGULE
+    | SIGNEDNUM DEUX_POINTS IDF POINT_VIRGULE
         {
-            int idx = recherche($1);
-            if (idx == -1) {
-                yyerror("Erreur: Variable non déclarée.");
+            if (recherche($3) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
             } else {
-                // Vérification de la compatibilité des types
-                if (ts[idx].type_donnee != $3.type_donnee) {
-                    yyerror("Erreur: Incompatibilité de type.");
-                } else {
-                    affecter($1, 1, $3.reel);
-                }
+                inserer($3, "VARIABLE", 0, SIGNEDNUM);
+            }
+        }
+    | REAL DEUX_POINTS IDF POINT_VIRGULE
+        {
+            if (recherche($3) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($3, "VARIABLE", 0, REAL);
+            }
+        }
+    | SIGNEDREAL DEUX_POINTS IDF POINT_VIRGULE
+        {
+            if (recherche($3) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($3, "VARIABLE", 0, SIGNEDREAL);
+            }
+        }
+    | TEXT DEUX_POINTS IDF POINT_VIRGULE
+        {
+            if (recherche($3) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($3, "VARIABLE", 0, TEXT);
             }
         }
     ;
@@ -122,29 +165,15 @@ instruction
     ;
 
 condition
-    : SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
-    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON condition
-    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON boucle
-    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc
+    : SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+    | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON condition
+    | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON boucle
+    | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc
     ;
 
 boucle
-    : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
-        {
-            if ($3.reel == 0) {
-                yyerror("Erreur: Division par zéro.");
-            }
-        }
-    ;
-
-table
-    : type_variable DEUX_POINTS IDF CROCHET_OUVRANT NUM CROCHET_FERMANT POINT_VIRGULE
-        {
-            if ($6 <= 0) {
-                yyerror("Erreur: Dépassement de la taille du tableau.");
-            }
-            inserer($3, "TABLEAU", 1, $1);  // Insertion dans la table des symboles
-        }
+    : TANTQUE PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE FAIRE bloc
+    |
     ;
 
 liste_arguments
@@ -154,56 +183,159 @@ liste_arguments
     | liste_arguments VIRGULE IDF
     ;
 
-chiffre
-    : NUM
-    | REAL
-    | SIGNEDNUM
-    | SIGNEDREAL
+expression_comparative
+    : NUM INF NUM
+    | SIGNEDNUM INF SIGNEDNUM
+    | REAL INF REAL    
+    | SIGNEDREAL INF SIGNEDREAL    
+    | NUM SUP NUM    
+    | SIGNEDNUM SUP SIGNEDNUM    
+    | REAL SUP REAL
+    | SIGNEDREAL SUP SIGNEDREAL
+    | NUM EGAL NUM
+    | SIGNEDNUM EGAL SIGNEDNUM
+    | REAL EGAL REAL
+    | SIGNEDREAL EGAL SIGNEDREAL
     ;
 
-valeur
-    : NUM
-    | REAL
-    | SIGNEDNUM
-    | SIGNEDREAL
-    | TEXT
+affect
+    : IDF AFFECTION expression_arithmetique POINT_VIRGULE
+    | IDF AFFECTION IDF POINT_VIRGULE
     ;
-
-expression
-    : NUM
-    | REAL
-    | SIGNEDNUM
-    | SIGNEDREAL
-    | IDF
-    | TEXT
-    | expression PLUS expression
-    | expression MOINS expression
-    | expression MULT expression
-    | expression DIV expression
-        {
-            if ($3 == 0) {
-                yyerror("Erreur: Division par zéro.");
-            }
+expression_arithmetique
+    : NUM PLUS NUM
+        { printf("%d + %d = %d\n", $1, $3, $1 + $3); }
+    | SIGNEDNUM PLUS SIGNEDNUM
+        { printf("%d + %d = %d\n", $1, $3, $1 + $3); }
+    | REAL PLUS REAL
+        { printf("%.2f + %.2f = %.2f\n", $1, $3, $1 + $3); }
+    | SIGNEDREAL PLUS SIGNEDREAL
+        { printf("%.2f + %.2f = %.2f\n", $1, $3, $1 + $3); }
+    | IDF PLUS NUM
+        { 
+            int idx = recherche($1);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%s + %d = %.2f\n", $1, $3, get_value(idx) + $3);
         }
-    | expression EGAL expression
-    | expression INF expression
-    | expression SUP expression
-    | expression DIFFERENT expression
-    | expression INF_EGAL expression
-    | expression SUP_EGAL expression
-    | expression ET expression
-    | expression OU expression
-    | NON expression
+    | NUM PLUS IDF
+        { 
+            int idx = recherche($3);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%d + %s = %.2f\n", $1, $3, $1 + get_value(idx));
+        }
+    | IDF PLUS IDF
+        { 
+            int idx1 = recherche($1);
+            int idx2 = recherche($3);
+            if (idx1 == -1 || idx2 == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%s + %s = %.2f\n", $1, $3, get_value(idx1) + get_value(idx2));
+        }
+    | NUM MOINS NUM
+        { printf("%d - %d = %d\n", $1, $3, $1 - $3); }
+    | SIGNEDNUM MOINS SIGNEDNUM
+        { printf("%d - %d = %d\n", $1, $3, $1 - $3); }
+    | REAL MOINS REAL
+        { printf("%.2f - %.2f = %.2f\n", $1, $3, $1 - $3); }
+    | SIGNEDREAL MOINS SIGNEDREAL
+        { printf("%.2f - %.2f = %.2f\n", $1, $3, $1 - $3); }
+    | IDF MOINS NUM
+        { 
+            int idx = recherche($1);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%s - %d = %.2f\n", $1, $3, get_value(idx) - $3);
+        }
+    | NUM MOINS IDF
+        { 
+            int idx = recherche($3);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%d - %s = %.2f\n", $1, $3, $1 - get_value(idx));
+        }
+    | IDF MOINS IDF
+        { 
+            int idx1 = recherche($1);
+            int idx2 = recherche($3);
+            if (idx1 == -1 || idx2 == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%s - %s = %.2f\n", $1, $3, get_value(idx1) - get_value(idx2));
+        }
+    | NUM MULT NUM
+        { printf("%d * %d = %d\n", $1, $3, $1 * $3); }
+    | SIGNEDNUM MULT SIGNEDNUM
+        { printf("%d * %d = %d\n", $1, $3, $1 * $3); }
+    | REAL MULT REAL
+        { printf("%.2f * %.2f = %.2f\n", $1, $3, $1 * $3); }
+    | SIGNEDREAL MULT SIGNEDREAL
+        { printf("%.2f * %.2f = %.2f\n", $1, $3, $1 * $3); }
+    | IDF MULT NUM
+        { 
+            int idx = recherche($1);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%s * %d = %.2f\n", $1, $3, get_value(idx) * $3);
+        }
+    | NUM MULT IDF
+        { 
+            int idx = recherche($3);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%d * %s = %.2f\n", $1, $3, $1 * get_value(idx));
+        }
+    | IDF MULT IDF
+        { 
+            int idx1 = recherche($1);
+            int idx2 = recherche($3);
+            if (idx1 == -1 || idx2 == -1) yyerror("Erreur: Variable non déclarée.");
+            else printf("%s * %s = %.2f\n", $1, $3, get_value(idx1) * get_value(idx2));
+        }
+    | NUM DIV NUM
+        { 
+            if ($3 == 0) yyerror("Erreur: Division par zéro.");
+            else printf("%d / %d = %.2f\n", $1, $3, (double)$1 / $3);
+        }
+    | SIGNEDNUM DIV SIGNEDNUM
+        { 
+            if ($3 == 0) yyerror("Erreur: Division par zéro.");
+            else printf("%d / %d = %.2f\n", $1, $3, (double)$1 / $3);
+        }
+    | REAL DIV REAL
+        { 
+            if ($3 == 0.0) yyerror("Erreur: Division par zéro.");
+            else printf("%.2f / %.2f = %.2f\n", $1, $3, $1 / $3);
+        }
+    | SIGNEDREAL DIV SIGNEDREAL
+        { 
+            if ($3 == 0.0) yyerror("Erreur: Division par zéro.");
+            else printf("%.2f / %.2f = %.2f\n", $1, $3, $1 / $3);
+        }
+    | IDF DIV NUM
+        { 
+            int idx = recherche($1);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else if ($3 == 0) yyerror("Erreur: Division par zéro.");
+            else printf("%s / %d = %.2f\n", $1, $3, get_value(idx) / $3);
+        }
+    | NUM DIV IDF
+        { 
+            int idx = recherche($3);
+            if (idx == -1) yyerror("Erreur: Variable non déclarée.");
+            else if (get_value(idx) == 0) yyerror("Erreur: Division par zéro.");
+            else printf("%d / %s = %.2f\n", $1, $3, $1 / get_value(idx));
+        }
+    | IDF DIV IDF
+        { 
+            int idx1 = recherche($1);
+            int idx2 = recherche($3);
+            if (idx1 == -1 || idx2 == -1) yyerror("Erreur: Variable non déclarée.");
+            else if (get_value(idx2) == 0) yyerror("Erreur: Division par zéro.");
+            else printf("%s / %s = %.2f\n", $1, $3, get_value(idx1) / get_value(idx2));
+        }
     ;
+
 
 %%
 
-int main() {
-    printf("Debut de l'analyse.\n");
-    return yyparse();
+int main(void) {
+    yyparse();
+  
 }
 
 void yyerror(const char* s) {
-    fprintf(stderr, "Erreur: %s\n", s);
-    exit(1);
+    fprintf(stderr, "Erreur: %s à la ligne %d, colonne %d.\n", s, nb_ligne, nb_colonne);
 }
