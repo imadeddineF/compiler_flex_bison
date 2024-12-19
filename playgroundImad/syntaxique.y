@@ -328,10 +328,10 @@ instruction
 	| table instruction  
     | instruction_si instruction
     | boucle_tantque instruction
-    | AFFICHE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE instruction
-    | AFFICHE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE instruction
-    | LIRE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE instruction
-    | LIRE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE instruction
+    | AFFICHE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
+    | AFFICHE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE
+    | LIRE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
+    | LIRE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE
 	/* | LIRE IDF POINT_VIRGULE
     | condition
     | boucle_tantque
@@ -417,15 +417,15 @@ expression
     | expression MULT expression
     | expression DIV expression
 	| PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE  // for grouped expressions
-    /* | expression EGAL expression
+    | expression EGAL expression
     | expression INF expression
     | expression SUP expression
     | expression DIFFERENT expression
     | expression INF_EGAL expression 
-    | expression SUP_EGAL expression */ // ------------> te3 comparaison hado!!!!
-    /* | expression ET expression
+    | expression SUP_EGAL expression // ------------> te3 comparaison hado!!!!
+    | expression ET expression
     | expression OU expression
-    | NON expression */  // ------------> te3 logique hado!!!!
+    | NON expression // ------------> te3 logique hado!!!!
 ;
 
 %%
