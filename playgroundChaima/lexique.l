@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "syntaxique.tab.h"
+#include "ts.h"
 
 extern YYSTYPE yylval;
 extern int nb_ligne;
@@ -127,7 +128,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
     nb_colonne += len;
     return IDF;
 }
-
 
 {TEXT} {
   printf("Token: Value of TEXT (%s)\n", yytext);

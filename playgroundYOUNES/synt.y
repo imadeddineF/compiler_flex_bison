@@ -20,7 +20,6 @@ void yyerror(const char* s);
     int entier;        // For NUM values
     double reel;       // For REAL values
     char* texte;       // For TEXT values
-    int taille;        // For array sizes
 }
 
 %token <entier> NUM SIGNEDNUM       // Integer tokens
@@ -28,8 +27,13 @@ void yyerror(const char* s);
 %token <texte> TEXT IDF             // Text and Identifier tokens
 
 %type <texte> type                  // Non-terminal for types (NUM, REAL, TEXT)
-%type <entier> constant
- 
+%type <texte> constantT
+%type <reel> constantR
+%type <entier> constantN
+%type <entier> expressionN
+%type <reel> expressionR
+%type <texte> expressionT
+
 
 %token DEBUT FIN EXECUTION SI ALORS SINON TANTQUE FAIRE FIXE QTEXT
 %token AFFICHE LIRE
@@ -50,7 +54,7 @@ void yyerror(const char* s);
 
 /* Grammar Rules */
 %%
-program:
+program://check
     DEBUT declarations EXECUTION LFBRA instructions RTBRA FIN
     {
         afficher(); // Print symbol table
@@ -60,20 +64,29 @@ program:
     ;
 
 
-declarations:
+declarations://Check
     declarations declaration
     | /* empty */  // No declarations
     ;
 
-constant:
+constantN://check
     NUM { $$ = strdup(yytext); }
+    |IDF
     | SIGNEDNUM { $$ = strdup(yytext); }
-    | REAL { $$ = strdup(yytext); }
-    | SIGNEDREAL { $$ = strdup(yytext); }
-    | TEXT { $$ = strdup(yytext); }
     ;
 
-declaration:
+constantR://check
+    REAL { $$ = strdup(yytext); }
+    |IDF
+    | SIGNEDREAL { $$ = strdup(yytext); }
+    ;
+
+constantT//Check
+    TEXT { $$ = strdup(yytext); }
+    |IDF
+    ;
+
+declaration://check
     type COLON IDF SEMICOLON {
         if (recherche($3) != -1) {
             printf("Erreur: Double déclaration de l'entité '%s' à la ligne %d.\n", $3, nb_ligne);
@@ -93,9 +106,26 @@ declaration:
         inserer($3, "Tableau", $1, size);
         printf("Tableau déclaré: Type %s, Nom %s, Taille %d.\n", $1, $3, $5);
     }
-}
+    }
 
-    | FIXE type COLON IDF AFFECT constant SEMICOLON {
+    | FIXE type COLON IDF AFFECT constantN SEMICOLON {
+        if (recherche($4) != -1) {
+            printf("Erreur: Double déclaration de la constante '%s' à la ligne %d.\n", $4, nb_ligne);
+        } else {
+            inserer($4, "Constante", $2, "Oui");
+            printf("Constante déclarée: Type %s, Nom %s, Valeur %s.\n", $2, $4, $6);
+        }
+    }
+    
+    | FIXE type COLON IDF AFFECT constantR SEMICOLON {
+        if (recherche($4) != -1) {
+            printf("Erreur: Double déclaration de la constante '%s' à la ligne %d.\n", $4, nb_ligne);
+        } else {
+            inserer($4, "Constante", $2, "Oui");
+            printf("Constante déclarée: Type %s, Nom %s, Valeur %s.\n", $2, $4, $6);
+        }
+    }
+    | FIXE type COLON IDF AFFECT constantT SEMICOLON {
         if (recherche($4) != -1) {
             printf("Erreur: Double déclaration de la constante '%s' à la ligne %d.\n", $4, nb_ligne);
         } else {
@@ -105,7 +135,7 @@ declaration:
     }
     ;
     
-array_access:
+array_access://check
     IDF LFSQBRA NUM RTSQBRA {
         int index = recherche($1);
         if (index == -1) {
@@ -121,27 +151,27 @@ array_access:
     ;
 
 
-type:
+type://check
     NUM { $$ = strdup("NUM"); }
     | REAL { $$ = strdup("REAL"); }
     | TEXT { $$ = strdup("TEXT"); }
 ;
 
-instructions:
+instructions://check
     instructions instruction
     | instruction
     ;
 
-instruction:
+instruction://check
     affectation
     | array_access
     | ConditionSI_ALORS_SINON
     | BoucleTANTQUE
     | Affiche_Lire_operation
     ;
-
+//-----------------------------------------------------------------------------------------------------------
 affectation:
-    IDF AFFECT expression SEMICOLON {
+    IDF AFFECT expressionN SEMICOLON {
         int index = recherche($1);
         if (index == -1) {
             printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
@@ -151,7 +181,47 @@ affectation:
             printf("Affectation: '%s' reçoit une nouvelle valeur.\n", $1);
         }
     }
-    | array_access AFFECT expression SEMICOLON {
+    |IDF AFFECT expressionR SEMICOLON {
+        int index = recherche($1);
+        if (index == -1) {
+            printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].Constant, "Oui") == 0) {
+            printf("Erreur: Tentative de modification de la constante '%s' à la ligne %d.\n", $1, nb_ligne);
+        } else {
+            printf("Affectation: '%s' reçoit une nouvelle valeur.\n", $1);
+        }
+    }
+    |IDF AFFECT expressionT SEMICOLON {
+        int index = recherche($1);
+        if (index == -1) {
+            printf("Erreur: Variable '%s' non déclarée à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].Constant, "Oui") == 0) {
+            printf("Erreur: Tentative de modification de la constante '%s' à la ligne %d.\n", $1, nb_ligne);
+        } else {
+            printf("Affectation: '%s' reçoit une nouvelle valeur.\n", $1);
+        }
+    }
+    | array_access AFFECT expressionN SEMICOLON {
+        int index = recherche($1);
+        if (index == -1) {
+            printf("Erreur: Tableau '%s' non déclaré à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].CodeEntite, "Tableau") != 0) {
+            printf("Erreur: '%s' n'est pas un tableau à la ligne %d.\n", $1, nb_ligne);
+        } else {
+            printf("Affectation: '%s[%d]' reçoit une nouvelle valeur.\n", $1, $3);
+        }
+    }
+    | array_access AFFECT expressionR SEMICOLON {
+        int index = recherche($1);
+        if (index == -1) {
+            printf("Erreur: Tableau '%s' non déclaré à la ligne %d.\n", $1, nb_ligne);
+        } else if (strcmp(ts[index].CodeEntite, "Tableau") != 0) {
+            printf("Erreur: '%s' n'est pas un tableau à la ligne %d.\n", $1, nb_ligne);
+        } else {
+            printf("Affectation: '%s[%d]' reçoit une nouvelle valeur.\n", $1, $3);
+        }
+    }
+    | array_access AFFECT expressionT SEMICOLON {
         int index = recherche($1);
         if (index == -1) {
             printf("Erreur: Tableau '%s' non déclaré à la ligne %d.\n", $1, nb_ligne);
@@ -163,20 +233,13 @@ affectation:
     }
     ;
 
-
-
-expression : 
-     NUM 
-    | SIGNEDNUM 
-    | REAL 
-    | SIGNEDREAL 
-    | IDF 
-    | array_access
-    | expression PLS expression 
-    | expression MINS expression 
-    | expression MULT expression 
-    | expression DIV expression 
-        { 
+//-----------------------------------------------------------------------------------------------------------------------
+expressionN :
+    NUM
+    |IDF
+    |SIGNEDNUM
+    |expressionN DIV expressionN
+    { 
             if ($3 == 0) { 
                 printf("Erreur: Division par 0 à la ligne %d, colonne %d\n", nb_ligne, nb_colonne); 
                 // Handle the error (e.g., return a default value, exit) 
@@ -184,32 +247,71 @@ expression :
                 $$ = $1 / $3; 
             } 
         } 
-
+    |expressionN MULT expressionN
+    |expressionN PLS expressionN
+    |expressionN MINS expressionN
     ;
 
+expressionR :
+    REAL
+    |IDF
+    |SIGNEDREAL
+    |expressionR DIV expressionR
+    { 
+            if ($3 == 0.000) { 
+                printf("Erreur: Division par 0 à la ligne %d, colonne %d\n", nb_ligne, nb_colonne); 
+                // Handle the error (e.g., return a default value, exit) 
+            } else { 
+                $$ = $1 / $3; 
+            } 
+        } 
+    |expressionR MULT expressionR
+    |expressionR PLS expressionR
+    |expressionR MINS expressionR
+    ;
+
+expressionT :
+     TEXT
+     |IDF
+     ;
+
+
+//-----------------------------------------------------------------------------------------------------------------------
 ConditionSI_ALORS_SINON:
     SI LFPar condition RTPar ALORS LFBRA instructions RTBRA
     | SI LFPar condition RTPar ALORS LFBRA instructions RTBRA SINON LFBRA instructions RTBRA
     ;
-
+//--------------------------------------------------------vvvvvv____________________________________________________________________
 condition:
       condition OU condition
     | condition ET condition
-    | expression LESS expression
-    | expression LESS_EQ expression
-    | expression GREATER expression
-    | expression GREATER_EQ expression
-    | expression EQUAL expression
-    | expression NOT_EQUAL expression
+    | expressionN LESS expressionN
+    | expressionN LESS_EQ expressionN
+    | expressionN GREATER expressionN
+    | expressionN GREATER_EQ expressionN
+    | expressionN EQUAL expressionN
+    | expressionN NOT_EQUAL expressionN
     | NON condition
+    | expressionR LESS expressionR
+    | expressionR LESS_EQ expressionR
+    | expressionR GREATER expressionR
+    | expressionR GREATER_EQ expressionR
+    | expressionR EQUAL expressionR
+    | expressionR NOT_EQUAL expressionR
     ;
-
+//-------------------------------------------------------------------------------------------------------------------------------
 BoucleTANTQUE:
     TANTQUE LFPar condition RTPar FAIRE LFBRA instructions RTBRA
     ;
 
 Affiche_Lire_operation:
-    AFFICHE LFPar expression RTPar SEMICOLON {
+      AFFICHE LFPar expressionN RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }
+    | AFFICHE LFPar expressionR RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }
+    | AFFICHE LFPar expressionT RTPar SEMICOLON {
         printf("Affichage: Expression affichée.\n");
     }
     | LIRE LFPar IDF RTPar SEMICOLON {
@@ -219,24 +321,25 @@ Affiche_Lire_operation:
             printf("Lecture: Variable %s\n", $3);
         }
     }
-    /*|AFFICHE LFPar QUOT TEXT QUOT RTPar SEMICOLON {
+    |AFFICHE LFPar TEXT RTPar SEMICOLON {
         printf("Affichage: Expression affichée.\n");
     }
-    |AFFICHE LFPar QUOT TEXT QUOT COMMA expression RTPar SEMICOLON {
+    |AFFICHE LFPar TEXT COMMA expressionN RTPar SEMICOLON {
         printf("Affichage: Expression affichée.\n");
-    }<----- if i used the QUOT def */
+    }
+    |AFFICHE LFPar TEXT COMMA expressionR RTPar SEMICOLON {
+        printf("Affichage: Expression affichée.\n");
+    }
     
-    |AFFICHE LFPar QTEXT RTPar SEMICOLON {
-        printf("Affichage: Expression affichée.\n");
-    }
-    |AFFICHE LFPar QTEXT COMMA expression RTPar SEMICOLON {
-        printf("Affichage: Expression affichée.\n");
-    }
     ;
 
 %%
+main ()
+{ yyparse();
+}
+yywrap ()
+{}
 
-/* Error Handling */
 void yyerror(const char* s) {
     printf("Erreur Syntaxique à la ligne %d, colonne %d: %s\n", nb_ligne, nb_colonne, s);
 }
