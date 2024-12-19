@@ -30,6 +30,7 @@ int nb_colonne = 1;
 %token OU ET NON ERR
 
 /* order is important for the priority (bottom >>>> top) */
+%left LOWER
 %left OU           // Lower precedence    
 %left ET                
 %right NON             
@@ -154,20 +155,17 @@ instruction
     : AFFICHE PARENTHOISE_OUVRANTE liste_arguments PARENTHOISE_FERMANTE POINT_VIRGULE
     | LIRE IDF POINT_VIRGULE
     | condition
-    | boucle
     | affect
     ;
 
 condition
     : SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON bloc
     | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON condition
-    | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON boucle
+    | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc SINON LOWER
     | SI PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE ALORS bloc
     ;
 
-boucle
 
-    ;
 
 liste_arguments
     : TEXT

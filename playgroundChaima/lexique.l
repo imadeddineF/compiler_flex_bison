@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "syntaxique.tab.h"
+#include "ts.h"
+
 
 extern YYSTYPE yylval;
 extern int nb_ligne;
@@ -80,6 +82,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   int val = atoi(yytext);  // Convert string to integer
   if (val < -32768 || val > 32767) { // Range check for SIGNEDNUM
     printf("\033[31m[ERROR] Valeur d'entier signé hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  }
   else {
     yylval.entier = val;  // Store the signed number in yylval.entier
   }

@@ -85,7 +85,8 @@
      OU = 301,
      ET = 302,
      NON = 303,
-     ERR = 304
+     ERR = 304,
+     LOWER = 305
    };
 #endif
 
@@ -95,9 +96,8 @@
 typedef union YYSTYPE
 {
 
-
 /* Line 1676 of yacc.c  */
-#line 20 "syntaxique.y"
+#line 12 "syntaxique.y"
 
     int entier;         // pour les entiers
     double reel;        // pour les réels
@@ -107,7 +107,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 110 "syntaxique.tab.h"
+#line 111 "syntaxique.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
