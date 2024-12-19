@@ -324,10 +324,10 @@ instructions
 ;
 
 instruction 
-	: IDF AFFECTION expression POINT_VIRGULE instruction 
-	| table instruction  
-    | instruction_si instruction
-    | boucle_tantque instruction
+	: IDF AFFECTION expression POINT_VIRGULE  
+	| table   
+    | instruction_si 
+    | boucle_tantque 
     | AFFICHE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
     | AFFICHE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE
     | LIRE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
@@ -364,7 +364,7 @@ condition
 
 boucle_tantque
     : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
-    | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE boucle_tantque
+    /* | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc boucle_tantque */
 ;
 
 table
@@ -405,27 +405,35 @@ table
 ; */
 
 expression
+    : expression_arithmetique
+    | expression_logique
+;
+
+expression_logique
+    : expression ET expression
+    | expression OU expression
+    | expression INF expression
+    | expression SUP expression
+    | expression EGAL expression
+    | expression DIFFERENT expression
+    | expression INF_EGAL expression
+    | expression SUP_EGAL expression
+    | NON expression
+    | PARENTHOISE_OUVRANTE expression_logique PARENTHOISE_FERMANTE
+;
+
+expression_arithmetique
     : NUM
     | REAL
     | SIGNEDNUM
     | SIGNEDREAL
     | IDF
-	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT 
-    /* | TEXT */ // ------------> Texte n'est pas une expression (not so sure)
-    | expression PLUS expression
-    | expression MOINS expression
-    | expression MULT expression
-    | expression DIV expression
-	| PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE  // for grouped expressions
-    | expression EGAL expression
-    | expression INF expression
-    | expression SUP expression
-    | expression DIFFERENT expression
-    | expression INF_EGAL expression 
-    | expression SUP_EGAL expression // ------------> te3 comparaison hado!!!!
-    | expression ET expression
-    | expression OU expression
-    | NON expression // ------------> te3 logique hado!!!!
+    | IDF CROCHET_OUVRANT NUM CROCHET_FERMANT
+    | expression_arithmetique PLUS expression_arithmetique
+    | expression_arithmetique MOINS expression_arithmetique
+    | expression_arithmetique MULT expression_arithmetique
+    | expression_arithmetique DIV expression_arithmetique
+    | PARENTHOISE_OUVRANTE expression_arithmetique PARENTHOISE_FERMANTE
 ;
 
 %%
