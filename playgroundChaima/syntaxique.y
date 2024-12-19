@@ -6,15 +6,7 @@
 int nb_ligne = 1;
 int nb_colonne = 1;
 
-extern int yylex();
-void yyerror(const char* s);
 
-// Déclaration des fonctions de la table des symboles
-extern int recherche(char entite[]);
-extern void inserer(char entite[], char code[], int type, int type_donnee);
-extern void affecter(char entite[], int is_int, double value);
-extern void _affecter_texte(char entite[], const char* TS_TEXTe);
-extern void afficher();
 %}
 
 %union {
@@ -37,21 +29,23 @@ extern void afficher();
 %token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
 %token OU ET NON ERR
 
-%left OU               
+/* order is important for the priority (bottom >>>> top) */
+%left OU           // Lower precedence    
 %left ET                
 %right NON             
 %nonassoc INF INF_EGAL SUP SUP_EGAL
 %left EGAL DIFFERENT    
 %left PLUS MOINS        
-%left MULT DIV          
+%left MULT DIV         // Higher precedence
+/* nzido ! maybe ------- */
 
-%start programme
+%start programme      // the root non-terminal of the grammar
 
 %%
 
 programme
     : DEBUT declarations EXECUTION bloc FIN
-        { printf("Programme valide.\n"); }
+        { printf("Programme valide ✅\n"); }
     ;
 
 declarations
@@ -172,8 +166,7 @@ condition
     ;
 
 boucle
-    : TANTQUE PARENTHOISE_OUVRANTE expression_comparative PARENTHOISE_FERMANTE FAIRE bloc
-    |
+
     ;
 
 liste_arguments
@@ -328,14 +321,17 @@ expression_arithmetique
         }
     ;
 
-
 %%
 
-int main(void) {
-    yyparse();
-  
+yyerror(const char* s) {
+    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
 }
 
-void yyerror(const char* s) {
-    fprintf(stderr, "Erreur: %s à la ligne %d, colonne %d.\n", s, nb_ligne, nb_colonne);
+int main() {
+    printf("Debut de l'analyse.\n");
+    /* return ttparse();  // why <e are returning yparse() ? */
+    yyparse();
+    return 0;
 }
+
+
