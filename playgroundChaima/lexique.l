@@ -3,12 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "syntaxique.tab.h"
-#include "ts.h"
 
 extern YYSTYPE yylval;
 extern int nb_ligne;
 extern int nb_colonne;
-
 #define YY_DECL int yylex(void)
 %}
 
@@ -80,8 +78,11 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 
 {SIGNEDNUM} {
   int val = atoi(yytext);  // Convert string to integer
-  if (val < -32768 || val > 32767)  // Range check for SIGNEDNUM
+  if (val < -32768 || val > 32767) { // Range check for SIGNEDNUM
     printf("\033[31m[ERROR] Valeur d'entier signé hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  else {
+    yylval.entier = val;  // Store the signed number in yylval.entier
+  }
   nb_colonne += strlen(yytext);  // Always update the column number
   return SIGNEDNUM;
 }
@@ -92,41 +93,43 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   nb_colonne += strlen(yytext);
   return REAL;
 }
+
 {SIGNEDREAL} {
   double val = atof(yytext);  // Convert string to double
-  if (val < -32768.0 || val > 32767.0)   // Range check for SIGNEDREAL
+  if (val < -32768.0 || val > 32767.0) {  // Range check for SIGNEDREAL
     printf("\033[31m[ERROR] Valeur réelle signée hors plage (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+  } else {
+    yylval.reel = val;  // Store the signed real number in yylval.reel
+  }
   nb_colonne += strlen(yytext);  // Always update the column number
   return SIGNEDREAL;
 }
 
-
 {IDF} {
   int consecutive_underscores = 0;
-    size_t len = strlen(yytext);
-    // Check for consecutive underscores
-    int i;
-    for (i = 1; yytext[i] != '\0'; i++) {
-        if (yytext[i] == '_' && yytext[i - 1] == '_') {
-            consecutive_underscores = 1;
-            break;
-        }
+  // size_t len = strlen(yytext);
+  // size_t len = yyleng; // Use yyleng instead of strlen(yytext)
+  // Check for consecutive underscores
+  int i;
+  for (i = 1; yytext[i] != '\0'; i++) {
+    if (yytext[i] == '_' && yytext[i - 1] == '_') {
+      consecutive_underscores = 1;
+      break;
     }
-    
-    // Validate identifier length and underscores
-    if (len > 10) {
-        fprintf(stderr, "\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-        return ERR;  // Return an error token for invalid identifiers
-    } else if (consecutive_underscores) {
-        fprintf(stderr, "\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
-        return ERR;  // Return an error token for invalid identifiers
-    }
-
-    // If valid, check the symbol table
+  }
+  // Validate identifier length and underscores
+  if (yyleng > 10) {
+    fprintf(stderr, "\033[31m[ERROR] Identificateur trop long (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+    return ERR;  // Return an error token for invalid identifiers
+  } else if (consecutive_underscores) {
+    fprintf(stderr, "\033[31m[ERROR] Identificateur contient deux underscores successifs (%s) à la ligne %d, colonne %d\033[0m\n", yytext, nb_ligne, nb_colonne);
+    return ERR;  // Return an error token for invalid identifiers
+  } 
+  // If valid, check the symbol table
   printf("Token: IDF (%s)\n", yytext); 
-    yylval.texte = strdup(yytext); // Assign yytext to yylval for Bison
-    nb_colonne += len;
-    return IDF;
+  yylval.texte = strdup(yytext); // Assign yytext to yylval for Bison
+  nb_colonne += yyleng;
+  return IDF;
 }
 
 {TEXT} {
@@ -135,7 +138,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   nb_colonne += strlen(yytext);
   return TEXT;
 }
-
 
 {commentaire_sur_ligne}  { 
   nb_colonne += strlen(yytext);
@@ -152,6 +154,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 }
 
 [ \t]+  { /* Ignorer les espaces et tabulations sans affecter la colonne */ }
+
 \n      { nb_ligne++; nb_colonne = 1; }  /* Avancer à la ligne suivante */
 
 . {
@@ -159,3 +162,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   return ERR;
 }
 %%
+
+
+/* ECHO   { printf("Caractère non reconnu: %s\n", yytext); } */

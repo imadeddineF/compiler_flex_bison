@@ -1,38 +1,40 @@
-DEBUT
-  -- Assign a number to an identifier ##
-  -- This is a single-line comment ##
-  {- This is a
-    multi-line comment -}
-  
+DEBUT   
+-- This is a single-line comment ##   
+{- This is a     
+   multi-line comment -}      
 
+FIXE NUM : ID1 = 1;   
+FIXE NUM : ID2 = 2;   
+FIXE NUM : ID3 = 3;   
+FIXE NUM : ID4 = 4;   
+FIXE NUM : MAX_VALEUR = 100;    
 
-  FIXE NUM : ID1 = 1;
-  FIXE NUM : ID2 = 2;
-  FIXE NUM : ID3 = 3;
-  FIXE NUM : ID4 = 4;
-  FIXE NUM : MAX_VALEUR = 100;
+NUM : X;    
+NUM : Scores[20];    
 
-
-  NUM : X;
-
-  
-
-  EXECUTION{
-    ID1 <- 100;
-    ID2 <- -250; -- Signed integer ##
-    ID3 <- 12.34; -- Real number ##
-    ID4 <- -0.567; -- Signed real ##
-
-  affiche ("Hello, World!");
-  SI (ID1 < ID2) ALORS {
-    affiche ("Condition met");
-  } SINON {
-    affiche ("Condition not met");
-  }
-  TANTQUE (ID1 > 0) FAIRE {
-    ID1 <- ID1 - 1;
-  }
-  lire ID5;
-  affiche ("Final Value: ", ID1);
-  }
+EXECUTION {     
+    ID1 <- 100;     
+    ID2 <- -250;    -- Signed integer ##     
+    ID3 <- 12.34;   -- Real number ##     
+    ID4 <- -0.567;  -- Signed real ##      
+    
+    Scores[2] <- 10;      
+    affiche("Hello, World!");      
+    
+    SI (ID1 < ID2) ALORS {       
+        affiche("Condition met");     
+    } SINON {       
+        affiche("Condition not met");     
+    }      
+    
+    TANTQUE (ID1 > 0) FAIRE {       
+        ID1 <- ID1 - 1;       
+        TANTQUE (ID1 > 10 ET ID1 < 100) FAIRE {         
+            ID2 <- ID1;       
+        }     
+    }      
+    
+    lire(ID4);     
+    affiche("Final Value: ", ID1);   
+} 
 FIN
