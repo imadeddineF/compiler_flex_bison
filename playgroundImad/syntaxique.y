@@ -1,287 +1,314 @@
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
-  #include "ts.h"
-  extern int yylex();
-  extern int yylineno;
-  extern char* yytext;
-  void yyerror(const char *s);
-  // Global symbol table
-  SymbolTable* symbol_table;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int nb_ligne = 1;
+int nb_colonne = 1;
+
+char sauvType [20];
+int yylex();
+
+void yyerror(const char* s) {
+    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
+    return 0;
+}
+
+void initialisation();
+void afficher();
+void rechercher(const char* entite, const char* code, const char* type, float val, int categorie);
+void insererType(const char* name, const char* type);
+int rechercheNonDeclare(const char* name);
+int CompType(const char* name, const char* type);
 %}
 
-
-// Define token types
+/* Déclarations de types et tokens */
 %union {
-  int ival;       // for integer values
-  double rval;    // for real values
-  char* sval;     // for string values and identifiers
+    int entier;
+    double reel;
+    char* texte;
 }
 
-// Token definitions
-%token DEBUT FIN EXECUTION
-%token SI ALORS SINON TANTQUE FAIRE
-%token FIXE 
-%token AFFICHE LIRE
-%token TYPE_NUM TYPE_REAL TYPE_TEXT
-%token MOINS_EGALE PLUS_EGALE INF_EGALE SUP_EGALE DIFFERENT
-%token ET OU NON
-%token ASSIGNMENT  // Assignment operator
+%token <entier> NUM SIGNEDNUM
+%token <reel> REAL SIGNEDREAL
+%token <texte> TEXT
+%token <texte> IDF
+%token SI ALORS SINON TANTQUE FAIRE DEBUT FIN EXECUTION FIXE AFFICHE LIRE
+%token ACCOLADE_OUVRANTE ACCOLADE_FERMANTE
+%token PARENTHOISE_OUVRANTE PARENTHOISE_FERMANTE
+%token CROCHET_OUVRANT CROCHET_FERMANT
+%token PLUS MOINS MULT DIV VIRGULE POINT_VIRGULE
+%token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
+%token OU ET NON ERR
+%token TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL
 
-// Define token types from lexical analyzer
-%token <sval> IDENTIFICATEUR
-%token <ival> NOMBRE_ENTIER
-%token <rval> NOMBRE_REEL
-%token <sval> CHAINE_TEXTE
+/* order is important for the priority (bottom >>>> top) */
+%left OU           // Lower precedence    
+%left ET                
+%right NON             
+%nonassoc INF INF_EGAL SUP SUP_EGAL
+%left EGAL DIFFERENT    
+%left PLUS MOINS        
+%left MULT DIV         // Higher precedence
+/* nzido ! maybe ------- */
 
-// Define non-terminal types
-%type <sval> programme bloc declaration liste_declarations 
-%type <sval> instruction liste_instructions 
-%type <sval> expression condition affectation 
-%type <sval> iteration selection entree_sortie
-
-// Operator precedence (from lowest to highest)
-%left OU
-%left ET 
-%left NON
-%left '<' '>' INF_EGALE SUP_EGALE '=' DIFFERENT 
-%left '+' '-'
-%left '*' '/'
-%right MOINS_UNAIRE
+%start programme      // the root non-terminal of the grammar
 
 
-// Grammar rules start here
+
+
 %%
-programme: 
-    DEBUT {
-      // Initialize symbol table when program starts
-      symbol_table = create_symbol_table();
-    }
-    liste_declarations 
-    EXECUTION 
-    '{' 
-    liste_instructions 
-    '}' 
-    FIN {
-      // Print symbol table for debugging
-      print_symbol_table(symbol_table);
-      // Free symbol table at end of program
-      free_symbol_table(symbol_table);
-      printf("Programme syntactically correct\n"); 
-    }
-		;
 
-liste_declarations:
-    declaration
-    | liste_declarations declaration
-    ;
+programme
+    : DEBUT declarations EXECUTION bloc FIN
+        { printf("Programme valide ✅\n"); }
+;
 
-declaration:
-    TYPE_NUM ':' IDENTIFICATEUR ';' 
-    {
-      // Insert integer variable
-      if (!insert_symbol(symbol_table, $3, ST_TYPE_INTEGER, 0)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate or invalid variable declaration: %s", $3);
-        yyerror(error_msg);
-      }
-      free($3);  // Free the string after use
-    }
-    | TYPE_REAL ':' IDENTIFICATEUR ';' 
-    {
-      // Insert real variable
-      if (!insert_symbol(symbol_table, $3, ST_TYPE_REAL, 0)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate or invalid variable declaration: %s", $3);
-        yyerror(error_msg);
-      }
-      free($3);  // Free the string after use
-    }
-    | TYPE_TEXT ':' IDENTIFICATEUR ';' 
-    {
-      // Insert text variable
-      if (!insert_symbol(symbol_table, $3, ST_TYPE_STRING, 0)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate or invalid variable declaration: %s", $3);
-        yyerror(error_msg);
-      }
-      free($3);  // Free the string after use
-    }
-    | FIXE TYPE_NUM ':' IDENTIFICATEUR '=' NOMBRE_ENTIER ';'
-    {
-      // Insert constant integer
-      if (!insert_symbol(symbol_table, $4, ST_TYPE_CONSTANT, 1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate constant declaration: %s", $4);
-        yyerror(error_msg);
-      } else {
-        // Update constant value
-        int val = $6;
-        update_symbol_value(symbol_table, $4, &val);
-      }
-      free($4);  // Free the string after use
-    }
-    | FIXE TYPE_REAL ':' IDENTIFICATEUR '=' NOMBRE_REEL ';'
-    {
-      // Insert constant real
-      if (!insert_symbol(symbol_table, $4, ST_TYPE_REAL, 1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate constant declaration: %s", $4);
-        yyerror(error_msg);
-      } else {
-        // Update constant value
-        double val = $6;
-        update_symbol_value(symbol_table, $4, &val);
-      }
-      free($4);  // Free the string after use
-    }
-    | FIXE TYPE_TEXT ':' IDENTIFICATEUR '=' CHAINE_TEXTE ';'
-    {
-      // Insert constant text
-      if (!insert_symbol(symbol_table, $4, ST_TYPE_STRING, 1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate constant declaration: %s", $4);
-        yyerror(error_msg);
-      } else {
-        // Update constant value
-        update_symbol_value(symbol_table, $4, $6);
-        free($6);  // Free the string literal
-      }
-      free($4);  // Free the identifier
-    }
-    | TYPE_NUM ':' IDENTIFICATEUR '[' NOMBRE_ENTIER ']' ';'
-    {
-      // Insert integer array
-      if (!insert_symbol(symbol_table, $3, ST_TYPE_INTEGER_ARRAY, 0)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Duplicate array declaration: %s", $3);
-        yyerror(error_msg);
-      }
-      free($3);  // Free the string after use
-    }
-    ;
+declarations
+    : declaration declarations
+    | /* vide */
+;
 
-liste_instructions:
-    instruction
-    | liste_instructions instruction
-    ;
+declaration
+    : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+        /* {
+            if (recherche($4) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($4, "FIXE", 0, $1);  // Insertion de la variable dans la table
+                affecter($4, 1, $6);  // Affectation de la valeur à la variable
+            }
+        } */
+    | type_variable DEUX_POINTS IDF POINT_VIRGULE
+        /* {
+            if (recherche($3) != -1) {
+                yyerror("Erreur: Double déclaration de variable.");
+            } else {
+                inserer($3, "VARIABLE", 0, $1);
+            }
+        } */
+    | table
+;
 
-instruction:
-    affectation
-    | selection
-    | iteration
-    | entree_sortie
-    ;
+variables 
+    : type_variable liste_vars POINT_VIRGULE variables
+	| FIXE type_variable DEUX_POINTS IDF EGAL liste_conts POINT_VIRGULE variables
 
-affectation:
-    IDENTIFICATEUR ASSIGNMENT expression ';'
-    {
-      // Check if variable exists before assignment
-      if (!check_symbol_exists(symbol_table, $1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Variable not declared: %s", $1);
-        yyerror(error_msg);
-      }
-      free($1);  // Free the identifier after use
-    }
-    | IDENTIFICATEUR '[' expression ']' ASSIGNMENT expression ';'
-    {
-      // Check if array exists before assignment
-      if (!check_symbol_exists(symbol_table, $1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Array not declared: %s", $1);
-        yyerror(error_msg);
-      }
-      free($1);  // Free the identifier after use
-    }
-    ;
+type_variable
+    : TYPE_NUM {strcpy(sauvType,"NUM");}
+    | TYPE_REAL {strcpy(sauvType,"REAL");}
+    | TYPE_TEXT {strcpy(sauvType,"TEXT");}
+    | TYPE_SIGNEDNUM {strcpy(sauvType,"SIGNEDNUM");}
+    | TYPE_SIGNEDREAL {strcpy(sauvType,"SIGNEDREAL");}
+;
 
-selection:
-    SI '(' condition ')' ALORS '{' liste_instructions '}' 
-    | SI '(' condition ')' ALORS '{' liste_instructions '}' SINON '{' liste_instructions '}'
-    ;
+liste_vars 
+    : IDF AFFECTION NUM VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);}
+	}
+    | IDF AFFECTION NUM {
+        if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);}
+    }     
+    | IDF VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+	}
+    | IDF {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION REAL VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION REAL {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION TEXT VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"STRING")==0) {printf("****Erreur semantique a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION TEXT {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"STRING")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+;
 
-iteration:
-    TANTQUE condition FAIRE '{' liste_instructions '}'
-    ;
+liste_conts 
+    : IDF AFFECTION NUM VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION NUM {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION REAL REAL liste_conts {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION REAL {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION TEXT VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+        if (CompType($1,"STRING")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	}
+    | IDF AFFECTION TEXT {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree**** \n", N,C, $1);}
+        if (CompType($1,"STRING")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+	} 
+    | IDF VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+	}
+    | IDF {
+		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
+		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+	}
+;
 
-condition:
-    expression '<' expression
-    | expression '>' expression
-    | expression INF_EGALE expression
-    | expression SUP_EGALE expression
-    | expression '=' expression
+/* 
+affect
+    : IDF AFFECTION expression POINT_VIRGULE
+; */
+
+bloc
+    : ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
+;
+
+instructions
+    : instruction instructions
+    | /* vide */
+;
+
+instruction 
+	: IDF AFFECTION expression POINT_VIRGULE instruction 
+    | instruction_si instruction
+    | boucle_tantque instruction
+    | AFFICHE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE instruction
+    | AFFICHE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE instruction
+    | LIRE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE instruction
+    | LIRE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE instruction
+	/* | LIRE IDF POINT_VIRGULE
+    | condition
+    | boucle_tantque
+    | affect */
+	| /* vide */
+;
+
+instruction_si
+    : AFFICHE PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE SINON ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE // -----> SI & SINON
+    | AFFICHE PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE  // -----> SI
+;
+
+condition
+    : expression INF expression
+    | expression INF_EGAL expression
+    | expression SUP expression
+    | expression SUP_EGAL expression
+    | expression EGAL expression
     | expression DIFFERENT expression
-    | condition ET condition
-    | condition OU condition
-    | NON condition
-    ;
+    | expression ET expression
+    | expression OU expression
+    | NON expression
+    /* : SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON bloc
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON condition
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc SINON boucle_tantque
+    | SI PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE ALORS bloc */ // ------------> refactored
+;
 
-expression:
-    NOMBRE_ENTIER
-    | NOMBRE_REEL
-    | CHAINE_TEXTE
-    | IDENTIFICATEUR 
-    {
-      // Check if variable exists when used
-      if (!check_symbol_exists(symbol_table, $1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Variable not declared: %s", $1);
-        yyerror(error_msg);
-      }
-      free($1);  // Free the identifier after use
-    }
-    | IDENTIFICATEUR '[' expression ']'
-    {
-      // Check if array exists when used
-      if (!check_symbol_exists(symbol_table, $1)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Array not declared: %s", $1);
-        yyerror(error_msg);
-      }
-      free($1);  // Free the identifier after use
-    }
-    | expression '+' expression
-    | expression '-' expression
-    | expression '*' expression
-    | expression '/' expression
-    {
-      // Optional: Maybe we will add division by zero check
-    }
-    | '(' expression ')'
-    | '-' expression %prec MOINS_UNAIRE
-    ;
+boucle_tantque
+    : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
+    | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE boucle_tantque
+;
 
-entree_sortie:
-    AFFICHE '(' expression ')' ';'
-    | LIRE '(' IDENTIFICATEUR ')' ';'
-    {
-      // Check if variable exists before reading
-      if (!check_symbol_exists(symbol_table, $3)) {
-        char error_msg[100];
-        snprintf(error_msg, sizeof(error_msg), "Variable not declared: %s", $3);
-        yyerror(error_msg);
-      }
-      free($3);  // Free the identifier after use
-    }
-    ;
+table
+    : type_variable DEUX_POINTS IDF CROCHET_OUVRANT NUM CROCHET_FERMANT POINT_VIRGULE
+        /* {
+            if ($6 <= 0) {
+                yyerror("Erreur: Dépassement de la taille du tableau.");
+            }
+            inserer($3, "TABLEAU", 1, $1);  // Insertion dans la table des symboles
+        } */
+;
+
+/* liste_arguments
+    : TEXT
+    | IDF
+    | liste_arguments VIRGULE TEXT
+    | liste_arguments VIRGULE IDF
+; */
+
+/* chiffre
+    : NUM
+    | REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
+; */
+
+/* valeur
+    : NUM
+    | REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
+    | TEXT
+; */
+
+expression
+    : NUM
+    | REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
+    | IDF
+    /* | TEXT */ // ------------> Texte n'est pas une expression (not so sure)
+    | expression PLUS expression
+    | expression MOINS expression
+    | expression MULT expression
+    | expression DIV expression
+    /* | expression EGAL expression
+    | expression INF expression
+    | expression SUP expression
+    | expression DIFFERENT expression
+    | expression INF_EGAL expression 
+    | expression SUP_EGAL expression */ // ------------> te3 comparaison hado!!!!
+    /* | expression ET expression
+    | expression OU expression
+    | NON expression */  // ------------> te3 logique hado!!!!
+;
 
 %%
 
-void yyerror(const char *s) {
-  fprintf(stderr, "\033[31m[ERROR] %s at line %d, near token '%s'\033[0m\n", s, yylineno, yytext);
-  /* exit(1); */ // removed to allow full error reporting
-}
-
-
+/* yyerror(const char* s) {
+    fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
+} */
 
 int main() {
-  printf("\n\033[34m================================== Compilation Start ==================================\033[0m\n");
-  yyparse();
-  return 0;
+    printf("Debut de l'analyse.\n");
+    initialisation();
+    yyparse(); 
+    printf("\n");
+    afficher();
+    /* return 0; */
 }
 
-int yywrap() {
-  return 1;
-}
+/* void yyerror(const char* s) {
+    fprintf(stderr, "Erreur: %s\n", s);
+    exit(1);
+} */
