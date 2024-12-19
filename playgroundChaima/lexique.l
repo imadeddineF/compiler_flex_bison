@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "syntaxique.tab.h"
+
 extern YYSTYPE yylval;
 extern int nb_ligne;
 extern int nb_colonne;
