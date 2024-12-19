@@ -71,23 +71,9 @@ declarations
 
 declaration
     : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
-        /* {
-            if (recherche($4) != -1) {
-                yyerror("Erreur: Double déclaration de variable.");
-            } else {
-                inserer($4, "FIXE", 0, $1);  // Insertion de la variable dans la table
-                affecter($4, 1, $6);  // Affectation de la valeur à la variable
-            }
-        } */
     | type_variable DEUX_POINTS IDF POINT_VIRGULE
-        /* {
-            if (recherche($3) != -1) {
-                yyerror("Erreur: Double déclaration de variable.");
-            } else {
-                inserer($3, "VARIABLE", 0, $1);
-            }
-        } */
-    | table
+    | type_variable DEUX_POINTS IDF CROCHET_OUVRANT expression CROCHET_FERMANT POINT_VIRGULE // ---> Tabeau
+	| table
 ;
 
 variables 
@@ -104,83 +90,222 @@ type_variable
 
 liste_vars 
     : IDF AFFECTION NUM VIRGULE liste_vars {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDNUM VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
 	}
     | IDF AFFECTION NUM {
-        if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);}
-    }     
+        if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+    }    
+	| IDF AFFECTION SIGNEDNUM {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+	}
     | IDF VIRGULE liste_vars {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
 	}
     | IDF {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION REAL VIRGULE liste_vars {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDREAL")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION REAL {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {	
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDREAL")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION TEXT VIRGULE liste_vars {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"STRING")==0) {printf("****Erreur semantique a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"STRING")==0) {
+			printf("****Erreur semantique a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION TEXT {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"STRING")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"STRING")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
 ;
 
 liste_conts 
     : IDF AFFECTION NUM VIRGULE liste_conts {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+        if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDNUM VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+		if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION NUM {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"INTEGER")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+        if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDNUM {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+		if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION REAL REAL liste_conts {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+        if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL SIGNEDREAL liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+		if (CompType($1,"SIGNEDREAL")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION REAL {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"FLOAT")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDREAL")==0) {	
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION TEXT VIRGULE liste_conts {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
-        if (CompType($1,"STRING")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"STRING")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	}
     | IDF AFFECTION TEXT {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree**** \n", N,C, $1);}
-        if (CompType($1,"STRING")==0) {printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree**** \n", N,C, $1);
+		}
+        if (CompType($1,"STRING")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
 	} 
     | IDF VIRGULE liste_conts {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
 	}
     | IDF {
-		if (rechercheNonDeclare($1)==0) {insererType($1,sauvType);}
-		else {printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);}
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
 	}
 ;
 
@@ -200,6 +325,7 @@ instructions
 
 instruction 
 	: IDF AFFECTION expression POINT_VIRGULE instruction 
+	| table instruction  
     | instruction_si instruction
     | boucle_tantque instruction
     | AFFICHE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE instruction
@@ -214,9 +340,11 @@ instruction
 ;
 
 instruction_si
-    : AFFICHE PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE SINON ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE // -----> SI & SINON
-    | AFFICHE PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE  // -----> SI
+    : SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE SINON ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE // -----> SI & SINON
+    | SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE  // -----> SI
+	| SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE SINON SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS ACCOLADE_OUVRANTE bloc ACCOLADE_FERMANTE  // -----> SI & SINON SI
 ;
+
 
 condition
     : expression INF expression
@@ -240,13 +368,18 @@ boucle_tantque
 ;
 
 table
-    : type_variable DEUX_POINTS IDF CROCHET_OUVRANT NUM CROCHET_FERMANT POINT_VIRGULE
-        /* {
-            if ($6 <= 0) {
-                yyerror("Erreur: Dépassement de la taille du tableau.");
-            }
-            inserer($3, "TABLEAU", 1, $1);  // Insertion dans la table des symboles
-        } */
+    : IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION NUM POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION REAL POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION SIGNEDNUM POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION SIGNEDREAL POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION TEXT POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION IDF POINT_VIRGULE
+		{
+		    // Add bounds checking here
+			if ($3 < 0) {
+				yyerror("Array index cannot be negative");
+			}
+		}
 ;
 
 /* liste_arguments
@@ -277,11 +410,13 @@ expression
     | SIGNEDNUM
     | SIGNEDREAL
     | IDF
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT 
     /* | TEXT */ // ------------> Texte n'est pas une expression (not so sure)
     | expression PLUS expression
     | expression MOINS expression
     | expression MULT expression
     | expression DIV expression
+	| PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE  // for grouped expressions
     /* | expression EGAL expression
     | expression INF expression
     | expression SUP expression

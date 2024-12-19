@@ -62,7 +62,7 @@ void inserer(char entite[], char code[], char type[], float val, int i, int y) {
 void rechercher(char entite[], char code[], char type[], float val, int y) {
   int j, i;
   switch (y) {
-    case 0: /*verifier si la case dans la tables des IDF et CONST est libre*/
+    case 0: /* verifier si la case dans la tables des IDF et CONST est libre */
       for (i = 0; ((i < 1000) && (tab[i].state == 1)) && (strcmp(entite, tab[i].name) != 0); i++);
       if (tab[i].state == 0) {
         inserer(entite, code, type, val, i, 0);
@@ -73,7 +73,7 @@ void rechercher(char entite[], char code[], char type[], float val, int y) {
       }
       break;
 
-    case 1: /*verifier si la case dans la tables des mots clés est libre*/
+    case 1: /* verifier si la case dans la tables des mots clés est libre */
       for (i = 0; ((i < 40) && (tabm[i].state == 1)) && (strcmp(entite, tabm[i].name) != 0); i++);
       if (tabm[i].state == 0) {
         inserer(entite, code, type, val, i, 1);
@@ -84,7 +84,7 @@ void rechercher(char entite[], char code[], char type[], float val, int y) {
       }
       break;
 
-    case 2: /*verifier si la case dans la tables des séparateurs est libre*/
+    case 2: /* verifier si la case dans la tables des séparateurs est libre */
       for (i = 0; ((i < 40) && (tabs[i].state == 1)) && (strcmp(entite, tabs[i].name) != 0); i++);
       if (i < 40)
         inserer(entite, code, type, val, i, 2);
@@ -96,7 +96,7 @@ void rechercher(char entite[], char code[], char type[], float val, int y) {
 
 void afficher() {
   int i;
-  printf("/***************Table des symboles IDF*************/\n");
+  printf("/*************** Table des symboles IDF *************/\n");
   printf("____________________________________________________________________\n");
   printf("\t| Nom_Entite |  Code_Entite | Type_Entite | Val_Entite\n");
   printf("____________________________________________________________________\n");
@@ -107,7 +107,7 @@ void afficher() {
     }
   }
 
-  printf("\n/***************Table des symboles mots cles*************/\n");
+  printf("\n/*************** Table des symboles mots cles *************/\n");
 
   printf("___________________________________________________\n");
   printf("\t| Nom_Entite |  Code_Entite | Type_Entite |\n");
@@ -119,7 +119,7 @@ void afficher() {
     }
   }
 
-  printf("\n/***************Table des symboles separateurs*************/\n");
+  printf("\n/*************** Table des symboles separateurs *************/\n");
 
   printf("_____________________________________\n");
   printf("\t| NomEntite |  CodeEntite | \n");
