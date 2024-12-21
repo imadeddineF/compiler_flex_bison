@@ -8,7 +8,3 @@ syntaxique.tab.c
 syntaxiquel.tab.h
 /src/syntaxique.tab.h
 output.exe
-/out/output
-/out/syntaxique.tab.c
-/out/syntaxique.tab.h
-/out/lex.yy.c
