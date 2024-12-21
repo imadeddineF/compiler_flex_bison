@@ -18,7 +18,7 @@ compile:
 	gcc -I$(SRC_DIR) $(BUILD_DIR)/syntaxique.tab.c $(BUILD_DIR)/lex.yy.c -lfl -o $(OUTPUT_FILE)
 
 clean: 
-	rm -rf $(BUILD_DIR)/*
+	rm -rf $(BUILD_DIR)
 
 test: compile
 	$(OUTPUT_FILE) < $(TEST_DIR)/test1.txt
