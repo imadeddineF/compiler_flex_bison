@@ -1,298 +1,436 @@
 %{
-  #include <string.h>
-  #include <stdio.h>
-  #include <stdlib.h>
-  void erreurdd(char* idf);
-  void erreur_dim(char* idf);
-  int getDimension(char entite[], char scope[]);
-  void erreurnondec(char* idf);
-  char *incomp_type(char* type1, char* type2);
-  char *type_idf(char entite[], char scope[]);
-  int nb_ligne = 1;
-  int nb_colonne = 1;
-  extern char currentScope[10];
-  extern char typeidf[10];
-  char arr[100];
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int nb_ligne = 1;
+int nb_colonne = 1;
+
+char sauvType [20]; // Sauvegarde du type de la variable  ---> Utilisé pour la comparaison de type
+int yylex();
+
+void yyerror(const char* s) {
+	fprintf(stderr, "Erreur syntaxique: %s, ligne %d, colonne %d\n", s, nb_ligne, nb_colonne);
+}
+
+void initialisation(); // Initialisation de TS
+void afficher(); // Affichage de TS
+void rechercher(const char* entite, const char* code, const char* type, float val, int categorie); // Recherche d'une entité dans TS
+void insererType(const char* name, const char* type); // Insertion d'une entité dans TS
+int rechercheNonDeclare(const char* name); // Recherche d'une entité non déclarée dans TS
+int CompType(const char* name, const char* type); // Comparaison de type d'une entité dans TS
 %}
 
-%union { 
-  int entier; 
-  float reel;
-  char* str;
-  struct {
-    char *type;
-  }exp;
+/* Déclarations de types et tokens */
+%union {
+    int entier;
+    double reel;
+    char* texte;
 }
 
-%token aff point po pf vg <str>idf pvg mc_then mc_if mc_else mc_program mc_endif mc_character mc_real mc_enddo mc_read mc_write mc_integer mc_endr mc_routine mc_equivalence mc_dowhile mc_end mc_call mc_dimension mc_logical <str>cst_char opar_plus opar_moins opar_div opar_mult <str>cst_bool <entier>cst_int <reel>cst_real op_gt op_lt op_eq op_ge op_le op_and op_or op_ne;
-%type <str> TYPE;
-%type <exp> EXPRESSION AFFECT CALL CST DECLARATION;
-%left op_and op_or;
-%left op_gt op_ge op_eq op_ne op_le op_lt;
-%left opar_plus opar_moins;
-%left opar_mult opar_div;
-%start PROG
+%token <entier> NUM SIGNEDNUM
+%token <reel> REAL SIGNEDREAL
+%token <texte> TEXT
+%token <texte> IDF
+%token SI ALORS SINON TANTQUE FAIRE DEBUT FIN EXECUTION FIXE AFFICHE LIRE
+%token ACCOLADE_OUVRANTE ACCOLADE_FERMANTE
+%token PARENTHOISE_OUVRANTE PARENTHOISE_FERMANTE
+%token CROCHET_OUVRANT CROCHET_FERMANT
+%token PLUS MOINS MULT DIV VIRGULE POINT_VIRGULE
+%token DEUX_POINTS EGAL INF SUP DIFFERENT INF_EGAL SUP_EGAL AFFECTION 
+%token OU ET NON ERR // cant't remove this since it's used in the lexical code
+%token TYPE_NUM TYPE_REAL TYPE_TEXT TYPE_SIGNEDNUM TYPE_SIGNEDREAL
+
+/* order is important for the priority (bottom >>>> top) */
+%left OU           // Lower precedence    
+%left ET                
+%right NON             
+%nonassoc INF INF_EGAL SUP SUP_EGAL // it reads as the order
+%left EGAL DIFFERENT    
+%left PLUS MOINS        
+%left MULT DIV         // Higher precedence
+
+%start programme      // the root non-terminal of the grammar
+
+
+
+
 %%
 
-// l'axiome de la grammaire
-PROG: {strcpy(currentScope, "main");} ROUTINE PROG | PP {printf("syntaxe correcte\n"); YYACCEPT;}
+programme
+    : DEBUT declarations EXECUTION bloc FIN
+      { 
+				printf("\n════════════════════════════════════════════════════════════════════════════════\n");
+				printf("Programme valide ✅");
+				printf("\n════════════════════════════════════════════════════════════════════════════════\n");
+			}
+;
+
+/* should be considered */
+declarations
+    : declaration declarations
+    |
+;
+
+declaration
+    : FIXE type_variable DEUX_POINTS IDF EGAL expression POINT_VIRGULE
+    | type_variable DEUX_POINTS IDF POINT_VIRGULE
+    | type_variable DEUX_POINTS IDF CROCHET_OUVRANT expression CROCHET_FERMANT POINT_VIRGULE // ---> Tabeau
+		| table
+;
+
+variables 
+    : type_variable liste_vars POINT_VIRGULE variables
+		| FIXE type_variable DEUX_POINTS IDF EGAL liste_conts POINT_VIRGULE variables
+
+type_variable
+    : TYPE_NUM {strcpy(sauvType,"NUM");}
+    | TYPE_REAL {strcpy(sauvType,"REAL");}
+    | TYPE_TEXT {strcpy(sauvType,"TEXT");}
+    | TYPE_SIGNEDNUM {strcpy(sauvType,"SIGNEDNUM");}
+    | TYPE_SIGNEDREAL {strcpy(sauvType,"SIGNEDREAL");}
+;
+
+liste_vars 
+    : IDF AFFECTION NUM VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDNUM VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION NUM {
+        if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+    }    
+	| IDF AFFECTION SIGNEDNUM {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d \n", N,C, $1);
+		}
+	}
+    | IDF VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+	}
+    | IDF {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION REAL VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDREAL")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION REAL {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {	
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDREAL")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION TEXT VIRGULE liste_vars {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"STRING")==0) {
+			printf("****Erreur semantique a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION TEXT {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"STRING")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+;
+
+liste_conts 
+    : IDF AFFECTION NUM VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+        if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDNUM VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+		if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION NUM {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+        if (CompType($1,"INTEGER")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDNUM {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+		if (CompType($1,"SIGNEDNUM")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION REAL REAL liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+        if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL SIGNEDREAL liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+		if (CompType($1,"SIGNEDREAL")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION REAL {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"FLOAT")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+	| IDF AFFECTION SIGNEDREAL {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"SIGNEDREAL")==0) {	
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION TEXT VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		} if (CompType($1,"STRING")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	}
+    | IDF AFFECTION TEXT {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree**** \n", N,C, $1);
+		}
+        if (CompType($1,"STRING")==0) {
+			printf("****Erreur a la ligne %d et la colonne %d : ICOMPATIBILITE DE TYPE de la variable %s ****\n", N,C, $1);
+		}
+	} 
+    | IDF VIRGULE liste_conts {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+	}
+    | IDF {
+		if (rechercheNonDeclare($1)==0) {
+			insererType($1,sauvType);
+		} else {
+			printf("****Erreur a la ligne %d et la colonne %d,la variable %s est deja declaree ****\n", N,C, $1);
+		}
+	}
+;
+
+bloc
+    : ACCOLADE_OUVRANTE instructions ACCOLADE_FERMANTE
+;
+
+instructions
+    : instruction instructions
+    |
+;
+
+instruction 
+	: IDF AFFECTION expression POINT_VIRGULE  
+	| table   
+  | instruction_si 
+  | boucle_tantque 
+  | AFFICHE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
+  | AFFICHE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE
+	| AFFICHE PARENTHOISE_OUVRANTE TEXT VIRGULE IDF PARENTHOISE_FERMANTE POINT_VIRGULE
+	| AFFICHE PARENTHOISE_OUVRANTE IDF VIRGULE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
+  | LIRE PARENTHOISE_OUVRANTE TEXT PARENTHOISE_FERMANTE POINT_VIRGULE
+  | LIRE PARENTHOISE_OUVRANTE IDF PARENTHOISE_FERMANTE POINT_VIRGULE
+	| 
+;
+
+instruction_si
+    : SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS bloc SINON bloc // -----> SI & SINON
+    | SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS bloc   // -----> SI
+	  | SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS bloc SINON SI PARENTHOISE_OUVRANTE condition PARENTHOISE_FERMANTE ALORS bloc  // -----> SI & SINON SI
+;
 
 
-// la grammaire
-PP: mc_program idf {strcpy(currentScope, "main");} CORP_PROGRAM
+condition
+    : expression INF expression
+    | expression INF_EGAL expression
+    | expression SUP expression
+    | expression SUP_EGAL expression
+    | expression EGAL expression
+    | expression DIFFERENT expression
+    | expression ET expression
+    | expression OU expression
+    | NON expression
+;
+
+boucle_tantque
+    : TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc
+    | TANTQUE PARENTHOISE_OUVRANTE expression PARENTHOISE_FERMANTE FAIRE bloc boucle_tantque
+;
+
+table
+  : IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION NUM POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION REAL POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION SIGNEDNUM POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION SIGNEDREAL POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION TEXT POINT_VIRGULE
+	| IDF CROCHET_OUVRANT NUM CROCHET_FERMANT AFFECTION IDF POINT_VIRGULE
+		{
+		  // to make sure the index size is not negative
+			if ($3 < 0) {
+				yyerror("Array index cannot be negative");
+			}
+		}
+;
 
 
-CORP_PROGRAM: LIST_DEC LIST_INSTRUCTION mc_end;
+expression
+    : expression_arithmetique
+    | expression_logique
+		| expression_chars
+;
+
+expression_logique
+    : expression ET expression
+    | expression OU expression
+    | expression INF expression
+    | expression SUP expression
+    | expression EGAL expression
+    | expression DIFFERENT expression
+    | expression INF_EGAL expression
+    | expression SUP_EGAL expression
+    | NON expression
+    | PARENTHOISE_OUVRANTE expression_logique PARENTHOISE_FERMANTE
+;
+
+expression_arithmetique
+    : NUM
+    | REAL
+    | SIGNEDNUM
+    | SIGNEDREAL
+    | IDF
+    | IDF CROCHET_OUVRANT NUM CROCHET_FERMANT
+    | expression_arithmetique PLUS expression_arithmetique
+    | expression_arithmetique MOINS expression_arithmetique
+    | expression_arithmetique MULT expression_arithmetique
+		| NUM DIV NUM 
+			{if ($3 == 0) printf("Erreur division sur 0\n");}
+    | REAL DIV REAL 
+			{if ($3 == 0) printf("Erreur division sur 0\n");}
+    | expression_arithmetique DIV expression_arithmetique
+		
+    | PARENTHOISE_OUVRANTE expression_arithmetique PARENTHOISE_FERMANTE
+;
+    | PARENTHOISE_OUVRANTE expression_arithmetique PARENTHOISE_FERMANTE
+;
+
+expression_chars 
+	: TEXT
+;
 
 
-ROUTINE: TYPE mc_routine idf {
-  strcpy(currentScope, $3);
-  if (doubleDeclaration($3, currentScope)) {      
-    printf("double declaration de la routine %s\n", $3);  
-  } else 
-    insererTYPE($3, typeidf, currentScope);
-  }
-  po LIST_PARAMETRE_RT pf CORP_FONCTION
 
-
-CORP_FONCTION: LIST_DEC LIST_INSTRUCTION RETURN mc_endr {strcpy(currentScope, "main");}
-
-RETURN: idf aff EXPRESSION 
-
-OPAR: opar_plus
-    | opar_moins 
-    | opar_mult;
-
-
-TYPE: mc_integer {strcpy(typeidf, "INTEGER");}
-    | mc_real {strcpy(typeidf, "REAL");}
-    | mc_logical {strcpy(typeidf, "LOGICAL");}
-    | mc_character {strcpy(typeidf, "CHARACTER");}
-
-
-LIST_PARAMETRE_RT: idf 
-                | LIST_PARAMETRE_RT vg idf 
-                | CST 
-                | LIST_PARAMETRE_RT vg CST 
-                | LIST_PARAMETRE_RT vg idf po CST pf 
-                | LIST_PARAMETRE_RT vg idf po CST vg CST pf 
-                | ;
-
-
-DECIDF: DECLARATION 
-      | DECLARATION vg DECIDF;
-
-
-TYPEDEC: TYPE DECIDF;
-
-
-LIST_DEC: TYPEDEC pvg LIST_DEC | ;
-
-
-DECLARATION: idf {
-              if (doubleDeclaration($1, currentScope)) erreurdd($1);
-              else insererTYPE($1, typeidf, currentScope);
-            }
-            | idf mc_dimension po cst_int pf {
-              if(doubleDeclaration($1, currentScope)) erreurdd($1); 
-              else {
-                // pour les tableaux a 1 dimension (assignation de la taille au type)
-                strcpy(arr, typeidf);
-                strcat(arr, "()");
-                insererTYPE($1, arr, currentScope);
-              }
-            }
-            | idf mc_dimension po cst_int vg cst_int pf {
-              if(doubleDeclaration($1, currentScope)) erreurdd($1); 
-              else {
-                // pour les tableaux a 2 dimensions (assignation de la taille au type)
-                strcpy(arr, typeidf);
-                strcat(arr, "(,)");
-                insererTYPE($1, arr, currentScope);
-              }
-            }
-            | idf opar_mult cst_int {
-              if(doubleDeclaration($1, currentScope)) erreurdd($1);
-              else insererTYPE($1, typeidf, currentScope);
-            }
-
-
-AFFECT: idf aff EXPRESSION {
-          if(!doubleDeclaration($1, currentScope)) erreurnondec($1);
-          else incomp_type(type_idf($1, currentScope), $3.type);
-        }
-      | idf po CST pf aff EXPRESSION {
-          if (!doubleDeclaration($1, currentScope)) erreurnondec($1); 
-          else incomp_type(type_idf($1, currentScope), $6.type);
-          if (getDimension($1, currentScope) != 1) erreur_dim($1);      
-        } 
-      | idf po CST vg CST pf aff EXPRESSION {
-          if (!doubleDeclaration($1, currentScope)) erreurnondec($1);
-          else incomp_type(type_idf($1, currentScope), $8.type);
-          if (getDimension($1, currentScope) != 2) erreur_dim($1);
-        }      
-
-
-EXPRESSION: CST { $$ = $1; } //pour recuperer la valeur semantique de la constante
-          | idf { 
-            if(!doubleDeclaration($1, currentScope)) erreurnondec($1);
-            $$.type = type_idf($1, currentScope);
-          }
-          | cst_char {$$.type = "CHARACTER";}
-          | cst_bool {$$.type = "LOGICAL";}
-          | EXPRESSION OPAR idf { 
-            if(!doubleDeclaration($3, currentScope)) erreurnondec($3);
-            $$.type = incomp_type($1.type, type_idf($3, currentScope));
-          }
-          | EXPRESSION opar_div idf { 
-            if (!doubleDeclaration($3, currentScope)) erreurnondec($3);
-            $$.type = incomp_type($1.type, type_idf($3, currentScope));
-          }
-          | EXPRESSION OPAR CST { 
-            $$.type = incomp_type($1.type, $3.type);
-          }
-          | EXPRESSION opar_div cst_real { 
-            $$.type = incomp_type($1.type, "REAL");
-          }
-          | EXPRESSION opar_div cst_int  {
-            if ($3==0) printf ("Erreur semantique division par 0 a la ligne %d et a la colonne %d \n",nb_ligne,nb_colonne); 
-            $$.type = incomp_type($1.type, "INTEGER");
-          }
-          | po EXPRESSION pf { $$ = $2; }
-          | CALL { $$ = $1; }
-          | EXPRESSION OPAR cst_char { 
-              $$.type = incomp_type($1.type, "CHARACTER");
-            }
-          | EXPRESSION opar_div cst_char { 
-              $$.type = incomp_type($1.type, "CHARACTER");
-            }
-          | EXPRESSION po CST pf { 
-              $$.type = type_idf($1.type, currentScope);
-            }
-          | EXPRESSION po CST vg CST pf { 
-              $$.type = type_idf($1.type, currentScope);
-            }
-          | EXPRESSION OPAR po EXPRESSION pf 
-          | EXPRESSION opar_div po EXPRESSION pf { 
-              $$.type = incomp_type($1.type, $4.type);
-            }
-
-
-CALL: mc_call idf po LIST_PARAMETRE_RT pf { 
-        $$.type = type_idf($2, $2);
-      }
-
-
-READ: mc_read po idf pf;
-
-
-WRITE: mc_write po WRITE_ARGS pf;
-
-
-WRITE_ARGS: cst_char 
-          | idf { if(!doubleDeclaration($1, currentScope)) erreurnondec($1);}
-          | WRITE_ARGS vg cst_char 
-          | WRITE_ARGS vg idf { if(!doubleDeclaration($3, currentScope)) erreurnondec($3);}
-
-
-CONDITION: mc_if po exp_cnd pf mc_then LIST_INSTRUCTION mc_else LIST_INSTRUCTION mc_endif 
-        | mc_if po cst_bool pf mc_then LIST_INSTRUCTION mc_else LIST_INSTRUCTION mc_endif;
-
-
-exp_cnd: EXPRESSION point OPCOMP point EXPRESSION 
-      | exp_cnd point OPLOG point LALR 
-      | LALR;
-
-
-LALR: po exp_cnd pf;
-
-
-INSTRUCTION: AFFECT pvg 
-          | WRITE pvg 
-          | READ pvg 
-          | CONDITION 
-          | BOUCLE 
-          | EQ pvg;       
-
-
-LIST_INSTRUCTION: LIST_INSTRUCTION INSTRUCTION 
-                | ;
-
-
-BOUCLE: mc_dowhile po exp_cnd pf LIST_INSTRUCTION mc_enddo;
-
-
-LIST_PARAMETRE_EQ: idf { if(!doubleDeclaration($1, currentScope)) erreurnondec($1);}
-                | LIST_PARAMETRE_EQ vg idf { if(!doubleDeclaration($3, currentScope)) erreurnondec($3);}
-                | CST 
-                | LIST_PARAMETRE_EQ vg CST 
-                | LIST_PARAMETRE_EQ vg idf po CST pf { if(!doubleDeclaration($3, currentScope)) erreurnondec($3);}
-                | LIST_PARAMETRE_EQ vg idf po CST vg CST pf { if(!doubleDeclaration($3, currentScope)) erreurnondec($3);}
-                | ;
-
-
-EQ: mc_equivalence po LIST_PARAMETRE_EQ pf vg po LIST_PARAMETRE_EQ pf 
-  | mc_equivalence po LIST_PARAMETRE_EQ pf;
-
-
-CST: cst_int {$$.type = "INTEGER";} 
-  | cst_real {$$.type = "REAL";}
-
-
-OPLOG: op_and 
-    | op_or;
-
-
-OPCOMP: op_gt 
-      | op_lt 
-      | op_eq 
-      | op_ge
-      | op_le
-      | op_ne;
 %%
 
-
-
-
-void erreurdd(char *idf){
-  printf("Erreur semantique: double declaration de la variable %s a la ligne %d et la colonne %d\n", idf, nb_ligne, nb_colonne);
-}
-
-void erreurnondec(char *idf){
-  printf("Erreur semantique: variable %s non declarer dans %s a la ligne %d et la colonne %d\n", idf, currentScope, nb_ligne, nb_colonne);
-}
-
-char *incomp_type(char* type1, char* type2) {
-  if (type1[0] == ' ' || type1[0] == '\0') {
-    return type2;
-  }
-  if (type2[0] == ' ' || type2[0] == '\0') {
-    return type1;
-  }
-  if (type1[0] == type2[0]) {
-    return type1;
-  }
-  printf("Erreur semantique: incompatibilite de types a la ligne %d et a la colonne %d\n", nb_ligne, nb_colonne);
-  return " ";
-}
-
-void erreur_dim(char* idf) {
-  printf("Erreur semantique: dimension de la variable %s incorrecte a la ligne %d et a la colonne %d\n", idf, nb_ligne, nb_colonne);
-}
-
-/* #include <stdio.h> */
-int yyerror(char *msg) {
-  printf(" ------------------------------- Erreur Syntaxique à la ligne %d, colonne: %d -------------------------------", nb_ligne, nb_colonne); // changed to the needed error
-  return 1;
-}
-
-int yywrap() {
-  return 1;
-}
 
 int main() {
-  initialisation();
-  yyparse();
-  afficher();
-  return 0;
+		printf("\n════════════════════════════════════════════════════════════════════════════════\n");
+    printf("Debut de l'analyse:");
+		printf("\n════════════════════════════════════════════════════════════════════════════════\n");
+    initialisation();
+    yyparse(); 
+    printf("\n");
+    afficher();
 }
+

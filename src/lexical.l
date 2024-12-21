@@ -83,7 +83,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 "TEXT"           { rechercher(yytext,"Mot Cle"," ",0,1); nb_colonne += strlen(yytext); printf("Token: TYPE_TEXT\n"); return TYPE_TEXT; }
 
 {NUM} {
-  rechercher(yytext,"identificateur"," ",0,0);
+  rechercher(yytext,"identificateur"," ",0,0); // Recherche dans TS 
   printf("Token: Value of NUM (%s)\n", yytext);
   yylval.entier = atoi(yytext);
   nb_colonne += strlen(yytext);
@@ -105,7 +105,7 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
 {REAL} {
   rechercher(yytext,"identificateur"," ",0,0);
   printf("Token: Value of REAL (%s)\n", yytext);
-  yylval.reel = atof(yytext);
+  yylval.reel = atof(yytext); // Convert string to double
   nb_colonne += strlen(yytext);
   return REAL;
 }
@@ -173,7 +173,6 @@ commentaire_multi_lignes \{-(.|\n)*?-\}
   }
   printf("{- Commentaire sur plusieurs lignes -}\n");
 }
-
 
 . {
   fprintf(stderr, "Erreur lexicale sur '%s' à la ligne %d, colonne %d\n", yytext, nb_ligne, nb_colonne);

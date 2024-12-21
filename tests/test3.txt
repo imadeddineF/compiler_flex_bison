@@ -3,24 +3,26 @@ DEBUT
 {- This is a     
    multi-line comment -}      
 
-FIXE NUM : ID1 = 5;   
-FIXE NUM : ID2 = 6;   
-FIXE NUM : ID3 = 7;   
-FIXE NUM : ID4 = 9;   
+FIXE NUM : ID1 = 1;   
+FIXE NUM : ID2 = 2;   
+FIXE NUM : ID3 = 3;   
+FIXE NUM : ID4 = 4;   
 FIXE NUM : MAX_VALEUR = 100;    
 
 NUM : X;    
-NUM : Scores[20];    
+NUM : Scores[20]; 
+REAL : Y ;   
 
 EXECUTION {     
     ID1 <- 100;     
     ID2 <- -250;    -- Signed integer ##     
     ID3 <- 12.34;   -- Real number ##     
-    ID4 <- -0.567;  -- Signed real ##     
-
-    
+    ID4 <- -0.567;  -- Signed real ##      
+    X <- Y ;
     Scores[2] <- 10;      
-    affiche("Hello, World!");      
+    affiche("Hello, World!");     
+
+    X <-"test";
     
     SI (ID1 < ID2) ALORS {       
         affiche("Condition met");     
